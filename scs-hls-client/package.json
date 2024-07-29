@@ -1,0 +1,16 @@
+{
+  "name": "scs-hls-client",
+  "version": "1.0.7",
+  "description": "SCS Client",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2"
+  }
+}

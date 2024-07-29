@@ -1,0 +1,19 @@
+{
+  "name": "emailserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start":"node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bullmq": "^5.10.3",
+    "dotenv": "^16.4.5",
+    "nodemailer": "^6.9.14"
+  }
+}
