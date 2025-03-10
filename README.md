@@ -23,6 +23,8 @@ MONGO_URI=your_mongodb_connection_string
 ACCESS_TOKEN_SECRET=your_access_token_secret
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
 OTP_SECRET=your_otp_secret
+ACCESS_KEY_CREDENTIALS_SECRET=your_access_key_credentials_secret
+SECRET_ACCESS_KEY_CREDENTIALS_SECRET=your_secret_access_key_credentials_secret
 
 # AWS Configuration
 ACCESS_KEY_ID=your_aws_access_key_id
@@ -48,6 +50,54 @@ QUEUE_PASSWORD=your_queue_password
 # Payment Gateway (Cashfree)
 CASHFREE_APP_KEY=your_cashfree_app_key
 CASHFREE_APP_SECRET_KEY=your_cashfree_secret_key
+
+# Service Charges
+TRANSCODER_SERVICE_CHARGE=your_transcoder_service_charge
+HOSTING_SERVICE_CHARGE_PER_30_DAYS=your_hosting_service_charge
+```
+
+### Transcoding Container (.env)
+
+```env
+# AWS Configuration
+MY_ACCESS_KEY_ID=your_aws_access_key_id
+MY_SECRET_ACCESS_KEY=your_aws_secret_access_key
+USER_ACCESS_KEY_ID=your_user_aws_access_key_id
+USER_SECRET_ACCESS_KEY=your_user_aws_secret_access_key
+
+# S3 Configuration
+MY_BUCKET_NAME=your_s3_bucket_name
+USER_BUCKET_NAME=your_user_bucket_name
+VIDEO_KEY=your_video_key
+BUCKET_PATH=your_bucket_path
+
+# User Information
+USER_EMAIL=your_user_email
+
+# Message Queue Configuration
+QUEUE_HOST=your_queue_host
+QUEUE_USER=your_queue_username
+QUEUE_PASSWORD=your_queue_password
+```
+
+### Hosting Container (.env)
+
+```env
+# AWS Configuration
+MY_ACCESS_KEY_ID=your_aws_access_key_id
+MY_SECRET_ACCESS_KEY=your_aws_secret_access_key
+MY_BUCKET_NAME=your_s3_bucket_name
+
+# Web Configuration
+WEB_URL=your_web_url
+```
+
+### Email Server (.env)
+
+```env
+# Email Configuration
+MY_EMAIL=your_email_address
+MY_PASSWORD=your_email_password
 ```
 
 ## Setup Instructions
