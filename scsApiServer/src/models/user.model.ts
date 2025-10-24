@@ -14,7 +14,6 @@ export interface IUser extends Document{
     credentialsActive:boolean;
     accessKey:string;
     secretAccessKey:string;
-
 }
 const userSchema:Schema<IUser>=new Schema({
     name:{
