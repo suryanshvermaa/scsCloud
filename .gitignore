@@ -1,1 +1,3 @@
 docker-compose.yml
+mongo-data
+redis_data
