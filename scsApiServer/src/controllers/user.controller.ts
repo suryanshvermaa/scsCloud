@@ -170,39 +170,18 @@ export const createApiKeys=asyncHandler(async(req:Request,res:Response)=>{
     response(  res,201,'api keys created',{});
 });
 
-export const getAccessKey=async(req:Request,res:Response)=>{
-    try {
-        const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
-        const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
-        if(isVerified){
-            const {userId}=JSON.parse(JSON.stringify(isVerified))
-            const user=await User.findById(userId);
-           if(user){
-           const accessKey=user.accessKey;
-            res.status(201).json({
-                success:true,
-                data:{
-                    accessKey
-                }
-            })
-           }else{
-            res.status(400).json({
-                success:false,
-                error:"User not found"
-            })
-           }
-        }else{
-            res.status(400).json({
-                success:false,
-                error:"Unathorised"
-            })
-        }
-         
-    } catch (err:any) {
-        res.status(400).json({
-            success:false,
-            message:"error in getting access key",
-            error:err.message
-        })
-    }
-}
+/**
+ * @description Get the access key of the authenticated user
+ * @param req request object containing user credentials
+ * @param res response object to send back the result
+ */
+export const getAccessKey=asyncHandler(async(req:Request,res:Response)=>{
+    const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
+    const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid authentication cookie',400);
+    const {userId}=JSON.parse(JSON.stringify(isVerified))
+    const user=await User.findById(userId);
+    if(!user) throw new AppError('User not found',404);
+    const accessKey=user.accessKey;
+    response(res,200,"access key fetched successfully",{data:{accessKey}})
+});
