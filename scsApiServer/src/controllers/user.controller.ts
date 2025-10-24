@@ -29,52 +29,25 @@ export const register=asyncHandler(async(req:Request,res:Response)=>{
     }})
 });
 
-export const verifyEmail=async(req:Request,res:Response)=>{
-
-   try {
-     const authCookie=req.cookies.authCookie || req.body.cookie;
-     const enteredOtp=req.body.OTP;
-     if(authCookie && enteredOtp){
-         const verifiedData=await jwt.verify(authCookie,process.env.OTP_SECRET!);
-     if(verifiedData){
-         const {email,password,otp,name}=JSON.parse(JSON.stringify(verifiedData));
-       if(otp==enteredOtp){
-         const user=await User.create({
-             email,password,name
-            });
-            const data=await user.save;
-            res.status(201)
-            .clearCookie("authCookie")
-            .json({
-             success:true,
-             message:"user created successfully. you can login to your account",
-             data
-            })
-       }else{
-         res.status(400)
-         .json({
-             success:false,
-             message:"Your otp is wrong or expired",
-         })
-       }
-     }
-     
-     }else{
-         res.status(400)
-         .json({
-             success:false,
-             message:"otp is expired",
-         })
-     }
-    
-   } catch (error:any) {
-    res.status(400)
-    .json({
-        success:false,
-        error:error.message,
-    })
-   }
-}
+/**
+ * @description Verify user's email using OTP and create a new user account
+ * @param req request object containing OTP and auth cookie
+ * @param res response object to send back the result
+ */
+export const verifyEmail=asyncHandler(async(req:Request,res:Response)=>{
+    const authCookie=req.body.cookie;
+    const enteredOtp=req.body.OTP;
+    if(!authCookie || !enteredOtp) throw new AppError('Authentication cookie is missing',400);
+    const verifiedData=await jwt.verify(authCookie,process.env.OTP_SECRET!);
+    if(!verifiedData) throw new AppError('Invalid authentication cookie',400);
+    const {email,password,otp,name}=JSON.parse(JSON.stringify(verifiedData));
+    if(otp!==enteredOtp) throw new AppError('Invalid OTP',400);
+    const user=await User.create({
+        email,password,name
+    });
+    const data=await user.save();
+    response(res,201,"user created successfully. you can login to your account",{});
+});
 
 export const login=async(req:Request,res:Response)=>{
    try {
