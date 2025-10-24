@@ -8,7 +8,7 @@ import {Queue} from 'bullmq'
 const queue = new Queue('TranscodingQueue',{
     connection:{
         host:process.env.QUEUE_HOST,
-        port:19481,
+        port:Number(process.env.QUEUE_PORT),
         username:process.env.QUEUE_USER,
         password:process.env.QUEUE_PASSWORD
     }
