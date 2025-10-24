@@ -41,6 +41,10 @@ Summary of routes 🧭
   - Action: Returns user profile (excludes refreshToken, isAdmin, _id)
   - Response 200: { success: true, message: 'user profile fetched successfully', data }
 
+- 🔎 GET `/api/v1/health-check`
+  - Action: Simple health check
+  - Response 200: { success: true, message: 'API is healthy', data: { timestamp } }
+
 - 🔎 GET `/api/v1/scs-coins`
   - Auth: `AccessCookie`
   - Action: Returns current SCS coins balance for the user

@@ -16,7 +16,7 @@ Lightweight TypeScript Express API for SCS Cloud services — user auth, payment
 - BullMQ (Redis-backed queues)
 - Cashfree payment SDK
 
-## Quick start (Windows PowerShell)
+## Quick start (Windows PowerShell) 🚀
 1. Copy `.env.example` to `.env` and fill values.
 
 2. Install dependencies:
@@ -41,7 +41,7 @@ npm start
 Notes:
 - This project expects external services (MongoDB, a message queue compatible with BullMQ, AWS credentials and ECS setup, Cashfree credentials). Use the `.env.example` as a template.
 
-## Environment variables
+## Environment variables 🔧
 All variables are listed in `.env.example`. Important ones:
 - `MONGO_URI` - MongoDB connection string
 - `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, `OTP_SECRET` - JWT secrets
@@ -50,8 +50,10 @@ All variables are listed in `.env.example`. Important ones:
 - `QUEUE_HOST`, `QUEUE_USER`, `QUEUE_PASSWORD` - BullMQ/Redis connection
 - `CASHFREE_APP_KEY`, `CASHFREE_APP_SECRET_KEY` - Cashfree gateway
 - `TRANSCODER_SERVICE_CHARGE`, `HOSTING_SERVICE_CHARGE_PER_30_DAYS` - service charge config
+- `BUCKET_HOST_FOR_HOSTING` - S3 base URL used by subdomain proxy for hosted sites
+- `CLIENT_ORIGIN` - comma-separated allowed origins for CORS (e.g. `http://localhost:5173`)
 
-## Project layout
+## Project layout 🗂️
 - `src/index.ts` - server entry (also contains a proxy that forwards non-`api` subdomains to S3 hosted websites)
 - `src/routes` - route definitions
 - `src/controllers` - controllers implementing route logic
@@ -59,9 +61,15 @@ All variables are listed in `.env.example`. Important ones:
 - `src/services` - integrations (S3 signed URLs, ECS task runner, payment SDK, queues)
 - `src/utils` - helper utilities (token helpers, etc.)
 
-## API documentation
+## API documentation 📘
 See `docs/API.md` for full list of routes, parameters and example responses.
 
-## Notes and assumptions
+## CORS and cookies 🍪
+- This API sets auth cookies. If you call it from a browser app on a different origin, ensure:
+	- Server has `CLIENT_ORIGIN` set to your frontend (e.g. `http://localhost:5173`).
+	- Client uses `withCredentials: true` in requests that should send/receive cookies.
+	- In production over HTTPS, set cookies with `SameSite=None; Secure`.
+
+## Notes and assumptions 📝
 - This documentation intentionally excludes secrets and `node_modules` per project policy.
 - The server expects a properly configured ECS cluster and task definitions for transcoding and hosting.

@@ -14,7 +14,7 @@ import {paymentMail} from './mails/payment.mail.js'
 const connection={
     connection:{
         host:process.env.QUEUE_HOST,
-        port:19482,
+        port:Number(process.env.QUEUE_PORT),
         username:process.env.QUEUE_USER,
         password:process.env.QUEUE_PASSWORD,
     }

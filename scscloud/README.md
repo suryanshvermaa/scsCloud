@@ -28,3 +28,12 @@ export default {
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+## Development proxy and CORS
+
+If you run the frontend on `http://localhost:5173` and the backend on `http://localhost:8080`, browsers will block cross-origin requests unless the backend answers CORS preflight requests. To keep development simple, the Vite dev server now proxies API traffic to the backend.
+
+- Dev env (`.env.development`) sets `VITE_API_URL` to an empty string, so API calls use relative paths like `/api/v1/...`.
+- `vite.config.ts` forwards requests starting with `/api` to `http://localhost:8080`.
+
+This avoids CORS during development. In production, configure `.env` with your actual API origin (e.g. `VITE_API_URL=https://api.example.com`) and ensure your backend sends proper CORS headers.
