@@ -6,4 +6,3 @@ Cashfree.XClientSecret = process.env.CASHFREE_APP_SECRET_KEY!;
 Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 
 export default Cashfree;
-

@@ -25,7 +25,6 @@ export interface IRunProps {
 }
 
 /**
- * 
  * @description Spins up a transcoder ECS task with the provided run object parameters.
  * @param {IRunProps} runObj
  */
@@ -113,7 +112,6 @@ interface IRunPropsHost {
 }
 
 /**
- * 
  * @description Spins up a hoster ECS task with the provided run object parameters.
  * @param {IRunPropsHost} runObj 
  */
