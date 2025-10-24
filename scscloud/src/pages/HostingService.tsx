@@ -36,7 +36,7 @@ const HostingService:React.FC=()=>{
     useEffect(()=>{
         setLoadingData(true)
         const accessToken= Cookies.get("AccessCookie");
-        axios.get(`https://api.suryanshverma.site/api/host/websites?token=${accessToken}`)
+        axios.get(`${import.meta.env.VITE_API_URL}/api/host/websites?token=${accessToken}`)
         .then((res)=>{
             const websitesData=res.data.data;
             console.log(websitesData);
@@ -65,7 +65,7 @@ const HostingService:React.FC=()=>{
         console.log(websiteType);
        if(websiteName && websiteType && gitUrl){
         const accessToken= Cookies.get("AccessCookie");
-        axios.post('https://api.suryanshverma.site/api/host/host-website',{AccessCookie:accessToken,gitUrl,websiteType,websiteName})
+        axios.post(`${import.meta.env.VITE_API_URL}/api/host/host-website`,{AccessCookie:accessToken,gitUrl,websiteType,websiteName})
         .then((res)=>{
             const data:any=res.data;
             console.log('hosted',data);
@@ -87,7 +87,7 @@ const HostingService:React.FC=()=>{
 
     const handleRenewValidDate=(websiteId:string)=>{
         const accessToken= Cookies.get("AccessCookie");
-        axios.post('https://api.suryanshverma.site/api/host/renew-validity',{AccessCookie:accessToken,websiteId}).then((res)=>{
+        axios.post(`${import.meta.env.VITE_API_URL}/api/host/renew-validity`,{AccessCookie:accessToken,websiteId}).then((res)=>{
             console.log(res.data);
             setOpen(false);
             alert('renewed successful')

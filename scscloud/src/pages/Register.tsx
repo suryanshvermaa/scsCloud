@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie'
 
 
-
 const Register:React.FC=()=> {
   const navigate=useNavigate();
   // (['RefreshCookie','AccessCookie','authCookie']);
@@ -20,7 +19,7 @@ const Register:React.FC=()=> {
       //  const data=registerData;
        console.log(registerData);
        //api call
-       const res=await axios.post('https://api.suryanshverma.site/api/v1/register',registerData);
+       const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/register`,registerData);
        console.log(res.data);
        Cookies.set("authCookie", res.data.cookie.value, {expires:Date.now()+900000})
        setEmailLoading(false)
@@ -30,7 +29,7 @@ const Register:React.FC=()=> {
     setVerifyingOtp(true)
     console.log(OTP);
     const cookie=Cookies.get("authCookie");
-    const res=await axios.post('https://api.suryanshverma.site/api/v1/verify-email',{OTP:OTP,cookie});
+    const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/verify-email`,{OTP:OTP,cookie});
     if(res.data){
       console.log(res.data);
       setVerifyingOtp(false)

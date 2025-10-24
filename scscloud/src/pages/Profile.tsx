@@ -69,13 +69,13 @@ const Profile:React.FC=()=>{
         setLoadingData(true)
         setLoadingHistoryData(true)
         const accessToken= Cookies.get("AccessCookie");
-      axios.get(`https://api.suryanshverma.site/api/v1/profile?token=${accessToken}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/v1/profile?token=${accessToken}`)
       .then((res)=>{
         const user=res.data.data;
         console.log(user);
         setUser(user);
         setLoadingData(false)
-        axios.get(`https://api.suryanshverma.site/api/payment/history?token=${accessToken}`).then((res)=>{
+        axios.get(`${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`).then((res)=>{
             const data=res.data.data;
             console.log(data);
             setLoadingHistoryData(false)
@@ -93,7 +93,7 @@ const Profile:React.FC=()=>{
 
     const createApiKeys=async()=>{
         const accessToken= Cookies.get("AccessCookie");
-        axios.post('https://api.suryanshverma.site/api/v1/create-api-keys',{AccessCookie:accessToken}).then((res)=>{
+        axios.post(`${import.meta.env.VITE_API_URL}/api/v1/create-api-keys`,{AccessCookie:accessToken}).then((res)=>{
            const data=res.data;
            console.log(data);
            setCredentialsModal(false)

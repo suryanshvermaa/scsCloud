@@ -20,7 +20,7 @@ const Home:React.FC=()=>{
         if(!accessToken){
            const refreshToken= Cookies.get("RefreshCookie");
            if(refreshToken){
-            const res=await axios.post('https://api.suryanshverma.site/api/v1/refresh-token',{refreshToken});
+            const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/refresh-token`,{refreshToken});
             if(res){
               const date1=new Date();
         date1.setHours(date1.getHours()+1)

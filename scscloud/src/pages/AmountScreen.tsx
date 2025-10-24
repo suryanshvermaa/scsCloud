@@ -17,7 +17,7 @@ const AmountScreen:React.FC=()=>{
      useEffect(()=>{
       setLoadingData(true)
       const accessToken= Cookies.get("AccessCookie");
-       axios.get(`https://api.suryanshverma.site/api/v1/scs-coins?token=${accessToken}`).then((res)=>{
+       axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scs-coins?token=${accessToken}`).then((res)=>{
         setScsCoins(res.data.data.scsCoins);
         setLoadingData(false);
        })
@@ -30,9 +30,7 @@ const AmountScreen:React.FC=()=>{
       let orderId='';
       
       
-      
-       
-        axios.post('https://api.suryanshverma.site/api/payment/create-order',{AccessCookie:accessToken,paymentAmount:inputAmount,phoneNumber}).then((res)=>{
+        axios.post(`${import.meta.env.VITE_API_URL}/api/payment/create-order`,{AccessCookie:accessToken,paymentAmount:inputAmount,phoneNumber}).then((res)=>{
           const data=res.data.data;
           console.log(data);
           const paymentSessionId=data.payment_session_id;
@@ -42,7 +40,7 @@ const AmountScreen:React.FC=()=>{
           redirectTarget: "_modal"
       }
       cashfree.checkout(checkoutOptions).then(()=>{
-        axios.post('https://api.suryanshverma.site/api/payment/verify-payment',{AccessCookie:accessToken,orderId}).then((res)=>{
+        axios.post(`${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,{AccessCookie:accessToken,orderId}).then((res)=>{
           alert(res.data.message);
           navigate('/home');
         })

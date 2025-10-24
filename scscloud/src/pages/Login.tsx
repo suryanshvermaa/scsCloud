@@ -12,14 +12,14 @@ const Login:React.FC=()=>{
     const handleLogin=async()=>{
          const data=loginData;
          console.log(data);
-         const res=await axios.post('https://api.suryanshverma.site/api/v1/login',loginData);
+         const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/login`,loginData);
        if(res){
         const date1=new Date();
         date1.setHours(date1.getHours()+1)
         const date2=new Date();
         date2.setHours(date2.getHours()+12);
-        Cookies.set("AccessCookie", res.data.cookies[0].value, {expires:date1})
-        Cookies.set("RefreshCookie", res.data.cookies[1].value, {expires:date2})
+        Cookies.set("AccessCookie", res.data.data.cookies[0].value, {expires:date1})
+        Cookies.set("RefreshCookie", res.data.data.cookies[1].value, {expires:date2})
         navigate('/home')
         console.log(res.data);
        }
