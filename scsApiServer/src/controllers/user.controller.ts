@@ -115,97 +115,60 @@ export const refreshToken=asyncHandler(async(req:Request,res:Response)=>{
     })
 });
 
-export const getUserProfile=async(req:Request,res:Response)=>{
-    try {
-        const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
-        const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
-        const {userId}=JSON.parse(JSON.stringify(isVerified)) 
-        const user=await User.findById(userId).select('-refreshToken -isAdmin -_id')
-        res.status(200).json({
-            success:true,
-            message:"user profile fetched successfully",
-            data:user
-        })
-    } catch (error:any) {
-        res.status(400).json({
-            success:false,
-            message:"failed to get user profile",
-            error:error.message
-        })
-    }
-}
+/**
+ * @description Get user profile information
+ * @param req request object containing user credentials
+ * @param res response object to send back the result
+ */
+export const getUserProfile=asyncHandler(async(req:Request,res:Response)=>{
+    const authCookie=req.body.AccessCookie || req.query.token;
+    if(!authCookie) throw new AppError('Authentication cookie is missing',400);
+    const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid authentication cookie',400);
+    const {userId}=JSON.parse(JSON.stringify(isVerified)) 
+    const user=await User.findById(userId).select('-refreshToken -isAdmin -_id')
+    response( res,200,"user profile fetched successfully",{data:user})
+})
 
-export const getSCSCoins=async(req:Request,res:Response)=>{
-    try {
-        const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
-        const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
-        if(isVerified){
-            const {userId}=JSON.parse(JSON.stringify(isVerified)) 
-        const user=await User.findById(userId).select('-refreshToken -isAdmin -_id')
-        const scsCoins=user?.SCSCoins;
-        res.status(200).json({
-            success:true,
-            message:"user profile fetched successfully",
-            data:{
-                scsCoins
-            }
-        })
-        }else{
-            res.status(401).json({
-                success:false,
-                error:"unauthorised",
-            })
-        }
-    } catch (err:any) {
-        res.status(400).json({
-            success:false,
-            mesaage:"error in getting scs coins",
-            error:err.message
-        })
-    }
-}
+/**
+ * @description Get the SCS coins of the authenticated user
+ * @param req request object containing user credentials
+ * @param res response object to send back the result
+ */
+export const getSCSCoins=asyncHandler(async(req:Request,res:Response)=>{
+    const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
+    if(!authCookie) throw new AppError('Authentication cookie is missing',400);
+    const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid authentication cookie',400);
+    const {userId}=JSON.parse(JSON.stringify(isVerified)) 
+    const user=await User.findById(userId).select('-refreshToken -isAdmin -_id')
+    const scsCoins=user?.SCSCoins;
+    response(  res,200,"user profile fetched successfully",{data:{scsCoins}})
+});
 
-export const createApiKeys=async(req:Request,res:Response)=>{
-    try {
-        const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
-        const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
-        if(isVerified){
-            const {userId}=JSON.parse(JSON.stringify(isVerified))
-            const user=await User.findById(userId);
-           if(user){
-            const accessKey=await jwt.sign({userId:user?._id},process.env.ACCESS_KEY_CREDENTIALS_SECRET!)
-            const secretAccessKey=await jwt.sign({userId:user?._id},process.env.SECRET_ACCESS_KEY_CREDENTIALS_SECRET!)
-            user.credentialsActive=true;
-            user.accessKey=accessKey;
-            user.secretAccessKey=secretAccessKey;
-            const email=user.email;
-            await user.save();
-            apiKeysQueue.add('apiKeys'+Date.now(),JSON.stringify({email,accessKey,secretAccessKey}))
-            res.status(201).json({
-                success:true,
-                message:'api keys created'
-            })
-           }else{
-            res.status(400).json({
-                success:false,
-                error:"User not found"
-            })
-           }
-        }else{
-            res.status(400).json({
-                success:false,
-                error:"Unathorised"
-            })
-        }
-         
-    } catch (err:any) {
-        res.status(400).json({
-            success:false,
-            message:"error in creating api keys",
-            error:err.message
-        })
-    }
-}
+/**
+ * @description Create API keys for the authenticated user
+ * @param req request object containing user credentials
+ * @param res response object to send back the result   
+ */
+export const createApiKeys=asyncHandler(async(req:Request,res:Response)=>{
+    const authCookie=req.cookies.AccessCookie || req.body.AccessCookie || req.query.token;
+    if(!authCookie) throw new AppError('Authentication cookie is missing',400);
+    const isVerified=await jwt.verify(authCookie,process.env.ACCESS_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid authentication cookie',400);
+    const {userId}=JSON.parse(JSON.stringify(isVerified))
+    const user=await User.findById(userId);
+    if(!user) throw new AppError('User not found',404);
+    const accessKey=await jwt.sign({userId:user?._id},process.env.ACCESS_KEY_CREDENTIALS_SECRET!)
+    const secretAccessKey=await jwt.sign({userId:user?._id},process.env.SECRET_ACCESS_KEY_CREDENTIALS_SECRET!)
+    user.credentialsActive=true;
+    user.accessKey=accessKey;
+    user.secretAccessKey=secretAccessKey;
+    const email=user.email;
+    await user.save();
+    apiKeysQueue.add('apiKeys'+Date.now(),JSON.stringify({email,accessKey,secretAccessKey}))
+    response(  res,201,'api keys created',{});
+});
 
 export const getAccessKey=async(req:Request,res:Response)=>{
     try {
