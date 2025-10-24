@@ -2,7 +2,7 @@ import e, { Request,Response } from "express";
 import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import { putObjectSignedUrl } from "../services/s3.service";
-import { spinTranscoder } from "../services/ecs.service";
+import { spinTranscoder } from "../services/containers.service";
 import User from "../models/user.model";
 import { AppError } from "../utils/error";
 import response from "../utils/response";
