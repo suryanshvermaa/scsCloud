@@ -1,10 +1,11 @@
-
 import { Outlet } from 'react-router-dom'
-
+import SiteLayout from './components/layout/SiteLayout'
 
 function App() {
   return (
-   <Outlet/>
+    <SiteLayout>
+      <Outlet/>
+    </SiteLayout>
   )
 }
 

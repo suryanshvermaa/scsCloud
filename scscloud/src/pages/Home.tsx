@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { FaVideo } from "react-icons/fa";
@@ -8,8 +6,6 @@ import { IoIosCodeWorking } from "react-icons/io";
 import { GrStorage } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import SCSCloudImage from '../assets/SCSCloud.png';
-import HLSTranscoder from "../docs/HLSTranscoder";
-import HostingServiceDoc from "../docs/HostingServiceDoc";
 
 const Home:React.FC=()=>{
   const navigate=useNavigate();
@@ -45,61 +41,68 @@ const Home:React.FC=()=>{
     validator();
   },[])
   return (
-    
-    <>
-    <Header />
-    <div className="h-[45px]">
-    </div>
-    <div className="w-full flex flex-row">
-      <div className="leftDiv md:w-[20%] md:flex md:flex-col hidden bg-blue-100 h-[83vh] rounde-md shadow-md shadow-gray-400 my-5 ml-4 rounded-md p-4 fixed" >
-                   <h1 className="text-2xl font-semibold text-gray-900 p-2 ">Services </h1>
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-1 cursor-pointer" onClick={()=>navigate('/hls-transcoding-service')}>
-                         <FaVideo className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">HLS Transcoder</h3>
-                    </div>
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-1 cursor-pointer" onClick={()=>navigate('/hosting-service')}>
-                         <IoIosCodeWorking className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">Static Web hosting</h3>
-                    </div>
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-1 cursor-pointer">
-                         <GrStorage className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">Storage</h3>
-                    </div>
-      </div>
-      <div className="rightDiv w-full md:ml-[20.3%] p-6 ml:0">
-   
-       <div className="w-full rounded-md p-5 flex-1 flex flex-col items-center shadow shadow-gray-700 ">
-       <div className="md:w-[70%] w-full flex flex-col p-4 bg-white rounded-md shadow shadow-gray-700 ">
-            <img src={SCSCloudImage} alt="scscloudImage" />
-            <div className="bg-gray-600 rounded-md p-3">
-              <h1 className="text-center text-2xl font-bold text-gray-200">What is SCS?</h1>
-              <h1 className="text-center text-2xl font-bold text-gray-200">(Suryansh Cloud Services)</h1>
+    <div className="relative">
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-6 py-14 md:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full ring-1 ring-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                Production-ready in minutes
+              </div>
+              <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-white">
+                Ship cloud apps faster with SCS Cloud
+              </h1>
+              <p className="mt-4 text-slate-300 text-sm md:text-base max-w-prose">
+                Deploy static sites, transcode videos to HLS, and scale with confidence. Unified developer experience, transparent pricing.
+              </p>
+              <div className="mt-6 flex items-center gap-3">
+                <button className="inline-flex items-center justify-center rounded-md bg-cyan-500/90 hover:bg-cyan-400 text-slate-900 font-semibold px-4 py-2 text-sm" onClick={()=>navigate('/register')}>
+                  Get started
+                </button>
+                <button className="inline-flex items-center justify-center rounded-md ring-1 ring-white/10 hover:bg-white/5 px-4 py-2 text-sm" onClick={()=>navigate('/hls-transcoder-docs')}>
+                  Read the docs
+                </button>
+              </div>
             </div>
-       </div>
-       <div className=" flex flex-col bg-white w-full mt-5">
-           
-       <h1 className="text-3xl font-semibold text-gray-700 text-start">Introduction</h1>
-       <div className="paragraph p-5">
-          <p >SCS is a best scalable and cheap service for developers and investors.SCS provide number of services.</p>
-          <p className="ml-4">
-            <ul>
-              <li>1) HLS Transcoder</li>
-              <li>2) Static Website Hosting</li>
-            </ul>
-          </p>
-          <HLSTranscoder/>
-          <HostingServiceDoc/>
-       </div>
-       
-       </div>
-         
-       </div>
-       <Footer/>
-      
-      </div>
+            <div className="relative">
+              <div className="relative rounded-xl border border-slate-800 bg-slate-900/60 backdrop-blur shadow-xl">
+                <img src={SCSCloudImage} alt="SCS Cloud" className="rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="max-w-7xl mx-auto px-6 py-10 md:py-14">
+        <h2 className="text-xl font-semibold text-slate-200">Core services</h2>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 hover:border-slate-700 transition cursor-pointer" onClick={()=>navigate('/hls-transcoding-service')}>
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
+              <FaVideo />
+            </div>
+            <h3 className="mt-3 font-semibold text-slate-100">HLS Transcoder</h3>
+            <p className="mt-1 text-sm text-slate-400">Adaptive streaming made easy with scalable transcoding pipelines.</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 hover:border-slate-700 transition cursor-pointer" onClick={()=>navigate('/hosting-service')}>
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+              <IoIosCodeWorking />
+            </div>
+            <h3 className="mt-3 font-semibold text-slate-100">Static Web Hosting</h3>
+            <p className="mt-1 text-sm text-slate-400">Global CDN, instant rollbacks, and zero-config deployments.</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 opacity-60">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20">
+              <GrStorage />
+            </div>
+            <h3 className="mt-3 font-semibold text-slate-100">Object Storage</h3>
+            <p className="mt-1 text-sm text-slate-400">Coming soon</p>
+          </div>
+        </div>
+      </section>
     </div>
-  </>
-    
   )
 }
 export default Home;

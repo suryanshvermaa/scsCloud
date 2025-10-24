@@ -6,27 +6,50 @@ import { useNavigate } from "react-router-dom";
 
 const Services:React.FC=()=>{
      const navigate=useNavigate();
-    
-    return (
-        <div className="absolute bg-gray-200 md:w-[60%] p-5 w-full z-40">
-            <h1 className="text-xl font-semibold text-gray-800">Services</h1>
-    
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-2 cursor-pointer" onClick={()=>navigate('/hls-transcoding-service')}>
-                         <FaVideo className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">HLS Transcoder</h3>
-                    </div>
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-2 cursor-pointer"onClick={()=>navigate('/hosting-service')}>
-                         <IoIosCodeWorking className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">Static Web hosting</h3>
-                    </div>
-                    <div  className="p-3 border-solid border-b-2 border-gray-300 flex flex-row items-center mt-2 cursor-pointer">
-                         <GrStorage className="text-2xl text-blue-400  font-extralight" />
-                         <h3 className="text-md font-semibold text-gray-700 pl-3">Storage</h3>
-                    </div>
 
-               
+     return (
+          <div className="relative">
+               <div className="w-full md:w-[60%] bg-slate-900 border border-slate-800 rounded-xl shadow-xl shadow-black/20 p-4 md:p-6">
+                    <h2 className="text-sm font-semibold text-slate-200">Products</h2>
+                    <div className="mt-3 divide-y divide-slate-800/80">
+                         <button
+                              className="w-full flex items-center gap-3 py-3 text-left hover:bg-white/5 rounded-md px-2"
+                              onClick={()=>navigate('/hls-transcoding-service')}
+                         >
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
+                                   <FaVideo className="text-lg"/>
+                              </span>
+                              <div>
+                                   <div className="text-slate-100 font-medium">HLS Transcoder</div>
+                                   <div className="text-xs text-slate-400">Transcode videos to adaptive HLS streams</div>
+                              </div>
+                         </button>
 
-        </div>
-    )
+                         <button
+                              className="w-full flex items-center gap-3 py-3 text-left hover:bg-white/5 rounded-md px-2"
+                              onClick={()=>navigate('/hosting-service')}
+                         >
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+                                   <IoIosCodeWorking className="text-lg"/>
+                              </span>
+                              <div>
+                                   <div className="text-slate-100 font-medium">Static Web Hosting</div>
+                                   <div className="text-xs text-slate-400">Fast, secure hosting for static sites</div>
+                              </div>
+                         </button>
+
+                         <div className="w-full flex items-center gap-3 py-3 text-left opacity-60 px-2">
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20">
+                                   <GrStorage className="text-lg"/>
+                              </span>
+                              <div>
+                                   <div className="text-slate-100 font-medium">Object Storage</div>
+                                   <div className="text-xs text-slate-400">Coming soon</div>
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     )
 }
 export default Services;

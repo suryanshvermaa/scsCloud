@@ -1,5 +1,3 @@
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import UserImage from '../assets/user.jpg';
 import { TiTick } from "react-icons/ti";
 import { useEffect, useState } from "react";
@@ -28,62 +26,59 @@ const Profile:React.FC=()=>{
         updatedAt:string;
     }
 
-    const paymentData=[
-       {
-        _id:1,
-        orderId:'fkfkhjlefj',
-        amount:500,
-        paymentId:'jjeedefwr',
-        updatedAt:'387/344/4r'
-       },
-       {
-        _id:2,
-        orderId:'fkfkhjlefj',
-        amount:500,
-        paymentId:'jjeedefwr',
-        updatedAt:'387/344/4r'
-       },
-       {
-        _id:3,
-        orderId:'fkfkhjlefj',
-        amount:500,
-        paymentId:'jjeedefwr',
-        updatedAt:'387/344/4r'
-       },
-       {
-        _id:4,
-        orderId:'fkfkhjlefj',
-        amount:500,
-        paymentId:'jjeedefwr',
-        updatedAt:'387/344/4r'
-       }
-    ]
-    const [user,setUser]=useState<IUser| undefined>();
-    const [paymentHistory,setPaymentHistory]=useState<Array<IPaymentHistory>|undefined>(paymentData)
+   const paymentData: IPaymentHistory[] = []
+   const [user,setUser]=useState<IUser| undefined>();
+   const [paymentHistory,setPaymentHistory]=useState<Array<IPaymentHistory>>(paymentData)
     const [loadingData,setLoadingData]=useState<boolean>(false);
     const [loadingHistoryData,setLoadingHistoryData]=useState<boolean>(false);
     const [credentialsModal,setCredentialsModal]=useState<boolean>(false);
     const [credentialsModal2,setCredentialsModal2]=useState<boolean>(false);
     const navigate=useNavigate();
     useEffect(()=>{
-        setLoadingData(true)
-        setLoadingHistoryData(true)
-        const accessToken= Cookies.get("AccessCookie");
-      axios.get(`${import.meta.env.VITE_API_URL}/api/v1/profile?token=${accessToken}`)
-      .then((res)=>{
-        const user=res.data.data;
-        console.log(user);
-        setUser(user);
-        setLoadingData(false)
-        axios.get(`${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`).then((res)=>{
-            const data=res.data.data;
-            console.log(data);
-            setLoadingHistoryData(false)
-            setPaymentHistory(data);
-            
-        })
-        
-      })
+      async function load() {
+        try {
+          setLoadingData(true)
+          setLoadingHistoryData(true)
+          let accessToken = Cookies.get("AccessCookie");
+          if (!accessToken) {
+            const refreshToken = Cookies.get("RefreshCookie");
+            if (refreshToken) {
+              const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/refresh-token`, { refreshToken });
+              if (res?.data?.data?.cookies) {
+                const date1=new Date(); date1.setHours(date1.getHours()+1)
+                const date2=new Date(); date2.setHours(date2.getHours()+12)
+                Cookies.set("AccessCookie", res.data.data.cookies[0].value, {expires:date1})
+                Cookies.set("RefreshCookie", res.data.data.cookies[1].value, {expires:date2})
+                accessToken = res.data.data.cookies[0].value;
+              }
+            }
+          }
+
+          if (!accessToken) {
+            navigate('/login');
+            return;
+          }
+
+          const { data: profileRes } = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/profile?token=${accessToken}`);
+          setUser(profileRes.data);
+          setLoadingData(false);
+
+          try {
+            const { data: historyRes } = await axios.get(`${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`);
+            const maybeArr = (historyRes as any)?.data;
+            setPaymentHistory(Array.isArray(maybeArr) ? maybeArr : []);
+          } catch (e) {
+            // history may fail independently; keep UI usable
+          } finally {
+            setLoadingHistoryData(false);
+          }
+        } catch (e:any) {
+          setLoadingData(false);
+          setLoadingHistoryData(false);
+          navigate('/login');
+        }
+      }
+      load();
     },[])
 
     const handleApiModal=()=>{
@@ -104,111 +99,88 @@ const Profile:React.FC=()=>{
         })
     }
  return (
-     <>
-     <Header/>
-      <div className="h-[45px]"></div>
+   <>
      {
-        !loadingData ? <div className="w-full flex md:flex-row flex-col md:bg-gray-400 bg-green-900">
-        <div className="leftdiv md:w-[25%] w-full flex flex-col h-auto gap-3">
-             <div className="leftCard1 md:mx-0 mx-5  md:ml-6  mt-5 flex flex-col  md:w-[300px] rounded-md shadow shadow-gray-500 p-4 items-center bg-white">
-          
-                  <div className="w-[130px] h-[130px]  rounded-full aspect-square bg-gray-300"><img src={UserImage} className=" w-full h-full rounded-full"/></div>
-                  <h1 className="text-gray-700 font-semibold text-3xl my-4">{user?.name}</h1>
-      
-              </div>
-              <div className="leftCard2  md:mx-0 mx-5 md:ml-8  flex flex-col  md:w-[300px] rounded-md shadow shadow-gray-500 p-4 items-center bg-white">
-          
-                 
-                  <h1 className="text-gray-700 font-semibold text-md  ">Email</h1>
-                  <p className=" text-green-800">{user?.email}</p>
- 
-      
-              </div>
- 
-              <div className="leftCard2 md:mx-0 mx-5   md:ml-8   flex flex-col  md:w-[300px] rounded-md shadow shadow-gray-500 p-4 items-center bg-white">
-          
-                 
-                  <h1 className="text-gray-700 font-semibold text-md  ">Payment till now</h1>
-                  <p className=" text-orange-800">{user?.paymentAmount} &#x20B9;</p>
- 
-      
-              </div>
- 
-              <div className="leftCard2 md:mx-0 mx-5 md:ml-8  flex flex-col  md:w-[300px] rounded-md shadow shadow-gray-500 p-4 items-center bg-white">
-          <button className="bg-orange-600 p-3 text-white font-bold rounded" onClick={()=>setCredentialsModal(true)}>Create Api Keys</button>
- 
- 
-      </div>
-        </div>
-        <div className="rightdiv w-full p-5">
-             <div className="rounded flex flex-row flex-wrap gap-4 w-auto h-auto justify-center">
-                 
-                   <div className="amountCard  p-3 rounded-md shadow-md shadow-gray-700 md:w-[30%] w-[94%]  flex flex-col justify-center bg-white" >
-                      <h1 className="text-3xl font-semibold text-gray-900  w-full text-center p-2"> Amount </h1>
-                       <h1 className="text-3xl font-bold text-gray-200 text-center p-2 bg-green-700 rounded-md mx-12"> {user?.SCSCoins} &#x20B9; </h1>
-                   </div>
- 
-                   <div className="amountCard  p-3 rounded-md shadow-md shadow-gray-700 md:w-[30%] w-[94%] flex flex-col justify-center bg-white" >
-                      <h1 className="text-3xl font-semibold text-gray-900  w-full text-center p-2"> Payment Count </h1>
-                       <h1 className="text-3xl font-bold text-gray-200 text-center p-2 bg-gray-700 rounded-md mx-12"> {user?.paymentCount} </h1>
-                   </div>
- 
-                   <div className="amountCard  p-3 rounded-md shadow-md shadow-gray-700 md:w-[30%] w-[94%] flex flex-col justify-center bg-white" >
-                      <h1 className="text-3xl font-semibold text-gray-900  w-full text-center p-2"> Services </h1>
-                       <h1 className="text-3xl font-bold text-gray-200 text-center p-2 bg-orange-500 rounded-md mx-12">2 </h1>
-                   </div>
- 
-                   <div className="amountCard  p-3 rounded-md shadow-md shadow-gray-700 w-full flex flex-col justify-center bg-gray-200 md:mx-7" >
-                      <h1 className="text-3xl ml-3 font-semibold text-gray-900  w-full">Payment history </h1>
- 
-                    <div className="flex w-full p-2 flex-col scroll-auto">
-                        {
-                          !loadingHistoryData && paymentHistory && paymentHistory.map((payment)=>(
-                             <div key={payment._id} className=" mx-3 my-1 rounded p-4 bg-white shadow flex justify-between md:flex-row flex-col  items-center gap-1">
-                                   <h1>amount: <span className="text-green-700">{payment.amount} &#x20B9;</span></h1>
-                                   <h1>orderId: <span className="text-yellow-700">{payment.orderId}</span></h1>
-                                   <h1>paymentId: <span className="text-gray-700">{payment.paymentId}</span></h1>
-                                   <h1>{payment.updatedAt}</h1><TiTick className="text-3xl text-gray-200 bg-green-700 rounded-full "/>
- 
-                              </div>
-                         ))
-                        }
-                        {
-                            !loadingHistoryData && !paymentHistory?.length==true &&  <div className=" mx-3 my-1 rounded p-4 bg-white shadow flex justify-between md:flex-row flex-col  items-center gap-1">
-                                 <h1 className="text-center font-semibold text-3xl text-gray-700">No payment you have done till now</h1>
-                             </div>
-                         }{
-                            loadingData &&  <div className="flex justify-center items-center h-[30vh] w-[90bw]">
-
-                            <div
-                            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                            role="status">
-                            <span
-                              className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
-                              >Loading...</span>
-                          </div>
-                           </div>
-                         }
-                    </div>
-                      
-                   </div>
-                 
+       !loadingData ? (
+         <div className="max-w-7xl mx-auto px-6 py-8 md:py-12">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             {/* Left column */}
+             <div className="space-y-4">
+               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 flex flex-col items-center">
+                 <div className="w-[120px] h-[120px] rounded-full overflow-hidden ring-1 ring-white/10">
+                   <img src={UserImage} className="w-full h-full object-cover" />
+                 </div>
+                 <h1 className="text-xl font-semibold mt-4 text-white">{user?.name}</h1>
+               </div>
+               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                 <h2 className="text-sm font-semibold text-slate-200">Email</h2>
+                 <p className="mt-1 text-sm text-cyan-300 break-all">{user?.email}</p>
+               </div>
+               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                 <h2 className="text-sm font-semibold text-slate-200">Payment till now</h2>
+                 <p className="mt-1 text-lg text-amber-300">{user?.paymentAmount} ₹</p>
+               </div>
+               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                 <button className="w-full rounded-md bg-amber-500/90 hover:bg-amber-400 text-slate-900 font-semibold px-3 py-2 text-sm" onClick={()=>setCredentialsModal(true)}>
+                   Create API Keys
+                 </button>
+               </div>
              </div>
-        </div>
-       </div>:
-         <div className="flex justify-center items-center h-[90vh] w-[90bw]">
 
-         <div
-         className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-         role="status">
-         <span
-           className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
-           >Loading...</span>
-       </div>
-        </div> 
+             {/* Right column */}
+             <div className="md:col-span-2 space-y-4">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                   <h3 className="text-sm text-slate-300">Amount</h3>
+                   <div className="mt-2 text-2xl font-bold text-emerald-300">{user?.SCSCoins} ₹</div>
+                 </div>
+                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                   <h3 className="text-sm text-slate-300">Payment Count</h3>
+                   <div className="mt-2 text-2xl font-bold text-slate-200">{user?.paymentCount}</div>
+                 </div>
+                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                   <h3 className="text-sm text-slate-300">Services</h3>
+                   <div className="mt-2 text-2xl font-bold text-amber-300">2</div>
+                 </div>
+               </div>
+
+               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                 <h3 className="text-base font-semibold text-white">Payment history</h3>
+                 <div className="mt-4 space-y-3">
+                   {(!loadingHistoryData && Array.isArray(paymentHistory)) && paymentHistory.map((payment)=> (
+                     <div key={payment._id} className="rounded-lg border border-slate-800 bg-slate-950 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                       <h1>amount: <span className="text-emerald-300">{payment.amount} ₹</span></h1>
+                       <h1>orderId: <span className="text-amber-300">{payment.orderId}</span></h1>
+                       <h1>paymentId: <span className="text-slate-300">{payment.paymentId}</span></h1>
+                       <h1 className="text-slate-400 text-sm">{payment.updatedAt}</h1>
+                       <TiTick className="text-2xl text-white bg-emerald-600 rounded-full"/>
+                     </div>
+                   ))}
+
+                   {(!loadingHistoryData && (!paymentHistory || paymentHistory.length === 0)) && (
+                     <div className="rounded-lg border border-slate-800 bg-slate-950 p-6 text-center text-slate-300">
+                       No payment you have done till now
+                     </div>
+                   )}
+
+                   {(loadingHistoryData || loadingData) && (
+                     <div className="flex justify-center items-center h-[20vh]">
+                       <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-white" role="status"/>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       ) : (
+         <div className="flex justify-center items-center h-[60vh]">
+           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-white" role="status"/>
+         </div>
+       )
      }
 
-         <Dialog open={credentialsModal} onClose={setCredentialsModal} className="relative z-10">
+         <Dialog open={credentialsModal} onClose={setCredentialsModal} className="relative z-50">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
@@ -259,7 +231,7 @@ const Profile:React.FC=()=>{
       </div>
     </Dialog>
 
-    <Dialog open={credentialsModal2} onClose={setCredentialsModal2} className="relative z-10">
+  <Dialog open={credentialsModal2} onClose={setCredentialsModal2} className="relative z-50">
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
@@ -302,8 +274,7 @@ const Profile:React.FC=()=>{
         </div>
       </div>
     </Dialog>
-     <Footer/>
-     </>
+   </>
  )
 }
 export default Profile;

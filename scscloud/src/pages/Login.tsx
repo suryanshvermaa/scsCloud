@@ -10,7 +10,6 @@ const Login:React.FC=()=>{
 
     const [loginData,setLoginData]=useState<object | undefined>();
     const handleLogin=async()=>{
-         const data=loginData;
          console.log(import.meta.env.VITE_API_URL);
          const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/login`,loginData);
        if(res){

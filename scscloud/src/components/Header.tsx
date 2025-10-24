@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { IoCloudOutline } from "react-icons/io5";
 import { CgMenuGridR } from "react-icons/cg";
-import { FaSearch } from "react-icons/fa";
 import { FaRegUser } from "react-icons/fa";
 import { HiOutlineCurrencyRupee } from "react-icons/hi";
 import { LuMenu } from "react-icons/lu";
@@ -21,60 +20,84 @@ const Header:React.FC=()=> {
         Cookies.remove("RefreshCookie");
         navigate('/login');
     }
-  return ( <>
-    <div className='w-full bg-gray-800 p-1 h-[45px] px-3 flex flex-row justify-between fixed items-center z-50'>
-        <div className='flex flex-row'>
-                 <div className='flex flex-row items-center hover:border-solid hover:border-[1.5px] hover:border-gray-300 px-2' onClick={()=>navigate('/home')}>
-                 <IoCloudOutline className='text-4xl text-gray-300  font-extralight'/>
-                 <h3 className='text-xl font-bold text-gray-300  ml-3'>SCS</h3>
-             </div>
-             <div className='flex flex-row items-center mx-6 cursor-pointer hover:border-solid hover:border-[1.5px] hover:border-gray-300 px-2 border-solid border-l-2 border-gray-600' onClick={()=>setServices(!services)}>
-                 <CgMenuGridR className='text-3xl text-gray-300 font-extralight'/>
-                 <h3 className='text-md font-medium text-gray-300  ml-2'>Services</h3>
-             </div>
-             <div className='md:flex flex-row items-center mx-6 cursor-pointer rounded bg-black md:my-1 px-4 hidden'>
-                 <FaSearch className='text-xl text-gray-300 font-extralight'/>
-                 <input className='text-md font-medium text-gray-300  ml-2 bg-transparent pl-2 py-[5px]' placeholder='services'/>
-             </div>
-        </div>
-        <div className='flex md:flex-row flex-col'>
-             {
-                !menu ? <LuMenu className="text-2xl text-gray-300 font-extralight md:hidden" onClick={()=>setMenu(true)}/>:
-                <RxCross1 className="text-2xl text-gray-300 font-extralight md:hidden" onClick={()=>setMenu(false)}/>
-             }
-             <div className='md:flex flex-row items-center mx-6 cursor-pointer rounded my-1 hover:border-solid hover:border-[1.5px] hover:border-gray-300 px-2 h-[100%] hidden ' onClick={()=>navigate('/amount-dashboard')}>
-                 <HiOutlineCurrencyRupee className='text-2xl text-gray-300 font-extralight'/>
-             </div>
-             <div className='md:flex hidden flex-row items-center mx-2 cursor-pointer rounded my-1 hover:border-solid hover:border-[1.5px] hover:border-gray-300 h-[100%] ' onClick={()=>navigate('/profile')}>
-                 <FaRegUser className='text-xl text-gray-300 font-extralight'/>
-                
-             </div>
-             <button className='px-2 md:bg-white justify-center items-center md:rounded md:font-semibold md:flex hidden' onClick={handleLogout}>Logout</button>
+    return ( <>
+        <div className='w-full fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:bg-slate-900/70 border-b border-slate-800'>
+            <div className='max-w-7xl mx-auto px-4 h-14 flex items-center justify-between'>
+                {/* Brand */}
+                <div className='flex items-center gap-3 cursor-pointer' onClick={()=>navigate('/home')}>
+                    <span className='inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10'>
+                        <IoCloudOutline className='h-5 w-5 text-cyan-400'/>
+                    </span>
+                    <div className='leading-tight'>
+                        <h3 className='text-base font-semibold text-slate-100'>SCS Cloud</h3>
+                        <p className='text-[11px] text-slate-400 -mt-0.5'>Build · Deploy · Scale</p>
+                    </div>
+                </div>
 
-             
-        </div>
-       
-        
-    </div>
-     {
-        menu &&<div className='absolute z-50 mt-[45px] w-full flex flex-col justify-center items-center bg-gray-300 p-5 md:hidden'>
-             <div className='flex flex-row items-center mx-6 cursor-pointer my-1 px-2 ' onClick={()=>navigate('/amount-dashboard')}>
-             <HiOutlineCurrencyRupee className='text-2xl text-gray-700 font-extralight'/>
-             <h3 className='text-xl font-medium text-gray-700  ml-2'>Amount Dashboard</h3>
-         </div>
-         <div className='flex flex-row items-center mx-2 cursor-pointer  my-6'  onClick={()=>navigate('/profile')}>
-             <FaRegUser className='text-xl text-gray-700 font-extralight'/>
-             <h3 className='text-xl font-medium text-gray-700  ml-2'>User</h3>
-            
-         </div>
-         <button className='p-2 px-3 bg-gray-700 justify-center items-center text-white text-xl rounded font-semibold mt-4' onClick={handleLogout}>Logout</button>
+                {/* Desktop nav */}
+                <nav className='hidden md:flex items-center gap-6 text-sm'>
+                    <button
+                        className='inline-flex items-center gap-2 text-slate-300 hover:text-white'
+                        onClick={()=>setServices(!services)}
+                    >
+                        <CgMenuGridR className='text-lg'/> Products
+                    </button>
+                    <button className='text-slate-300 hover:text-white' onClick={()=>navigate('/hls-transcoder-docs')}>Docs</button>
+                    <button className='text-slate-300 hover:text-white' onClick={()=>navigate('/amount-dashboard')}>Dashboard</button>
+                    <button className='text-slate-300 hover:text-white' onClick={()=>navigate('/hosting-service-docs')}>Hosting</button>
+                </nav>
 
+                {/* Right controls */}
+                <div className='flex items-center gap-3'>
+                    <button
+                        className='hidden md:inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-slate-200 ring-1 ring-white/10 hover:bg-white/5'
+                        onClick={()=>navigate('/profile')}
+                    >
+                        <FaRegUser className='text-base'/> Profile
+                    </button>
+                    <button
+                        className='hidden md:inline-flex items-center gap-2 rounded-md bg-cyan-500/90 hover:bg-cyan-400 text-slate-900 font-semibold px-3 py-1.5 text-sm'
+                        onClick={handleLogout}
+                    >
+                        Logout
+                    </button>
+                    {/* Mobile menu toggle */}
+                    { !menu ? (
+                        <LuMenu className='text-2xl text-slate-200 md:hidden' onClick={()=>setMenu(true)} />
+                    ) : (
+                        <RxCross1 className='text-2xl text-slate-200 md:hidden' onClick={()=>setMenu(false)} />
+                    )}
+                </div>
+            </div>
+            {/* Products dropdown */}
+            {services && (
+                <div className='hidden md:block border-t border-slate-800'>
+                    <div className='max-w-7xl mx-auto px-4'>
+                        <Services/>
+                    </div>
+                </div>
+            )}
         </div>
-    }{
-        services && <Services/>
-      }
-    </>
-  )
+
+        {/* Mobile panel */}
+        {menu && (
+            <div className='md:hidden fixed top-14 left-0 right-0 z-40 bg-slate-800/95 backdrop-blur border-b border-slate-700 p-4 space-y-3'>
+                <button className='w-full text-left px-3 py-2 rounded-md hover:bg-white/5 text-slate-200' onClick={()=>{setMenu(false); setServices(false); navigate('/amount-dashboard')}}>
+                    <span className='inline-flex items-center gap-2'><HiOutlineCurrencyRupee/> Dashboard</span>
+                </button>
+                <button className='w-full text-left px-3 py-2 rounded-md hover:bg-white/5 text-slate-200' onClick={()=>{setMenu(false); setServices(false); navigate('/hls-transcoder-docs')}}>
+                    Docs
+                </button>
+                <button className='w-full text-left px-3 py-2 rounded-md hover:bg-white/5 text-slate-200' onClick={()=>{setMenu(false); setServices(false); navigate('/profile')}}>
+                    <span className='inline-flex items-center gap-2'><FaRegUser/> Profile</span>
+                </button>
+                <button className='w-full text-left px-3 py-2 rounded-md bg-cyan-500/90 text-slate-900 font-semibold' onClick={handleLogout}>
+                    Logout
+                </button>
+            </div>
+        )}
+        </>
+    )
 }
 
 export default Header;
