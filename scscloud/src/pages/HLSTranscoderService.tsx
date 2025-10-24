@@ -76,6 +76,7 @@ const HLSTranscoderService:React.FC=()=>{
              email=res.data.data.email;
              videoKey=res.data.data.videoKey;
             //one route after this
+            console.log(res.data.data.uploadUrl);
             axios.put(res.data.data.uploadUrl,file).then((res)=>{
               setLoading('transcoding...')
               console.log(res);
@@ -90,7 +91,7 @@ const HLSTranscoderService:React.FC=()=>{
               userBucketName:data.bucketName,
               AccessCookie:accessToken
             }
-            axios.post('https://api.suryanshverma.site/api/v1/transcoding-video',transcodingdata).then((res)=>{
+            axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata).then((res)=>{
               console.log(res.data.data);
               setLoading('')
               alert('we are transcoding your video. when transcoding is complete. we will notify you through email')

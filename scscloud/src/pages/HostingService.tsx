@@ -13,36 +13,41 @@ const HostingService:React.FC=()=>{
     const [loading,setLoading]=useState<string|undefined>();
     const [gitUrl,setGitUrl]=useState<string|undefined>();
     const [websiteName,setWebsiteName]=useState<string|undefined>();
-    const [websiteType,setWebsiteType]=useState<string>('viteReact');
+  const [websiteType,setWebsiteType]=useState<string>('ViteReact');
     const [hostingServiceScreen,setHostingServiceScreen]=useState<boolean>(false);
     const [loadingData,setLoadingData]=useState<boolean>(false);
    
     
 
-    interface IWebsite{
+  interface IWebsite{
         _id:string;
         user:string;
         websiteUrl:string;
         websiteName:string;
-        validDate:Date;
+    validDate:string | Date;
         websiteType:string;
     }
     const [open, setOpen] = useState<boolean>(false)
     const [selectedWebsite,setSelectedWebsite]=useState<string>('')
-    const [websites,setWebsites]=useState<Array<IWebsite> |undefined>()
+  const [websites,setWebsites]=useState<IWebsite[]>([])
     const navigate=useNavigate();
     const [openHost,setOpenHost]=useState<boolean>(false);
 
     useEffect(()=>{
         setLoadingData(true)
         const accessToken= Cookies.get("AccessCookie");
-        axios.get(`${import.meta.env.VITE_API_URL}/api/host/websites?token=${accessToken}`)
-        .then((res)=>{
-            const websitesData=res.data.data;
-            console.log(websitesData);
-            setWebsites(websitesData)
-            setLoadingData(false)
-        })
+    axios.get(`${import.meta.env.VITE_API_URL}/api/host/websites?token=${accessToken}`)
+    .then((res)=>{
+      const data = res.data.data;
+      console.log('websitesData:', data);
+      setWebsites([...data.data]);
+      setLoadingData(false);
+    })
+    .catch((err)=>{
+      console.error('Failed fetching websites:', err);
+      setWebsites([]);
+      setLoadingData(false);
+    })
     },[])
 
     const openRenewalModal=(id:string)=>{
@@ -50,7 +55,7 @@ const HostingService:React.FC=()=>{
         setSelectedWebsite(id)
     }
 
-    const compareDates=(validDate:Date,todayDate:Date)=>{
+  const compareDates=(validDate:string|Date,todayDate:string|Date)=>{
         const date1=new Date(validDate);
         const date2=new Date(todayDate);
         return date2>=date1;
@@ -100,88 +105,69 @@ const HostingService:React.FC=()=>{
         <>
         <Header/>
         <div className="h-[45px]"></div>
-    {
-        hostingServiceScreen?
-        <div>
-        <button className="bg-gray-700 text-gray-200 font-bold rounded absolute p-2 px-3 m-2" onClick={()=>setHostingServiceScreen(false)}>Back</button>
-         <div className="w-full flex justify-center mx-3">  <h1 className="text-3xl font-bold text-gray-900 border-solid border-b-2 border-gray-400 inline text-center p-2 w-auto">Static Web Hosting</h1></div>
-  
-  <div className="flex justify-center items-center">
-
-  <div className="flex flex-col md:w-[44vw]  justify-center w-full p-4">
-      
- 
-       <select className="border-solid border-gray-400 border-[1.5px] rounded p-2 px-4 text-xl" onChange={(e)=>setWebsiteType(e.target.value)}>
-        <option disabled>Choose your website type</option>
-        <option value="CreateReactApp">CreateReactApp</option>
-        <option value="ViteReact">ViteReact</option>
-      </select>
-
-
-
-      <label className="text-xl font-semibold text-gray-800 mt-5">Website Name</label>
-      <input type="text"  className='text-md font-medium text-gray-600  bg-transparent p-3 border-solid border-gray-300 border-2 rounded w-full' placeholder="enter your websit name..."  onChange={(e)=>setWebsiteName(e.target.value)}/>
-
-      <label className="text-xl font-semibold text-gray-800 mt-5">Git url</label>
-      <input type="text"  className='text-md font-medium text-gray-600  bg-transparent p-3 border-solid border-gray-300 border-2 rounded w-full' placeholder="enter your website git url..."  onChange={(e)=>setGitUrl(e.target.value)}/>
-
-      {
-              !loading ? <button className='text-lg font-bold text-cyan-900 bg-cyan-400 p-3 rounded mt-10 mb-20 w-full' onClick={()=>setOpenHost(true)}>Host Website</button>
-              :
-              <button className='text-lg font-bold text-cyan-900 bg-cyan-400 p-3 rounded mt-10 mb-20 w-full'>{loading}</button>
-            }
-
-
-    </div>
-    </div>
-    </div>
-        :
-        <div>
-        <div className="w-full flex justify-center mx-3">  <h1 className="text-3xl font-bold text-gray-900 border-solid border-b-2 border-gray-400 w-[32%] inline text-center p-2 w-auto"> Static web hosting Service </h1></div>
-        <div className=" items-center flex flex-col p-3">
-            <div className="w-full rounded-md bg-gray-200 p-4">
-              <h1 className="text-2xl font-semibold my-3 text-center">Your websites</h1>
-             <div className="flex flex-col gap-3">
-                             {
-                               !loadingData && websites && websites.map((website)=>(
-                                    <div key={website._id} className=" mx-3 my-1 rounded p-4 bg-white shadow flex justify-between md:flex-row flex-col  items-center gap-1 shadow">
-                                  <h1 className="font-semibold">{website.websiteType}</h1>
-                                  <h1 className="font-semibold">url: <a href={website.websiteUrl} className="text-blue-600 font-bold">{website.websiteUrl}</a></h1>
-                                  <h1>valid till: <b>{String(website.validDate).split('T')[0]}</b></h1>
-                                  <h1>status</h1>{
-                                    compareDates(website.validDate,new Date())
-                                     ? <ImCross className="text-3xl text-gray-200 bg-red-700 rounded-full p-1 "/> :
-                                    <TiTick className="text-3xl text-gray-200 bg-green-700 rounded-full "/>
-                                  }
-                                  <button className="bg-gray-500 text-white p-2 rounded" onClick={()=>openRenewalModal(website._id)}>Increase validity(1 month)</button>
-
-                             </div>
-                                ))
-                             }{
-                                loadingData && <div className="flex justify-center items-center h-[50vh] w-[90bw]">
-
-                                <div
-                                className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-                                role="status">
-                                <span
-                                  className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
-                                  >Loading...</span>
-                              </div>
-                               </div>
-                             }
-
-             </div>
+        {
+          hostingServiceScreen?
+          <div>
+            <button className="bg-gray-700 text-gray-200 font-bold rounded absolute p-2 px-3 m-2" onClick={()=>setHostingServiceScreen(false)}>Back</button>
+            <div className="w-full flex justify-center mx-3"><h1 className="text-3xl font-bold text-gray-900 border-solid border-b-2 border-gray-400 inline text-center p-2 w-auto">Static Web Hosting</h1></div>
+            <div className="flex justify-center items-center">
+              <div className="flex flex-col md:w-[44vw]  justify-center w-full p-4">
+                <select className="border-solid border-gray-400 border-[1.5px] rounded p-2 px-4 text-xl" onChange={(e)=>setWebsiteType(e.target.value)}>
+                  <option disabled>Choose your website type</option>
+                  <option value="CreateReactApp">CreateReactApp</option>
+                  <option value="ViteReact">ViteReact</option>
+                </select>
+                <label className="text-xl font-semibold text-gray-800 mt-5">Website Name</label>
+                <input type="text"  className='text-md font-medium text-gray-600  bg-transparent p-3 border-solid border-gray-300 border-2 rounded w-full' placeholder="enter your websit name..."  onChange={(e)=>setWebsiteName(e.target.value)}/>
+                <label className="text-xl font-semibold text-gray-800 mt-5">Git url</label>
+                <input type="text"  className='text-md font-medium text-gray-600  bg-transparent p-3 border-solid border-gray-300 border-2 rounded w-full' placeholder="enter your website git url..."  onChange={(e)=>setGitUrl(e.target.value)}/>
+                {
+                  !loading ? <button className='text-lg font-bold text-cyan-900 bg-cyan-400 p-3 rounded mt-10 mb-20 w-full' onClick={()=>setOpenHost(true)}>Host Website</button>
+                  :
+                  <button className='text-lg font-bold text-cyan-900 bg-cyan-400 p-3 rounded mt-10 mb-20 w-full'>{loading}</button>
+                }
+              </div>
             </div>
-          
-          <div className="mt-4 w-full flex justify-center">
-            <button className="bg-cyan-400 rounded p-3 text-xl font-bold text-gray-700 mx-2" onClick={()=>setHostingServiceScreen(true)}>Host a website</button>
-            <button className="bg-gray-600 rounded p-3 text-xl font-bold text-gray-200 mx-2" onClick={()=>navigate('/hosting-service-docs')}>Documentation</button>
+          </div>
+          :
+          <div>
+            <div className="w-full flex justify-center mx-3"><h1 className="text-3xl font-bold text-gray-900 border-solid border-b-2 border-gray-400 w-[32%] inline text-center p-2 w-auto"> Static web hosting Service </h1></div>
+            <div className=" items-center flex flex-col p-3">
+              <div className="w-full rounded-md bg-gray-200 p-4">
+                <h1 className="text-2xl font-semibold my-3 text-center">Your websites</h1>
+                <div className="flex flex-col gap-3">
+                  {
+                    !loadingData && websites.length!==0 && websites.map((website)=>(
+                      <div key={website._id} className=" mx-3 my-1 rounded p-4 bg-white shadow flex justify-between md:flex-row flex-col  items-center gap-1 shadow">
+                        <h1 className="font-semibold">{website.websiteType}</h1>
+                        <h1 className="font-semibold">url: <a href={website.websiteUrl} className="text-blue-600 font-bold">{website.websiteUrl}</a></h1>
+                        <h1>valid till: <b>{String(website.validDate).split('T')[0]}</b></h1>
+                        <h1>status</h1>{
+                          compareDates(website.validDate,new Date())
+                            ? <ImCross className="text-3xl text-gray-200 bg-red-700 rounded-full p-1 "/>
+                            :
+                            <TiTick className="text-3xl text-gray-200 bg-green-700 rounded-full "/>
+                        }
+                        <button className="bg-gray-500 text-white p-2 rounded" onClick={()=>openRenewalModal(website._id)}>Increase validity(1 month)</button>
+                      </div>
+                    ))
+                  }
+                  {
+                    loadingData && <div className="flex justify-center items-center h-[50vh] w-[90bw]">
+                      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white" role="status">
+                        <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div className="mt-4 w-full flex justify-center">
+                <button className="bg-cyan-400 rounded p-3 text-xl font-bold text-gray-700 mx-2" onClick={()=>setHostingServiceScreen(true)}>Host a website</button>
+                <button className="bg-gray-600 rounded p-3 text-xl font-bold text-gray-200 mx-2" onClick={()=>navigate('/hosting-service-docs')}>Documentation</button>
+              </div>
             </div>
-        </div>
-
-    </div>
-    
-    }
+          </div>
+        }
 
 <Dialog open={open} onClose={setOpen} className="relative z-10">
       <DialogBackdrop
