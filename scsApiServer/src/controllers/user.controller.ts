@@ -4,47 +4,30 @@ import jwt from "jsonwebtoken";
 import 'dotenv/config'
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
 import { emailQueue,apiKeysQueue } from "../services/queue.service";
+import { AppError } from "../utils/error";
+import asyncHandler from "../utils/asyncHandler";
+import response from "../utils/response";
 
 
-
-export const register=async(req:Request,res:Response)=>{
-  try {
+/**
+ * @description Register a new user and send OTP for email verification
+ * @param req request object containing user details
+ * @param res response object to send back the result
+ */
+export const register=asyncHandler(async(req:Request,res:Response)=>{
     const {email,password,name}=req.body;
-    if(email && password && name){
-        const otp=Math.floor(Math.random()*1000000);
-        emailQueue.add('email'+Date.now(),JSON.stringify({email,otp}))
-        const tokenData={
-         email,password,name,otp
-        }
-        const verifyToken=await jwt.sign(tokenData,process.env.OTP_SECRET!);
-        res.status(201)
-        .cookie('authCookie',verifyToken,{
-         httpOnly:true,
-         maxAge:900000
-        })
-        .json({
-         success:true,
-         message:"Please Check your otp for verification",
-         cookie:{
-            key:"authCookie",
-            value:verifyToken
-         }
-        })
-        
-    }else{
-     res.status(400).json({
-         success:false,
-         message:'Please provide all the fields',
-     })
+    if(!email || !password || !name) throw new AppError('Please provide all the fields',400);
+    const otp=Math.floor(Math.random()*1000000);
+    emailQueue.add('email'+Date.now(),JSON.stringify({email,otp}))
+    const tokenData={
+        email,password,name,otp
     }
-  } catch (error:any) {
-    res.status(400)
-    .json({
-        success:false,
-        error:error.message,
-    })
-  }
-}
+    const verifyToken=await jwt.sign(tokenData,process.env.OTP_SECRET!);
+    response(res,201,"Please Check your otp for verification",{cookie:{
+        key:"authCookie",
+        value:verifyToken
+    }})
+});
 
 export const verifyEmail=async(req:Request,res:Response)=>{
 
