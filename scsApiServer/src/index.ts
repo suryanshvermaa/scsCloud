@@ -20,7 +20,7 @@ const app=express();
 app.get('/*',(req:Request,res:Response,next:NextFunction)=>{
     const hostname=req.hostname;
     const subdomain=hostname.split('.')[0];
-    if(subdomain!='api'){
+    if(hostname!="localhost"&&subdomain!='api'){
         const resolveWeb=`${process.env.BUCKET_HOST_FOR_HOSTING!}/${subdomain}`
         const proxy=httpProxy.createProxy();
         proxy.web(req,res,{target:resolveWeb,changeOrigin:true})

@@ -1,4 +1,4 @@
-FROM node as builder
+FROM node:22-alpine AS builder
 
 WORKDIR /build
 
@@ -8,7 +8,7 @@ COPY src/ src/
 COPY tsconfig.json tsconfig.json
 RUN npm run build
 
-FROM node as runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 COPY --from=builder build/package*.json .
