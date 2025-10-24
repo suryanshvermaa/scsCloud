@@ -1,11 +1,26 @@
 import UserImage from '../assets/user.jpg';
-import { TiTick } from "react-icons/ti";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
+import { 
+  Mail, 
+  Wallet, 
+  CreditCard, 
+  Key, 
+  Calendar,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  Copy,
+  Edit,
+  Settings,
+  Shield,
+  Activity,
+  DollarSign
+} from 'lucide-react';
 
 const Profile:React.FC=()=>{
     interface IUser{
@@ -60,7 +75,7 @@ const Profile:React.FC=()=>{
           }
 
           const { data: profileRes } = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/profile?token=${accessToken}`);
-          setUser(profileRes.data);
+          setUser(profileRes.data.data);
           setLoadingData(false);
 
           try {
@@ -102,70 +117,270 @@ const Profile:React.FC=()=>{
    <>
      {
        !loadingData ? (
-         <div className="max-w-7xl mx-auto px-6 py-8 md:py-12">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             {/* Left column */}
-             <div className="space-y-4">
-               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 flex flex-col items-center">
-                 <div className="w-[120px] h-[120px] rounded-full overflow-hidden ring-1 ring-white/10">
-                   <img src={UserImage} className="w-full h-full object-cover" />
+         <div className="max-w-7xl mx-auto px-6 py-8">
+           {/* Header */}
+           <div className="mb-8">
+             <h1 className="text-3xl font-bold text-foreground mb-2">Account Profile</h1>
+             <p className="text-muted-foreground">Manage your account information and settings</p>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+             {/* Left Sidebar - Profile Card */}
+             <div className="lg:col-span-4 space-y-6">
+               {/* Profile Picture & Name */}
+               <div className="rounded-xl border border-border bg-card p-6">
+                 <div className="flex flex-col items-center">
+                   <div className="relative group">
+                     <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-primary/20">
+                       <img src={UserImage} alt={user?.name} className="w-full h-full object-cover" />
+                     </div>
+                     <button className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                       <Edit className="h-4 w-4" />
+                     </button>
+                   </div>
+                   <h2 className="text-2xl font-bold text-foreground mt-4">{user?.name}</h2>
+                   <p className="text-sm text-muted-foreground mt-1">SCS Cloud Member</p>
+                   
+                   <div className="flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                     <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                     <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Verified Account</span>
+                   </div>
                  </div>
-                 <h1 className="text-xl font-semibold mt-4 text-white">{user?.name}</h1>
+
+                 <div className="mt-6 pt-6 border-t border-border space-y-3">
+                   <div className="flex items-center gap-3">
+                     <div className="p-2 rounded-lg bg-primary/10">
+                       <Mail className="h-4 w-4 text-primary" />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <p className="text-xs text-muted-foreground">Email</p>
+                       <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
+                     </div>
+                   </div>
+
+                   <div className="flex items-center gap-3">
+                     <div className="p-2 rounded-lg bg-accent/10">
+                       <Calendar className="h-4 w-4 text-accent" />
+                     </div>
+                     <div className="flex-1">
+                       <p className="text-xs text-muted-foreground">Member Since</p>
+                       <p className="text-sm font-medium text-foreground">
+                         {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'N/A'}
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+
+                 <button 
+                   onClick={() => navigate('/amount-dashboard')}
+                   className="w-full mt-6 flex items-center justify-center gap-2 p-3 rounded-lg bg-primary text-primary-foreground hover:bg-accent transition-colors font-medium"
+                 >
+                   <Wallet className="h-4 w-4" />
+                   Go to Billing
+                 </button>
                </div>
-               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                 <h2 className="text-sm font-semibold text-slate-200">Email</h2>
-                 <p className="mt-1 text-sm text-cyan-300 break-all">{user?.email}</p>
+
+               {/* Quick Stats */}
+               <div className="rounded-xl border border-border bg-card p-6">
+                 <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                   <Activity className="h-4 w-4 text-primary" />
+                   Quick Stats
+                 </h3>
+                 <div className="space-y-3">
+                   <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                     <span className="text-sm text-muted-foreground">Active Services</span>
+                     <span className="text-lg font-bold text-primary">2</span>
+                   </div>
+                   <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                     <span className="text-sm text-muted-foreground">API Keys</span>
+                     <span className="text-lg font-bold text-accent">1</span>
+                   </div>
+                 </div>
                </div>
-               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                 <h2 className="text-sm font-semibold text-slate-200">Payment till now</h2>
-                 <p className="mt-1 text-lg text-amber-300">{user?.paymentAmount} ₹</p>
-               </div>
-               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                 <button className="w-full rounded-md bg-amber-500/90 hover:bg-amber-400 text-slate-900 font-semibold px-3 py-2 text-sm" onClick={()=>setCredentialsModal(true)}>
-                   Create API Keys
+
+               {/* API Keys Card */}
+               <div className="rounded-xl border border-border bg-gradient-to-br from-amber-500/10 to-amber-500/5 p-6">
+                 <div className="flex items-center gap-3 mb-4">
+                   <div className="p-2 rounded-lg bg-amber-500/20">
+                     <Key className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                   </div>
+                   <div>
+                     <h3 className="text-sm font-semibold text-foreground">API Keys</h3>
+                     <p className="text-xs text-muted-foreground">Access your services programmatically</p>
+                   </div>
+                 </div>
+                 <button 
+                   onClick={() => setCredentialsModal(true)}
+                   className="w-full flex items-center justify-center gap-2 p-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-medium text-sm transition-colors"
+                 >
+                   <Key className="h-4 w-4" />
+                   Generate API Keys
                  </button>
                </div>
              </div>
 
-             {/* Right column */}
-             <div className="md:col-span-2 space-y-4">
+             {/* Right Content */}
+             <div className="lg:col-span-8 space-y-6">
+               {/* Account Overview Cards */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                   <h3 className="text-sm text-slate-300">Amount</h3>
-                   <div className="mt-2 text-2xl font-bold text-emerald-300">{user?.SCSCoins} ₹</div>
+                 <div className="rounded-xl border border-border bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-5">
+                   <div className="flex items-center justify-between mb-2">
+                     <div className="p-2 rounded-lg bg-emerald-500/20">
+                       <Wallet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                     </div>
+                   </div>
+                   <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
+                   <p className="text-3xl font-bold text-foreground">₹{user?.SCSCoins || 0}</p>
+                   <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Available to spend</p>
                  </div>
-                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                   <h3 className="text-sm text-slate-300">Payment Count</h3>
-                   <div className="mt-2 text-2xl font-bold text-slate-200">{user?.paymentCount}</div>
+
+                 <div className="rounded-xl border border-border bg-gradient-to-br from-primary/10 to-primary/5 p-5">
+                   <div className="flex items-center justify-between mb-2">
+                     <div className="p-2 rounded-lg bg-primary/20">
+                       <CreditCard className="h-5 w-5 text-primary" />
+                     </div>
+                   </div>
+                   <p className="text-sm text-muted-foreground mb-1">Total Payments</p>
+                   <p className="text-3xl font-bold text-foreground">{user?.paymentCount || 0}</p>
+                   <p className="text-xs text-muted-foreground mt-2">Transactions made</p>
                  </div>
-                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                   <h3 className="text-sm text-slate-300">Services</h3>
-                   <div className="mt-2 text-2xl font-bold text-amber-300">2</div>
+
+                 <div className="rounded-xl border border-border bg-gradient-to-br from-accent/10 to-accent/5 p-5">
+                   <div className="flex items-center justify-between mb-2">
+                     <div className="p-2 rounded-lg bg-accent/20">
+                       <TrendingUp className="h-5 w-5 text-accent" />
+                     </div>
+                   </div>
+                   <p className="text-sm text-muted-foreground mb-1">Total Spent</p>
+                   <p className="text-3xl font-bold text-foreground">₹{user?.paymentAmount || 0}</p>
+                   <p className="text-xs text-muted-foreground mt-2">Lifetime spending</p>
                  </div>
                </div>
 
-               <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-                 <h3 className="text-base font-semibold text-white">Payment history</h3>
-                 <div className="mt-4 space-y-3">
-                   {(!loadingHistoryData && Array.isArray(paymentHistory)) && paymentHistory.map((payment)=> (
-                     <div key={payment._id} className="rounded-lg border border-slate-800 bg-slate-950 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                       <h1>amount: <span className="text-emerald-300">{payment.amount} ₹</span></h1>
-                       <h1>orderId: <span className="text-amber-300">{payment.orderId}</span></h1>
-                       <h1>paymentId: <span className="text-slate-300">{payment.paymentId}</span></h1>
-                       <h1 className="text-slate-400 text-sm">{payment.updatedAt}</h1>
-                       <TiTick className="text-2xl text-white bg-emerald-600 rounded-full"/>
+               {/* Account Actions */}
+               <div className="rounded-xl border border-border bg-card p-6">
+                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                   <Settings className="h-5 w-5 text-primary" />
+                   Quick Actions
+                 </h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   <button 
+                     onClick={() => navigate('/hosting-service')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-primary/10">
+                       <Activity className="h-5 w-5 text-primary" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Hosting Service</p>
+                       <p className="text-xs text-muted-foreground">Manage your websites</p>
+                     </div>
+                   </button>
+
+                   <button 
+                     onClick={() => navigate('/hls-transcoding-service')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-accent/10">
+                       <Activity className="h-5 w-5 text-accent" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">HLS Transcoding</p>
+                       <p className="text-xs text-muted-foreground">Transcode videos</p>
+                     </div>
+                   </button>
+
+                   <button 
+                     onClick={() => navigate('/amount-dashboard')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-emerald-500/10">
+                       <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Billing Dashboard</p>
+                       <p className="text-xs text-muted-foreground">View payments</p>
+                     </div>
+                   </button>
+
+                   <button 
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-violet-500/10">
+                       <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Security Settings</p>
+                       <p className="text-xs text-muted-foreground">Manage security</p>
+                     </div>
+                   </button>
+                 </div>
+               </div>
+
+               {/* Payment History */}
+               <div className="rounded-xl border border-border bg-card p-6">
+                 <div className="flex items-center justify-between mb-6">
+                   <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                     <Clock className="h-5 w-5 text-primary" />
+                     Recent Transactions
+                   </h3>
+                   <button 
+                     onClick={() => navigate('/amount-dashboard')}
+                     className="text-sm text-primary hover:text-accent transition-colors"
+                   >
+                     View All →
+                   </button>
+                 </div>
+
+                 <div className="space-y-3">
+                   {(!loadingHistoryData && Array.isArray(paymentHistory) && paymentHistory.length > 0) ? (
+                     paymentHistory.slice(0, 5).map((payment) => (
+                       <div 
+                         key={payment._id} 
+                         className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
+                       >
+                         <div className="flex items-center gap-4">
+                           <div className="p-2 rounded-full bg-emerald-500/10">
+                             <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                           </div>
+                           <div>
+                             <p className="font-medium text-foreground">Payment Received</p>
+                             <div className="flex items-center gap-2 mt-1">
+                               <p className="text-xs text-muted-foreground">Order: {payment.orderId}</p>
+                               <button className="text-muted-foreground hover:text-foreground transition-colors">
+                                 <Copy className="h-3 w-3" />
+                               </button>
+                             </div>
+                           </div>
+                         </div>
+                         <div className="text-right">
+                           <p className="font-semibold text-emerald-600 dark:text-emerald-400">+₹{payment.amount}</p>
+                           <p className="text-xs text-muted-foreground mt-1">
+                             {new Date(payment.updatedAt).toLocaleDateString()}
+                           </p>
+                         </div>
+                       </div>
+                     ))
+                   ) : (!loadingHistoryData && (
+                     <div className="text-center py-12">
+                       <div className="inline-flex p-4 rounded-full bg-secondary mb-4">
+                         <DollarSign className="h-8 w-8 text-muted-foreground" />
+                       </div>
+                       <p className="text-muted-foreground mb-4">No transactions yet</p>
+                       <button
+                         onClick={() => navigate('/amount-dashboard')}
+                         className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent"
+                       >
+                         Make your first payment →
+                       </button>
                      </div>
                    ))}
 
-                   {(!loadingHistoryData && (!paymentHistory || paymentHistory.length === 0)) && (
-                     <div className="rounded-lg border border-slate-800 bg-slate-950 p-6 text-center text-slate-300">
-                       No payment you have done till now
-                     </div>
-                   )}
-
                    {(loadingHistoryData || loadingData) && (
                      <div className="flex justify-center items-center h-[20vh]">
-                       <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-white" role="status"/>
+                       <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-e-transparent" role="status">
+                         <span className="sr-only">Loading...</span>
+                       </div>
                      </div>
                    )}
                  </div>
@@ -174,56 +389,61 @@ const Profile:React.FC=()=>{
            </div>
          </div>
        ) : (
-         <div className="flex justify-center items-center h-[60vh]">
-           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-white" role="status"/>
+         <div className="flex justify-center items-center min-h-[80vh]">
+           <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-e-transparent" role="status">
+             <span className="sr-only">Loading...</span>
+           </div>
          </div>
        )
      }
 
          <Dialog open={credentialsModal} onClose={setCredentialsModal} className="relative z-50">
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
-      />
+      <DialogBackdrop className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
 
-      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <DialogPanel
-            transition
-            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-lg data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
-          >
-            <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-              <div className="sm:flex sm:items-start">
-                <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <ExclamationTriangleIcon aria-hidden="true" className="h-6 w-6 text-red-600" />
+          <DialogPanel className="relative transform overflow-hidden rounded-xl bg-card border border-border text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10">
+                    <Key className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  </div>
                 </div>
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
-                    Create Your Api Keys
+                <div className="flex-1">
+                  <DialogTitle className="text-lg font-semibold text-foreground mb-2">
+                    Generate API Keys
                   </DialogTitle>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Are you sure you want to create your API KEYS? If you have created api keys earlier that will be rejected. And new api keys will be working.
-                    </p>
+                  <p className="text-sm text-muted-foreground">
+                    Creating new API keys will invalidate your previous keys. The new credentials will be sent to your registered email for security purposes.
+                  </p>
+                  
+                  <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <div className="flex items-start gap-2">
+                      <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-900 dark:text-amber-200">
+                        <strong>Important:</strong> Old API keys will stop working immediately after new ones are generated.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            
+            <div className="bg-secondary/50 px-6 py-4 flex gap-3 justify-end">
               <button
                 type="button"
-                onClick={() =>createApiKeys()}
-                className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                onClick={() => setCredentialsModal(false)}
+                className="px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium text-foreground"
               >
-                Create API Keys
+                Cancel
               </button>
               <button
                 type="button"
-                data-autofocus
-                onClick={() => setCredentialsModal(false)}
-                className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                onClick={createApiKeys}
+                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold transition-colors"
               >
-                Cancel
+                Generate Keys
               </button>
             </div>
           </DialogPanel>
@@ -231,43 +451,43 @@ const Profile:React.FC=()=>{
       </div>
     </Dialog>
 
-  <Dialog open={credentialsModal2} onClose={setCredentialsModal2} className="relative z-50">
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
-      />
+    <Dialog open={credentialsModal2} onClose={setCredentialsModal2} className="relative z-50">
+      <DialogBackdrop className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
 
-      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <DialogPanel
-            transition
-            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-lg data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
-          >
-            <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-              <div className="sm:flex sm:items-start">
-                <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <ExclamationTriangleIcon aria-hidden="true" className="h-6 w-6 text-red-600" />
+          <DialogPanel className="relative transform overflow-hidden rounded-xl bg-card border border-border text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                 </div>
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
-                    Api Keys Created successfully
+                <div className="flex-1">
+                  <DialogTitle className="text-lg font-semibold text-foreground mb-2">
+                    API Keys Generated Successfully
                   </DialogTitle>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                    Please Check your and wait till you got a email from us. We have sended your api keys through email due to security purposes.
+                  <p className="text-sm text-muted-foreground">
+                    Your new API keys have been created and sent to your registered email address. Please check your inbox (and spam folder) for the credentials.
+                  </p>
+                  
+                  <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <p className="text-xs text-foreground">
+                      <strong>Security Tip:</strong> Store your API keys securely and never share them publicly. Use environment variables in your applications.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            
+            <div className="bg-secondary/50 px-6 py-4 flex justify-end">
               <button
                 type="button"
-                data-autofocus
-                onClick={() => handleApiModal()}
-                className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                onClick={handleApiModal}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-accent transition-colors font-medium"
               >
-                Cancel
+                Got it, thanks!
               </button>
             </div>
           </DialogPanel>

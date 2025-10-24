@@ -5,6 +5,7 @@ import Home from '../pages/Home.tsx';
 import App from '../App.tsx';
 import HLSTranscoderService from '../pages/HLSTranscoderService.tsx';
 import AmountScreen from '../pages/AmountScreen.tsx';
+import BillingDashboard from '../pages/BillingDashboard.tsx';
 import HLSTranscoderDocs from '../pages/HLSTranscoder.docs.tsx';
 import Profile from '../pages/Profile.tsx';
 import HostingService from '../pages/HostingService.tsx';
@@ -37,6 +38,10 @@ export const router=createBrowserRouter([
               },
               {
                 path:'amount-dashboard',
+                element:<BillingDashboard/>
+              },
+              {
+                path:'amount-dashboard-old',
                 element:<AmountScreen/>
               },
               {

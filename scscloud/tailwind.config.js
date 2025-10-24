@@ -51,6 +51,12 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // New color palette for direct usage
+        'vibrant-cyan': '#00BFFF',
+        'warm-coral': '#FF7F50',
+        'charcoal': '#333333',
+        'soft-white': '#F7F7F7',
+        'deep-navy': '#1E1E2F',
       },
       borderRadius: {
         lg: "var(--radius)",
