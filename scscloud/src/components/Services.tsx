@@ -1,7 +1,6 @@
 import React from "react";
 import { FaVideo } from "react-icons/fa";
 import { IoIosCodeWorking } from "react-icons/io";
-import { GrStorage } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 
 type Props = { onNavigate?: () => void }
@@ -39,16 +38,6 @@ const Services:React.FC<Props>=({ onNavigate })=>{
                                                        <div className="text-xs text-slate-500 dark:text-slate-300">Fast, secure hosting for static sites</div>
                               </div>
                          </button>
-
-                                             <div className="w-full flex items-center gap-3 py-3 text-left opacity-70 px-2">
-                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 ring-1 ring-violet-500/20 dark:ring-violet-500/40">
-                                   <GrStorage className="text-lg"/>
-                              </span>
-                              <div>
-                                                       <div className="text-slate-900 dark:text-slate-50 font-medium">Object Storage</div>
-                                                       <div className="text-xs text-slate-500 dark:text-slate-300">Coming soon</div>
-                              </div>
-                         </div>
                     </div>
                </div>
           </div>

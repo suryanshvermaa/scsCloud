@@ -262,21 +262,6 @@ const BillingDashboard: React.FC = () => {
                 />
               </div>
             </div>
-
-            {/* Storage */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">Object Storage</span>
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">₹{usageStats.storage}</span>
-              </div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${scsCoins > 0 ? Math.min((usageStats.storage / scsCoins) * 100, 100) : 0}%` }}
-                />
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">Coming soon</p>
-            </div>
           </div>
 
           <div className="mt-6 pt-4 border-t border-border">

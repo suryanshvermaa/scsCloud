@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { FaVideo } from "react-icons/fa";
 import { IoIosCodeWorking } from "react-icons/io";
-import { GrStorage } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import SCSCloudImage from '../assets/SCSCloud.png';
 
@@ -92,13 +91,6 @@ const Home:React.FC=()=>{
             </div>
             <h3 className="mt-3 font-semibold text-slate-900 dark:text-slate-50">Static Web Hosting</h3>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Global CDN, instant rollbacks, and zero-config deployments.</p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-5 opacity-90 dark:border-slate-600 dark:bg-slate-700">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 ring-1 ring-violet-500/20 dark:ring-violet-500/40">
-              <GrStorage />
-            </div>
-            <h3 className="mt-3 font-semibold text-slate-900 dark:text-slate-50">Object Storage</h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Coming soon</p>
           </div>
         </div>
       </section>
