@@ -81,81 +81,39 @@ export const login=asyncHandler(async(req:Request,res:Response)=>{
     })
 });
 
-
-export const logout=async(req:Request,res:Response)=>{
-    try {
-        res.status(200).clearCookie("AccessCookie").clearCookie("RefreshCookie").json({
-            success:true,
-            message:"logout successfully"
-        })
-    } catch (error) {
-        res.status(200).json({
-            success:false,
-            message:"failed to logout"
-        })
-    }
-}
-
-export const refreshToken=async(req:Request,res:Response)=>{
-    try {
-        const refreshToken=req.cookies.RefreshCookie ||req.body.refreshToken;
-       if(refreshToken){
-        const isVerified=await jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET!);
-        if(isVerified){
-            const {userId}=JSON.parse(JSON.stringify(isVerified));
-            const user=await User.findById(userId);
-            if(user){
-                const accessTokenPayload={userId:user._id,userName:user.name,email:user.email};
-                const refreshTokenPayload={userId:user._id};
-                const accessToken=await generateAccessToken(accessTokenPayload)
-                const refreshToken=await generateRefreshToken(refreshTokenPayload);
-                user.refreshToken=refreshToken;
-                await user.save();
-                res.status(200)
-                .cookie("AccessCookie",accessToken,{httpOnly:true,maxAge:3600000})//1 hour
-                .cookie("RefreshCookie",refreshToken,{httpOnly:true,maxAge:43200000})//12 hour
-                .json({
-                    success:true,
-                    message:"Access token refressment successfully",
-                    cookies:[
-                        {
-                    
-                            key:"AccessCookie",
-                            value:accessToken
-                         
-                    },
-                    {
-                        
-                        key:"RefreshCookie",
-                        value:refreshToken
-                    }
-                    ]
-                })
-            }else{
-                res.status(200).json({
-                    success:false,
-                    message:"wrong refresh token"
-                })
+/**
+ * @description Refresh access and refresh tokens using a valid refresh token
+ * @param req request object containing the refresh token
+ * @param res response object to send back the result
+ */
+export const refreshToken=asyncHandler(async(req:Request,res:Response)=>{
+    const refreshToken=req.body.refreshToken;
+    if(!refreshToken) throw new AppError('Refresh token is missing',400);
+    const isVerified=await jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid refresh token',400);
+    const {userId}=JSON.parse(JSON.stringify(isVerified));
+    const user=await User.findById(userId);
+    if(!user) throw new AppError('User not found',404);
+    if(user.refreshToken!==refreshToken) throw new AppError('Refresh token does not match',400);
+    const accessTokenPayload={userId:user._id,userName:user.name,email:user.email};
+    const refreshTokenPayload={userId:user._id};
+    const accessT=await generateAccessToken(accessTokenPayload)
+    const refreshT=await generateRefreshToken(refreshTokenPayload);
+    user.refreshToken=refreshT;
+    await user.save();
+    response(res,200,"Refresh token generated successfully",{
+        cookies:[
+            {
+                key:"AccessCookie",
+                value:accessT
+            },
+            {
+                key:"RefreshCookie",
+                value:refreshT
             }
-        }else{
-            res.status(200).json({
-                success:false,
-                message:"wrong refresh token"
-            })
-        }
-       }else{
-        res.status(200).json({
-            success:false,
-            message:"wrong refresh token"
-        })
-       }
-    } catch (error) {
-        res.status(200).json({
-            success:false,
-            message:"failed to refresh access token"
-        })
-    }
-}
+        ]
+    })
+});
 
 export const getUserProfile=async(req:Request,res:Response)=>{
     try {
