@@ -49,69 +49,38 @@ export const verifyEmail=asyncHandler(async(req:Request,res:Response)=>{
     response(res,201,"user created successfully. you can login to your account",{});
 });
 
-export const login=async(req:Request,res:Response)=>{
-   try {
+/**
+ * @description Login user and generate access and refresh tokens
+ * @param req request object containing user credentials
+ * @param res response object to send back the result
+ */
+export const login=asyncHandler(async(req:Request,res:Response)=>{
     const {email,password}=req.body;
-    if(email && password){
-        const user=await User.findOne({email}).select('+password');
-   if(user){
+    if(!email || !password) throw new AppError('Please provide email and password',400);
+    const user=await User.findOne({email}).select('+password');
+    if(!user) throw new AppError('Invalid email or password',400);
     const isCorrect=await user?.comparePassword(password);
-    if(isCorrect){
-        const accessTokenPayload={userId:user._id,userName:user.name,email:user.email};
-        const refreshTokenPayload={userId:user._id};
-        const accessToken=await generateAccessToken(accessTokenPayload)
-        const refreshToken=await generateRefreshToken(refreshTokenPayload);
-        user.refreshToken=refreshToken;
-        await user.save();
-        res.status(200)
-        .cookie("AccessCookie",accessToken,{httpOnly:true,maxAge:3600000})
-        .cookie("RefreshCookie",refreshToken,{httpOnly:true,maxAge:43200000})
-        .json({
-            success:true,
-            message:"login successfully",
-            cookies:[
-                {
-                    
-                        key:"AccessCookie",
-                        value:accessToken
-                     
-                },
-                {
-                    
-                    key:"RefreshCookie",
-                    value:refreshToken
-                }
-            ]
-        })
+    if(!isCorrect) throw new AppError('Invalid email or password',400);
+    const accessTokenPayload={userId:user._id,userName:user.name,email:user.email};
+    const refreshTokenPayload={userId:user._id};
+    const accessToken=await generateAccessToken(accessTokenPayload)
+    const refreshToken=await generateRefreshToken(refreshTokenPayload);
+    user.refreshToken=refreshToken;
+    await user.save();
+    response(res,200,"login successfully",{
+        cookies:[
+            {
+                key:"AccessCookie",
+                value:accessToken
+            },
+            {
+                key:"RefreshCookie",
+                value:refreshToken
+            }
+        ]
+    })
+});
 
-    }else{
-        res.status(400).json({
-            success:false,
-            message:"incorrect email or password"
-        })
-    }
-   }else{
-    res.status(400)
-    .json({
-        success:false,
-        message:"User not found",
-    })
-   }
-    }else{
-        res.status(400)
-    .json({
-        success:false,
-        message:"User not found",
-    })
-    }
-   } catch (error:any) {
-    res.status(400)
-    .json({
-        success:false,
-        error:error.message,
-    })
-   }
-}
 
 export const logout=async(req:Request,res:Response)=>{
     try {
