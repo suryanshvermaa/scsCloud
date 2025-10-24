@@ -10,8 +10,8 @@ export async function validator(){
        if(refreshToken){
         const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/refresh-token`,{refreshToken});
         if(res){
-            Cookies.set("AccessCookie", res.data.cookies[0].value, {expires:Date.now()+900000})
-            Cookies.set("RefreshCookie", res.data.cookies[1].value, {expires:Date.now()+86400000})
+            Cookies.set("AccessCookie", res.data.data.cookies[0].value, {expires:Date.now()+900000})
+            Cookies.set("RefreshCookie", res.data.data.cookies[1].value, {expires:Date.now()+86400000})
             console.log('refresh token successfully');
             
         }else{

@@ -20,8 +20,8 @@ const Login:React.FC=()=>{
         date2.setHours(date2.getHours()+12);
         Cookies.set("AccessCookie", res.data.data.cookies[0].value, {expires:date1})
         Cookies.set("RefreshCookie", res.data.data.cookies[1].value, {expires:date2})
-        navigate('/home')
-        console.log(res.data);
+  navigate('/home')
+  console.log(res.data.data);
        }
          
          

@@ -17,8 +17,8 @@ const AmountScreen:React.FC=()=>{
      useEffect(()=>{
       setLoadingData(true)
       const accessToken= Cookies.get("AccessCookie");
-       axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scs-coins?token=${accessToken}`).then((res)=>{
-        setScsCoins(res.data.data.scsCoins);
+  axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scs-coins?token=${accessToken}`).then((res)=>{
+   setScsCoins(res.data.data.scsCoins);
         setLoadingData(false);
        })
      },[])

@@ -93,8 +93,8 @@ const Profile:React.FC=()=>{
 
     const createApiKeys=async()=>{
         const accessToken= Cookies.get("AccessCookie");
-        axios.post(`${import.meta.env.VITE_API_URL}/api/v1/create-api-keys`,{AccessCookie:accessToken}).then((res)=>{
-           const data=res.data;
+      axios.post(`${import.meta.env.VITE_API_URL}/api/v1/create-api-keys`,{AccessCookie:accessToken}).then((res)=>{
+        const data=res.data.data;
            console.log(data);
            setCredentialsModal(false)
             setCredentialsModal2(true);

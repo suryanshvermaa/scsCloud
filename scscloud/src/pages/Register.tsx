@@ -19,9 +19,9 @@ const Register:React.FC=()=> {
       //  const data=registerData;
        console.log(registerData);
        //api call
-       const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/register`,registerData);
-       console.log(res.data);
-       Cookies.set("authCookie", res.data.cookie.value, {expires:Date.now()+900000})
+  const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/register`,registerData);
+  console.log(res.data.data);
+  Cookies.set("authCookie", res.data.data.cookie.value, {expires:Date.now()+900000})
        setEmailLoading(false)
        setEmailScreen(true);
   }
@@ -30,8 +30,8 @@ const Register:React.FC=()=> {
     console.log(OTP);
     const cookie=Cookies.get("authCookie");
     const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/verify-email`,{OTP:OTP,cookie});
-    if(res.data){
-      console.log(res.data);
+    if(res.data.data){
+      console.log(res.data.data);
       setVerifyingOtp(false)
        navigate('/login')
     }

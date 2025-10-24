@@ -38,8 +38,8 @@ const HLSTranscoderService:React.FC=()=>{
         date1.setHours(date1.getHours()+1)
         const date2=new Date();
         date2.setHours(date2.getHours()+12);
-                Cookies.set("AccessCookie", res.data.cookies[0].value, {expires:date1})
-                Cookies.set("RefreshCookie", res.data.cookies[1].value, {expires:date2})
+                Cookies.set("AccessCookie", res.data.data.cookies[0].value, {expires:date1})
+                Cookies.set("RefreshCookie", res.data.data.cookies[1].value, {expires:date2})
                 console.log('refresh token successfully');
                 
             }else{
@@ -69,14 +69,14 @@ const HLSTranscoderService:React.FC=()=>{
         if(fileType==='video/mp4'){
           const accessToken=Cookies.get("AccessCookie");
           console.log(accessToken);
-          
-          axios.post('https://api.suryanshverma.site/api/v1/upload-video',{fileName,AccessCookie:accessToken})
+
+          axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{fileName,AccessCookie:accessToken})
           .then((res)=>{
-            console.log(res.data);
-             email=res.data.email;
-             videoKey=res.data.videoKey;
+            console.log(res.data.data);
+             email=res.data.data.email;
+             videoKey=res.data.data.videoKey;
             //one route after this
-            axios.put(res.data.uploadUrl,file).then((res)=>{
+            axios.put(res.data.data.uploadUrl,file).then((res)=>{
               setLoading('transcoding...')
               console.log(res);
               
@@ -91,7 +91,7 @@ const HLSTranscoderService:React.FC=()=>{
               AccessCookie:accessToken
             }
             axios.post('https://api.suryanshverma.site/api/v1/transcoding-video',transcodingdata).then((res)=>{
-              console.log(res.data);
+              console.log(res.data.data);
               setLoading('')
               alert('we are transcoding your video. when transcoding is complete. we will notify you through email')
              return navigate('/home')

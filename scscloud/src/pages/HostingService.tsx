@@ -67,10 +67,10 @@ const HostingService:React.FC=()=>{
         const accessToken= Cookies.get("AccessCookie");
         axios.post(`${import.meta.env.VITE_API_URL}/api/host/host-website`,{AccessCookie:accessToken,gitUrl,websiteType,websiteName})
         .then((res)=>{
-            const data:any=res.data;
+            const data:any=res.data.data;
             console.log('hosted',data);
             setLoading(undefined);
-            alert(`your website url is ${data.data.websiteUrl} it will take upto 1 min to active url`);
+            alert(`your website url is ${data.websiteUrl} it will take upto 1 min to active url`);
           return  setHostingServiceScreen(false);
         }
         ).catch((err:any)=>{
@@ -87,8 +87,8 @@ const HostingService:React.FC=()=>{
 
     const handleRenewValidDate=(websiteId:string)=>{
         const accessToken= Cookies.get("AccessCookie");
-        axios.post(`${import.meta.env.VITE_API_URL}/api/host/renew-validity`,{AccessCookie:accessToken,websiteId}).then((res)=>{
-            console.log(res.data);
+    axios.post(`${import.meta.env.VITE_API_URL}/api/host/renew-validity`,{AccessCookie:accessToken,websiteId}).then((res)=>{
+      console.log(res.data.data);
             setOpen(false);
             alert('renewed successful')
             
