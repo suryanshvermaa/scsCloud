@@ -1,5 +1,5 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunProps, myBucketName } from "../ecs.service";
+import { IRunProps, myBucketName } from "../containers.service";
 
 const transcodingJob = (runProps: IRunProps) => {
   const jobConfig: V1Job = {

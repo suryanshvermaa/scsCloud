@@ -1,5 +1,5 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunPropsHost, myBucketName } from "../ecs.service";
+import { IRunPropsHost, myBucketName } from "../containers.service";
 
 const hostingJob = (runProps: IRunPropsHost) => {
   const jobConfig: V1Job = {

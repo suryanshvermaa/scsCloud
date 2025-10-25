@@ -1,4 +1,4 @@
-import { IRunProps, IRunPropsHost } from "./ecs.service";
+import { IRunProps, IRunPropsHost } from "./containers.service";
 import hostingJob from "./k8s/hostingJob";
 import { k8sbatchAPi } from "./k8s/k8s";
 import transcodingJob from "./k8s/transcodingJob";
