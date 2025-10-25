@@ -1,12 +1,12 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunProps } from "../ecs.service";
+import { IRunProps, myBucketName } from "../ecs.service";
 
 const transcodingJob = (runProps: IRunProps) => {
   const jobConfig: V1Job = {
     apiVersion: "batch/v1",
     kind: "Job",
     metadata: {
-      name: "transcoding-job",
+      name: `transcoding-job-${Date.now()}`,
       namespace: "scs-cloud"
     },
     spec: {
@@ -15,7 +15,7 @@ const transcodingJob = (runProps: IRunProps) => {
           containers:[
             {
               name: "transcoding-container",
-              image: "suryanshvermaaa/transcoding-container1.0.0",
+              image: "suryanshvermaaa/transcoding-container:1.0.0",
               env:[
                 {
                   name: "MY_ACCESS_KEY_ID",
@@ -25,7 +25,7 @@ const transcodingJob = (runProps: IRunProps) => {
                   value: process.env.SECRET_ACCESS_KEY,
                 },{
                   name:"MY_BUCKET_NAME",
-                  value: process.env.BUCKET_NAME,
+                  value: myBucketName,
                 },{
                     name: "USER_ACCESS_KEY_ID",
                     value: runProps.userAccessKey,

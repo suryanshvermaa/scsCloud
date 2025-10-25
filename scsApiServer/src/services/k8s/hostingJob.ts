@@ -1,12 +1,12 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunPropsHost } from "../ecs.service";
+import { IRunPropsHost, myBucketName } from "../ecs.service";
 
 const hostingJob = (runProps: IRunPropsHost) => {
   const jobConfig: V1Job = {
     apiVersion: "batch/v1",
     kind: "Job",
     metadata: {
-      name: "hosting-job",
+      name: `hosting-job-${Date.now()}`,
     },
     spec: {
       template: {
@@ -14,7 +14,7 @@ const hostingJob = (runProps: IRunPropsHost) => {
           containers:[
             {
               name: "hosting-container",
-              image: "suryanshvermaaa/hosting-container1.0.0",
+              image: "suryanshvermaaa/hosting-container:1.0.0",
               env:[
                 {
                   name: "MY_ACCESS_KEY_ID",
@@ -24,7 +24,7 @@ const hostingJob = (runProps: IRunPropsHost) => {
                   value: process.env.SECRET_ACCESS_KEY,
                 },{
                   name:"MY_BUCKET_NAME",
-                  value: process.env.BUCKET_NAME,
+                  value: myBucketName,
                 },{
                   name: "GIT_URL",
                   value: runProps.gitUrl
