@@ -10,10 +10,10 @@ const ecsClient = new ECSClient({
   },
 });
 
-const queueHost = process.env.QUEUE_HOST;
-const queueUser = process.env.QUEUE_USER;
-const queuePassword = process.env.QUEUE_PASSWORD;
-const myBucketName = process.env.MY_BUCKET_NAME;
+export const queueHost = process.env.QUEUE_HOST;
+export const queueUser = process.env.QUEUE_USER;
+export const queuePassword = process.env.QUEUE_PASSWORD;
+export const myBucketName = process.env.MY_BUCKET_NAME;
 
 export interface IRunProps {
   videoKey: string;
@@ -28,7 +28,7 @@ export interface IRunProps {
  * @description Spins up a transcoder ECS task with the provided run object parameters.
  * @param {IRunProps} runObj
  */
-export const spinTranscoder = async (runObj: IRunProps) => {
+export const transcodingContainerTask = async (runObj: IRunProps) => {
   const command = new RunTaskCommand({
     cluster: process.env.CLUSTER_ARN,
     taskDefinition: process.env.TRANSCODER_TASK_DEFINITION_ARN,
@@ -106,7 +106,7 @@ export const spinTranscoder = async (runObj: IRunProps) => {
   await ecsClient.send(command);
 };
 
-interface IRunPropsHost {
+export interface IRunPropsHost {
   gitUrl: string;
   webUrl: string;
 }
@@ -115,7 +115,7 @@ interface IRunPropsHost {
  * @description Spins up a hoster ECS task with the provided run object parameters.
  * @param {IRunPropsHost} runObj 
  */
-export const spinHoster = async (runObj: IRunPropsHost) => {
+export const hostingContainerTask = async (runObj: IRunPropsHost) => {
   const command = new RunTaskCommand({
     cluster: process.env.CLUSTER_ARN,
     taskDefinition: process.env.HOSTER_TASK_DEFINITION_ARN,

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-cloud-redis
+  namespace: scs-cloud
+  labels:
+    app: scs-cloud-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scs-cloud-redis
+  template:
+    metadata:
+      labels:
+        app: scs-cloud-redis
+    spec:
+      containers:
+        - name: scs-cloud-redis
+          image: redis:7.2-alpine
+          ports:
+            - containerPort: 6379
+              name: redis-port
+          volumeMounts:
+            - name: redis-volume
+              mountPath: /data
+      volumes:
+        - name: redis-volume
+          persistentVolumeClaim:
+            claimName: scs-cloud-redis-pvc

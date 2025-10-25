@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-cloud-frontend
+  namespace: scs-cloud
+  labels:
+    app: scs-cloud-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scs-cloud-frontend
+  template:
+    metadata:
+      labels:
+        app: scs-cloud-frontend
+    spec:
+      containers:
+        - name: scs-cloud-frontend
+          image: suryanshvermaaa/scs-cloud-frontend:1.0.0
+          ports:
+            - containerPort: 80
+              name: frontend-port

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scs-cloud-redis-pvc
+  namespace: scs-cloud
+  labels:
+    app: redis
+spec:
+  storageClassName: standard   # change to your cluster's StorageClass if different
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 0.5Gi
+  volumeMode: Filesystem

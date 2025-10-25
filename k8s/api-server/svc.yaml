@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  scs-cloud-app-service
+  namespace:  scs-cloud
+spec:
+  selector:
+    app:  scs-cloud-api-server
+  type:  ClusterIP
+  ports:
+  - name:  scs-cloud-api-port
+    port:  3000
+    targetPort:  3000
