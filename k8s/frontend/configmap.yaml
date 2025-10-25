@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scs-cloud-frontend-config
+  namespace: scs-cloud
+data:
+  VITE_API_URL: "http://scs-cloud-app-service.scs-cloud.svc.cluster.local:3000"

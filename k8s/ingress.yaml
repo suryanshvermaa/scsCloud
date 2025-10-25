@@ -1,20 +1,27 @@
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: drogon-app-ingress
-#   namespace: drogon-project
-#   labels:
-#     app.kubernetes.io/name: drogon-app-ingress
-#     app.kubernetes.io/part-of: drogon-project
-# spec:
-#   rules:
-#   - host: localhost
-#     http:
-#       paths:
-#       - pathType: Prefix
-#         path: "/"
-#         backend:
-#           service:
-#             name: drogon-app-svc
-#             port: 
-#               number: 3000
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: scs-app-ingress
+  namespace: scs-cloud
+  labels:
+    app.kubernetes.io/name: scs-app-ingress
+    app.kubernetes.io/part-of: scs-cloud
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: scs-cloud
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/api"
+        backend:
+          service:
+            name: scs-cloud-app-service
+            port:
+              number: 3000
