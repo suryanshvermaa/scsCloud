@@ -1,6 +1,7 @@
 import { Request,Response,NextFunction } from "express";
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
+import response from "../utils/response";
 
 /**
  * 
@@ -17,10 +18,6 @@ export const authMiddleware=async(req:Request,res:Response,next:NextFunction)=>{
         if(!isVerified) throw new Error("Unauthorised");                           
         next();
     } catch (error) {
-        res.status(401)
-            .json({
-                success:false, 
-                message:"Unauthorised"
-            })
+        response(res,401,"Unauthorised",{});
     }
 }
