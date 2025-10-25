@@ -4,6 +4,7 @@ import { AppError } from "../utils/error";
 import { deleteSession, getSession, setSession } from "../bot/sessions";
 import { systemPrompt } from "../bot/system_prompt";
 import { getGroqChatCompletion } from "../bot";
+import jwt from "jsonwebtoken";
 import {
     getOverview,
     getStaticHostingOverview,
@@ -27,9 +28,12 @@ import response from "../utils/response";
  * @param res response object to send back the reply
  */
 export const chat = asyncHandler(async (req: Request, res: Response) => {
-    const { message, sessionId } = req.body as { message?: string; sessionId?: string };
-    if (!message || !sessionId) throw new AppError("message and sessionId both required", 400);
-    
+    let { message, sessionId ,AccessCookie} = req.body;
+    if (!message || !sessionId ||!AccessCookie) throw new AppError("message and sessionId both required", 400);
+    const isVerified=await jwt.verify(AccessCookie,process.env.ACCESS_TOKEN_SECRET!);
+    if(!isVerified) throw new AppError('Invalid Access Cookie',401);
+    const {userId}=JSON.parse(JSON.stringify(isVerified));
+    sessionId=sessionId+userId;
     const prevSession=getSession(sessionId);
     if(!prevSession){
         const startingMessage:Groq.Chat.Completions.ChatCompletionMessageParam[]=[

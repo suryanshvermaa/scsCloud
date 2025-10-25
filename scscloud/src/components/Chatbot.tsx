@@ -52,24 +52,20 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const accessToken = Cookies.get('AccessCookie');
+      const requestBody = {
+        message: userMessage.text,
+        sessionId: sessionId || Date.now().toString(),
+        AccessCookie: Cookies.get('AccessCookie'),
+      };
+      console.log('Request Body:', requestBody);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/v1/bot/chat`,
-        {
-          message: inputMessage,
-          sessionId: sessionId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
+        requestBody
       );
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: response.data.message || response.data.reply || 'I received your message!',
+        text: response.data.data.response || 'I received your message!',
         sender: 'bot',
         timestamp: new Date(),
       };
