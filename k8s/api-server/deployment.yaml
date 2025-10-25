@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-cloud-api-server
+  namespace: scs-cloud
+  labels:
+    app: scs-cloud-api-server
+spec:
+  replicas: 1 #due to low resource availability on my local cluster
+  selector:
+    matchLabels:
+      app: scs-cloud-api-server
+  template:
+    metadata:
+      labels:
+        app: scs-cloud-api-server
+    spec:
+      containers:
+      - name: scs-cloud-api-server
+        image: suryanshvermaaa/scs-cloud-api-server:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        # commented out to test on low resource cluster
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "500m"
+        #   requests:
+        #     memory: "128Mi"
+        #     cpu: "250m"
+        env:
+        - name: PORT
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: PORT
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: MONGO_URI
+        - name: ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: ACCESS_TOKEN_SECRET
+        - name: REFRESH_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: REFRESH_TOKEN_SECRET
+        - name: OTP_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: OTP_SECRET
+        - name: ACCESS_KEY_CREDENTIALS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: ACCESS_KEY_CREDENTIALS_SECRET
+        - name: SECRET_ACCESS_KEY_CREDENTIALS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: SECRET_ACCESS_KEY_CREDENTIALS_SECRET
+        - name: ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: ACCESS_KEY_ID
+        - name: SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: SECRET_ACCESS_KEY
+        - name: MY_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: MY_BUCKET_NAME
+        - name: BUCKET_HOST_FOR_HOSTING
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: BUCKET_HOST_FOR_HOSTING
+        - name: HOSTING_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: HOSTING_DOMAIN
+        - name: QUEUE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_HOST
+        - name: QUEUE_USER
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_USER
+        - name: QUEUE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_PASSWORD
+        - name: QUEUE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_PORT
+        - name: CASHFREE_APP_KEY
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: CASHFREE_APP_KEY
+        - name: CASHFREE_APP_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: CASHFREE_APP_SECRET_KEY
+        - name: TRANSCODER_SERVICE_CHARGE
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: TRANSCODER_SERVICE_CHARGE
+        - name: HOSTING_SERVICE_CHARGE_PER_30_DAYS
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: HOSTING_SERVICE_CHARGE_PER_30_DAYS
+        

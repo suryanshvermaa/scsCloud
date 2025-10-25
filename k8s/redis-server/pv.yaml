@@ -1,0 +1,15 @@
+# /c:/Users/hp/Desktop/nodejs/scsCloud/k8s/redis-server/pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: scs-cloud-redis-pv
+spec:
+  capacity:
+    storage: "0.5Gi"
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /app/redis/data/
