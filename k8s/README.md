@@ -18,7 +18,10 @@ kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
 
 ## applying manifests
 ```bash
-kubectl apply -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -f ./api-server -f ./frontend -f ./ingress.yaml
+kubectl apply -f ./namespace.yaml -f ./db -f ./redis-server
+```
+```bash
+kubectl apply -f ./email-server -f ./api-server -f ./frontend -f ./ingress.yaml
 ```
 
 ## pods status

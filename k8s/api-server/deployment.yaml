@@ -15,6 +15,7 @@ spec:
       labels:
         app: scs-cloud-api-server
     spec:
+      serviceAccountName: api-access
       containers:
       - name: scs-cloud-api-server
         image: suryanshvermaaa/scs-api-server:1.0.0
