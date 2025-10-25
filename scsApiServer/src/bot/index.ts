@@ -1,10 +1,9 @@
 import Groq from "groq-sdk";
 import "dotenv/config"
-import { IMessage } from "./sessions";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export async function getGroqChatCompletion(messages: Array<IMessage>) {
+export async function getGroqChatCompletion(messages: Groq.Chat.Completions.ChatCompletionMessageParam[]) {
 return await groq.chat.completions.create({
     messages: messages,
     model: "openai/gpt-oss-20b",

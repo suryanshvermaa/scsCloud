@@ -1,11 +1,6 @@
-export interface IMessage{
-    role: 'user' | 'assistant'| 'system';
-    content: string;
-}
-
+import Groq from "groq-sdk";
 export interface IChat{
-    messages: IMessage[];
-    userID: string;
+    messages: Groq.Chat.Completions.ChatCompletionMessageParam[];
     timeoutHandle?: NodeJS.Timeout;
 }
 
@@ -22,3 +17,4 @@ export function setSession(sessionId: string, data: IChat): void {
 export function deleteSession(sessionId: string): void {
   sessions.delete(sessionId);
 }
+
