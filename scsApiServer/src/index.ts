@@ -11,6 +11,7 @@ import hostingRouter from './routes/hosting.routes';
 import errorHandler from './middleware/error.middleware';
 import asyncHandler from './utils/asyncHandler';
 import response from './utils/response';
+import botRouter from './routes/bot.routes';
 
 const app=express();
 
@@ -46,6 +47,7 @@ app.use('/api/v1',userRouter)
 app.use('/api/v1',transcodingRouter)
 app.use('/api/payment',paymentRouter)
 app.use('/api/host',hostingRouter)
+app.use('/api/v1/bot',botRouter)
 
 // health check route
 app.get('/api/v1/health-check',asyncHandler(async(req:Request,res:Response)=>{
