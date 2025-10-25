@@ -1,203 +1,303 @@
-# SCS Cloud Project
+<div align="center">
 
-A comprehensive cloud-based streaming and content management system consisting of multiple microservices.
+# SCS Cloud ☁️
 
-## Project Structure
+End-to-end cloud platform for video transcoding (HLS), static-site hosting, payments and email notifications — built as a multi-service monorepo.
 
-- `scscloud/` - Frontend application built with React/TypeScript
-- `scsApiServer/` - Backend API server
-- `scs-hls-client/` - HLS streaming client
-- `emailServer/` - Email service
-- `scs-cloud-services/` - Cloud infrastructure services
+</div>
 
-## Environment Variables
+## Why this repo exists ✨
 
-### API Server (.env)
+SCS Cloud brings together a TypeScript/Node.js API, a React frontend, background workers, and containerized jobs that run on AWS (S3/ECS) to offer:
 
-```env
-# Server Configuration
-PORT=8080
-MONGO_URI=your_mongodb_connection_string
+- 🎬 HLS video transcoding (FFmpeg-based, stored on S3)
+- 🌐 Static website hosting to S3 (per-site subdomains supported via proxy)
+- 💳 Payment integration (Cashfree) with SCS Coins crediting
+- 📬 Email notifications using BullMQ workers (Redis)
+- 🗄️ MongoDB for persistence
+- 🐳 Docker Compose for local dev and ☸️ Kubernetes manifests for cluster deployment
 
-# JWT Tokens
-ACCESS_TOKEN_SECRET=your_access_token_secret
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
-OTP_SECRET=your_otp_secret
-ACCESS_KEY_CREDENTIALS_SECRET=your_access_key_credentials_secret
-SECRET_ACCESS_KEY_CREDENTIALS_SECRET=your_secret_access_key_credentials_secret
+---
 
-# AWS Configuration
-ACCESS_KEY_ID=your_aws_access_key_id
-SECRET_ACCESS_KEY=your_aws_secret_access_key
-MY_BUCKET_NAME=your_s3_bucket_name
+## Monorepo at a glance 🗂️
 
-# AWS ECS Configuration
-CLUSTER_ARN=your_ecs_cluster_arn
-TRANSCODER_TASK_DEFINITION_ARN=your_transcoder_task_definition_arn
-HOSTER_TASK_DEFINITION_ARN=your_hoster_task_definition_arn
-TRANSCODER_TASK_NAME=your_transcoder_task_name
-HOSTER_TASK_NAME=your_hoster_task_name
-MY_SUBNET_1=your_subnet_1_id
-MY_SUBNET_2=your_subnet_2_id
-MY_SUBNET_3=your_subnet_3_id
-MY_SECURITY_GROUP=your_security_group_id
+- `scsApiServer/` — TypeScript Express API (auth, transcoding/hosting orchestration, payments, queues)
+- `scscloud/` — React + Vite frontend (TailwindCSS)
+- `emailServer/` — BullMQ workers + Nodemailer for all outbound emails
+- `scs-cloud-services/`
+   - `Hosting-container/` — Builds a static site and uploads to S3
+   - `Transcoding-container/` — Downloads source from S3, transcodes via FFmpeg, uploads HLS outputs to user S3
+- `scs-hls-client/` — Lightweight JS client helpers for upload + transcode flows
+- `k8s/` — Kind/NGINX Ingress setup and per-service Kubernetes manifests (no secrets committed)
+- `docker-compose.yml`, `dockercompose.dev.yaml` — Local services and dev stack
+- `mongo-data/`, `redis_data/` — Local persistent volumes (git-ignored)
 
-# Message Queue Configuration
-QUEUE_HOST=your_queue_host
-QUEUE_USER=your_queue_username
-QUEUE_PASSWORD=your_queue_password
+---
 
-# Payment Gateway (Cashfree)
-CASHFREE_APP_KEY=your_cashfree_app_key
-CASHFREE_APP_SECRET_KEY=your_cashfree_secret_key
+## High-level architecture 🧭
 
-# Service Charges
-TRANSCODER_SERVICE_CHARGE=your_transcoder_service_charge
-HOSTING_SERVICE_CHARGE_PER_30_DAYS=your_hosting_service_charge
+```mermaid
+flowchart LR
+   A[Frontend (scscloud)] -->|HTTP| B[API Server (scsApiServer)]
+   B <--> M[(MongoDB)]
+   B <--> R[(Redis)]
+   E[emailServer] <--> R
+   B -->|ECS task| T[Transcoding-container]
+   B -->|ECS task| H[Hosting-container]
+   T -->|Upload HLS| U[(User S3 Bucket)]
+   H -->|Upload site| S3[(Hosting S3 Bucket)]
+   B -->|Proxy non-api subdomains| S3
 ```
 
-### Transcoding Container (.env)
+Notes:
+- The API has a subdomain proxy: non-`api` subdomains are forwarded to S3 websites (see `src/index.ts`).
+- Background work uses BullMQ (Redis).
+- On Kubernetes, traffic flows via NGINX Ingress to `scs-cloud` (frontend) and `scs-cloud-app-service` (API).
 
-```env
-# AWS Configuration
-MY_ACCESS_KEY_ID=your_aws_access_key_id
-MY_SECRET_ACCESS_KEY=your_aws_secret_access_key
-USER_ACCESS_KEY_ID=your_user_aws_access_key_id
-USER_SECRET_ACCESS_KEY=your_user_aws_secret_access_key
+---
 
-# S3 Configuration
-MY_BUCKET_NAME=your_s3_bucket_name
-USER_BUCKET_NAME=your_user_bucket_name
-VIDEO_KEY=your_video_key
-BUCKET_PATH=your_bucket_path
+## Quick start (Linux) 🚀
 
-# User Information
-USER_EMAIL=your_user_email
+Pick one of the options below.
 
-# Message Queue Configuration
-QUEUE_HOST=your_queue_host
-QUEUE_USER=your_queue_username
-QUEUE_PASSWORD=your_queue_password
-```
+### Option A — Dev stack with Docker Compose 🐳
 
-### Hosting Container (.env)
+Prerequisites:
+- Docker Engine (or Docker Desktop on Linux)
+- Bash shell
 
-```env
-# AWS Configuration
-MY_ACCESS_KEY_ID=your_aws_access_key_id
-MY_SECRET_ACCESS_KEY=your_aws_secret_access_key
-MY_BUCKET_NAME=your_s3_bucket_name
+1) Create a root `.env.dev` used by `dockercompose.dev.yaml` (placeholders shown):
 
-# Web Configuration
-WEB_URL=your_web_url
-```
-
-### Email Server (.env)
-
-```env
-# Email Configuration
-MY_EMAIL=your_email_address
-MY_PASSWORD=your_email_password
-```
-
-## Setup Instructions
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd scsCloud
+# Database and Redis
+MONGO_INITDB_ROOT_USERNAME=root
+MONGO_INITDB_ROOT_PASSWORD=<your-mongo-root-password>
+REDIS_PASSWORD=<your-redis-password>
+
+# Email worker
+MY_EMAIL=<your-smtp-email>
+MY_PASSWORD=<your-smtp-app-password>
+QUEUE_PASSWORD=<same-as-redis-password>
+
+# API server
+ACCESS_TOKEN_SECRET=<secret>
+REFRESH_TOKEN_SECRET=<secret>
+OTP_SECRET=<secret>
+ACCESS_KEY_CREDENTIALS_SECRET=<secret>
+SECRET_ACCESS_KEY_CREDENTIALS_SECRET=<secret>
+MONGO_URI=mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongoDb:27017/scsCloudDB
+
+# AWS + Hosting/Transcoding config
+ACCESS_KEY_ID=<aws-access-key-id>
+SECRET_ACCESS_KEY=<aws-secret-access-key>
+MY_BUCKET_NAME=<your-s3-bucket>
+BUCKET_HOST_FOR_HOSTING=<https://s3.<region>.amazonaws.com/<bucket>>
+HOSTING_DOMAIN=<your-hosting-domain-if-any>
+
+CLUSTER_ARN=<ecs-cluster-arn>
+TRANSCODER_TASK_DEFINITION_ARN=<task-def-arn>
+HOSTER_TASK_DEFINITION_ARN=<task-def-arn>
+TRANSCODER_TASK_NAME=<task-name>
+HOSTER_TASK_NAME=<task-name>
+MY_SUBNET_1=<subnet-id>
+MY_SUBNET_2=<subnet-id>
+MY_SUBNET_3=<subnet-id>
+MY_SECURITY_GROUP=<sg-id>
+
+# Payments
+CASHFREE_APP_KEY=<cashfree-key>
+CASHFREE_APP_SECRET_KEY=<cashfree-secret>
+
+# Fees
+TRANSCODER_SERVICE_CHARGE=0
+HOSTING_SERVICE_CHARGE_PER_30_DAYS=0
+
+# Frontend origin for CORS
+CLIENT_ORIGIN=http://localhost:5173
 ```
 
-2. Set up environment variables:
-   - Copy the `.env.example` files in each service directory to `.env`
-   - Fill in the required environment variables as described above
+2) Start the dev stack:
 
-3. Install dependencies for each service:
 ```bash
+docker compose -f dockercompose.dev.yaml up -d
+```
+
+This launches MongoDB, Redis, the email worker, and the API server (port 3000). Frontend runs separately via Vite dev server.
+
+3) Run the frontend locally:
+
+```bash
+cd scscloud && npm install && npm run dev
+```
+
+4) Stop everything:
+
+```bash
+docker compose -f dockercompose.dev.yaml down
+```
+
+Optional: Use `docker-compose.yml` for a smaller stack (MongoDB, Redis, Email worker).
+
+### Option B — Manual local development 🛠️
+
+In separate terminals:
+
+```bash
+# API server
+cd scsApiServer && npm install && npm run dev
+
 # Frontend
-cd scscloud
-npm install
+cd scscloud && npm install && npm run dev
 
-# API Server
-cd ../scsApiServer
-npm install
-
-# HLS Client
-cd ../scs-hls-client
-npm install
-
-# Email Server
-cd ../emailServer
-npm install
+# Email worker
+cd emailServer && npm install && npm run dev
 ```
 
-4. Start the services:
+HLS client helpers (optional):
+
 ```bash
-# API Server
-cd scsApiServer
-npm run dev
-
-# Frontend
-cd ../scscloud
-npm run dev
-
-# HLS Client
-cd ../scs-hls-client
-npm run dev
-
-# Email Server
-cd ../emailServer
-npm run dev
+cd scs-hls-client && npm install && node index.js
 ```
 
-## Features
+---
 
-- User authentication and authorization
-- File upload and management
-- Video transcoding
-- HLS streaming
-- Payment integration
-- Email notifications
-- AWS infrastructure integration
+## Kubernetes deployment ☸️
 
-## AWS Services Used
+Manifests are under `k8s/`. A quick path using Kind + NGINX Ingress (see `k8s/README.md` for full details):
 
-- ECS (Elastic Container Service)
-- S3 (Simple Storage Service)
-- Other AWS services as configured
+```bash
+# Create local Kind cluster
+kind create cluster --name suryansh-cluster --config ./k8s/cluster.yaml
 
-## Security Notes
+# Install NGINX ingress controller
+kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
 
-- Never commit `.env` files to version control
-- Keep all secrets and API keys secure
-- Use appropriate IAM roles and permissions
-- Follow security best practices for production deployment
+# Apply namespace, DB and Redis
+kubectl apply -f ./k8s/namespace.yaml -f ./k8s/db -f ./k8s/redis-server
 
-## Development
+# Apply app services (ensure you created the required secrets beforehand)
+kubectl apply -f ./k8s/email-server -f ./k8s/api-server -f ./k8s/frontend -f ./k8s/ingress.yaml
 
-- Frontend is built with React, TypeScript, and Vite
-- Backend uses Node.js with TypeScript
-- Uses MongoDB for data storage
-- Implements message queues for service communication
-- Integrates with Cashfree payment gateway
+# Watch pods
+kubectl get pods -n scs-cloud --watch
+```
 
-## Production Deployment
+Ingress routes:
+- Frontend: http://localhost/
+- API: http://api.localhost/
 
-1. Set up AWS infrastructure according to the architecture
-2. Configure all environment variables in your deployment environment
-3. Set up CI/CD pipelines (if applicable)
-4. Deploy services to their respective environments
-5. Configure domain names and SSL certificates
-6. Set up monitoring and logging
+Secrets are intentionally not included in this repository. Create them per your environment before applying deployments.
 
-## Contributing
+---
 
-1. Fork the repository
+## Service details 🔍
+
+- API Server (`scsApiServer/`)
+   - Express + TypeScript
+   - Routes: user auth, transcoding, payments, hosting
+   - Integrations: MongoDB, Redis (BullMQ), AWS S3 & ECS, Cashfree
+   - Special: subdomain proxy to S3 static sites
+   - Local port: 3000 (via dev compose)
+
+- Frontend (`scscloud/`)
+   - React + Vite + Tailwind CSS
+   - Development port: 5173
+   - Production build: static assets suitable for S3/NGINX
+
+- Email Worker (`emailServer/`)
+   - BullMQ workers: OTP, transcoding finished, API keys, hosting, hosting renewal, payments
+   - Uses Nodemailer (configure your SMTP credentials via env)
+
+- Transcoding job (`scs-cloud-services/Transcoding-container/`)
+   - Downloads source from S3, runs FFmpeg to 1080p/720p/480p/360p HLS, uploads to user S3
+   - Notifies via BullMQ when done
+
+- Hosting job (`scs-cloud-services/Hosting-container/`)
+   - Builds the static site and uploads to `hosted-websites/<site>/...` in S3
+
+- Client helpers (`scs-hls-client/`)
+   - Simple JS wrappers around upload/transcode API flows
+
+---
+
+## Environment variables 🔐
+
+This repo avoids committing secrets or values. Use the `.env.example` files where present and the lists below as a guide.
+
+- API server (`scsApiServer/.env` sample keys)
+   - PORT, MONGO_URI
+   - ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, OTP_SECRET
+   - ACCESS_KEY_CREDENTIALS_SECRET, SECRET_ACCESS_KEY_CREDENTIALS_SECRET
+   - ACCESS_KEY_ID, SECRET_ACCESS_KEY, MY_BUCKET_NAME
+   - BUCKET_HOST_FOR_HOSTING, HOSTING_DOMAIN
+   - CLUSTER_ARN, TRANSCODER_TASK_DEFINITION_ARN, HOSTER_TASK_DEFINITION_ARN, TRANSCODER_TASK_NAME, HOSTER_TASK_NAME
+   - MY_SUBNET_1..3, MY_SECURITY_GROUP
+   - QUEUE_HOST, QUEUE_USER, QUEUE_PASSWORD, QUEUE_PORT
+   - CASHFREE_APP_KEY, CASHFREE_APP_SECRET_KEY
+   - TRANSCODER_SERVICE_CHARGE, HOSTING_SERVICE_CHARGE_PER_30_DAYS
+   - CLIENT_ORIGIN
+
+- Email worker (`emailServer/.env`)
+   - MY_EMAIL, MY_PASSWORD
+   - QUEUE_HOST, QUEUE_PORT, QUEUE_USER, QUEUE_PASSWORD
+
+- Transcoding container (`scs-cloud-services/Transcoding-container/.env`)
+   - MY_ACCESS_KEY_ID, MY_SECRET_ACCESS_KEY
+   - USER_ACCESS_KEY_ID, USER_SECRET_ACCESS_KEY
+   - MY_BUCKET_NAME, USER_BUCKET_NAME, VIDEO_KEY, BUCKET_PATH
+   - USER_EMAIL
+   - QUEUE_HOST, QUEUE_PORT, QUEUE_USER, QUEUE_PASSWORD
+
+- Hosting container (`scs-cloud-services/Hosting-container/.env`)
+   - MY_ACCESS_KEY_ID, MY_SECRET_ACCESS_KEY, MY_BUCKET_NAME
+   - WEB_URL (site slug to publish)
+
+- Frontend (`scscloud/.env` or `.env.development`)
+   - VITE_API_URL (optional; for production, set your API origin)
+
+Never commit `.env` files. Rotate credentials regularly and scope IAM minimally.
+
+---
+
+## Data and persistence 💾
+
+- Docker Compose volumes:
+   - `./mongo-data` → MongoDB data
+   - `./redis_data` → Redis data (AOF enabled in dev compose)
+- Kubernetes:
+   - Mongo: `scs-cloud-pv`/`scs-cloud-pvc` (hostPath used in sample)
+   - Redis: `scs-cloud-redis-pv`/`scs-cloud-redis-pvc`
+
+Adjust storage classes/paths for your cluster. The provided manifests are examples for local Kind.
+
+---
+
+## Troubleshooting 🧰
+
+- API cannot reach MongoDB or Redis
+   - Check container names and network: `mongoDb` and `redis` are the service names in dev compose
+   - Ensure `MONGO_URI` and `QUEUE_*` are correctly set and passwords match
+
+- Emails not sending
+   - Use an SMTP provider/app password; many providers block basic auth
+
+- CORS/cookies issues in local dev
+   - Set `CLIENT_ORIGIN=http://localhost:5173` and use `withCredentials: true` from the frontend
+
+- Ingress not routing
+   - Confirm NGINX ingress installation and that hosts `localhost` and `api.localhost` match your entries
+
+---
+
+## Contributing 🤝
+
+1. Fork the repo
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Commit and push
+4. Open a Pull Request
 
-## License
+---
 
-[Add your license information here] 
+## License 📄
+
+Add your license information here.
