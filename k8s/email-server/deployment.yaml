@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-cloud-email-server
+  namespace: scs-cloud
+  labels:
+    app: scs-cloud-email-server
+spec:
+  replicas: 1 #due to low resource availability on my local cluster
+  selector:
+    matchLabels:
+      app: scs-cloud-email-server
+  template:
+    metadata:
+      labels:
+        app: scs-cloud-email-server
+    spec:
+      containers:
+      - name: scs-cloud-email-server
+        image: suryanshvermaaa/scs-email-server:1.0.0
+        imagePullPolicy: Always
+        # commented out to test on low resource cluster
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "500m"
+        #   requests:
+        #     memory: "128Mi"
+        #     cpu: "250m"
+        env:
+        - name: QUEUE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_HOST
+        - name: QUEUE_USER
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_USER
+        - name: QUEUE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_PASSWORD
+        - name: QUEUE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-secrets
+              key: QUEUE_PORT
+        - name: MY_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-email-secret
+              key: MY_EMAIL
+        - name: MY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-email-secret
+              key: MY_PASSWORD
