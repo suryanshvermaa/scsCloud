@@ -16,24 +16,24 @@ Lightweight TypeScript Express API for SCS Cloud services — user auth, payment
 - BullMQ (Redis-backed queues)
 - Cashfree payment SDK
 
-## Quick start (Windows PowerShell) 🚀
+## Quick start (Linux) 🚀
 1. Copy `.env.example` to `.env` and fill values.
 
 2. Install dependencies:
 
-```powershell
+```bash
 npm install
 ```
 
 3. Run in development (uses `ts-node` / `nodemon`):
 
-```powershell
+```bash
 npm run dev
 ```
 
 4. Build and run production:
 
-```powershell
+```bash
 npm run build
 npm start
 ```
