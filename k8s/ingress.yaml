@@ -18,8 +18,11 @@ spec:
             name: scs-cloud
             port:
               number: 80
+  - host: api.localhost
+    http:
+      paths:
       - pathType: Prefix
-        path: "/api"
+        path: "/"
         backend:
           service:
             name: scs-cloud-app-service

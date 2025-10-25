@@ -1,50 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  scs-cloud-db
-  namespace:  scs-cloud
+  name: scs-cloud-db
+  namespace: scs-cloud
   labels:
-    name:  scs-cloud-db
+    name: scs-cloud-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name:  scs-cloud-db
+      name: scs-cloud-db
   template:
     metadata:
       labels:
-        name:  scs-cloud-db
+        name: scs-cloud-db
     spec:
       containers:
-      - image:  bitnami/mongodb:7.0.5
-        name:  scs-cloud-db
-        ports:
-        - containerPort:  27017
-          name:  scs-cloud-db
+        - name: scs-cloud-db
+          image: mongo:8.0.15-noble
+          ports:
+            - containerPort: 27017
+              name: scs-cloud-db
           env:
-            - name: MONGODB_ROOT_PASSWORD
+            - name: MONGO_INITDB_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: scs-cloud-db-secret
-                  key: MONGODB_ROOT_PASSWORD
-            - name: MONGODB_DATABASE
+                  key: MONGO_INITDB_DATABASE
+            - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: scs-cloud-db-secret
-                  key: MONGODB_DATABASE
-            - name: MONGODB_USERNAME
+                  key: MONGO_INITDB_ROOT_PASSWORD
+            - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: scs-cloud-db-secret
-                  key: MONGODB_USERNAME
-            - name: MONGODB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: scs-cloud-db-secret
-                  key: MONGODB_PASSWORD
-        volumeMounts:
-          - name: mongo-volume
-            mountPath: /data/db # MongoDB data directory
+                  key: MONGO_INITDB_ROOT_USERNAME
+          volumeMounts:
+            - name: mongo-volume
+              mountPath: /data/db  # MongoDB data directory
       volumes:
         - name: mongo-volume
           persistentVolumeClaim:

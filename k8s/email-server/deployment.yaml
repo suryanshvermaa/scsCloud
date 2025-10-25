@@ -31,22 +31,22 @@ spec:
         - name: QUEUE_HOST
           valueFrom:
             secretKeyRef:
-              name: scs-cloud-secrets
+              name: scs-cloud-email-secret
               key: QUEUE_HOST
         - name: QUEUE_USER
           valueFrom:
             secretKeyRef:
-              name: scs-cloud-secrets
+              name: scs-cloud-email-secret
               key: QUEUE_USER
         - name: QUEUE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: scs-cloud-secrets
+              name: scs-cloud-email-secret
               key: QUEUE_PASSWORD
         - name: QUEUE_PORT
           valueFrom:
             secretKeyRef:
-              name: scs-cloud-secrets
+              name: scs-cloud-email-secret
               key: QUEUE_PORT
         - name: MY_EMAIL
           valueFrom:
