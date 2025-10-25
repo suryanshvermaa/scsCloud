@@ -1,10 +1,7 @@
-<div align="center">
-
 # SCS Cloud ☁️
 
 End-to-end cloud platform for video transcoding (HLS), static-site hosting, payments and email notifications — built as a multi-service monorepo.
 
-</div>
 
 ## Why this repo exists ✨
 
@@ -35,19 +32,6 @@ SCS Cloud brings together a TypeScript/Node.js API, a React frontend, background
 ---
 
 ## High-level architecture 🧭
-
-```mermaid
-flowchart LR
-   A[Frontend (scscloud)] -->|HTTP| B[API Server (scsApiServer)]
-   B <--> M[(MongoDB)]
-   B <--> R[(Redis)]
-   E[emailServer] <--> R
-   B -->|ECS task| T[Transcoding-container]
-   B -->|ECS task| H[Hosting-container]
-   T -->|Upload HLS| U[(User S3 Bucket)]
-   H -->|Upload site| S3[(Hosting S3 Bucket)]
-   B -->|Proxy non-api subdomains| S3
-```
 
 Notes:
 - The API has a subdomain proxy: non-`api` subdomains are forwarded to S3 websites (see `src/index.ts`).
