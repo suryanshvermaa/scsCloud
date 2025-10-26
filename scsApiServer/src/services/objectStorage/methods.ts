@@ -129,7 +129,6 @@ export {
     listBuckets,
     getObjectSignedUrl,
     deleteObject,
-    getObjectMetadata,
     enableBucketService,
     createS3Bucket,
     deleteS3Bucket,
