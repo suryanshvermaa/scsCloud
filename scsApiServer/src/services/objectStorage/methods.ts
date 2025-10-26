@@ -1,4 +1,4 @@
-import { S3Client, ListObjectsV2Command, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand  } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import getMinioManifests from "../k8s/getMinioManifests";
 import { k8sObjectApi } from "../k8s/k8s";
@@ -20,8 +20,8 @@ interface IS3ClientConfig{
  * @returns {StorageEndpoint:string} endpoint
  */
 const enableBucketService=async(userId:string,storageInGB:number,accesskey:string,secretkey:string)=>{
-    const base64encodedSecretKey=Buffer.from(secretkey).toString('base64');
-    const base64encodedAccessKey=Buffer.from(accesskey).toString('base64');
+    const base64encodedSecretKey=Buffer.from(secretkey,'utf-8').toString('base64');
+    const base64encodedAccessKey=Buffer.from(accesskey,'utf-8').toString('base64');
     const userIdSanitized=userId.replace(/[^a-z0-9]/gi,'n').toLowerCase();//k8s resource name sanitization
     const {deployment,persistentVolume,persistentVolumeClaim,secrets,service,ingress}=getMinioManifests(userIdSanitized,storageInGB,base64encodedAccessKey,base64encodedSecretKey);
     await k8sObjectApi.create(secrets); //secret
@@ -118,6 +118,13 @@ const getObjectMetadata=async(s3Client:S3Client,bucketName:string,objectKey:stri
     return (await s3Client.send(command)).Metadata;
 }
 
+const createS3Bucket=async(s3Client:S3Client,bucketName:string)=>{
+    const command = new CreateBucketCommand({
+        Bucket: bucketName,
+    });
+    return await s3Client.send(command);
+}
+
 export {
     getS3Client,
     listObjects,
@@ -127,4 +134,5 @@ export {
     deleteObject,
     getObjectMetadata,
     enableBucketService,
+    createS3Bucket,
 }

@@ -122,7 +122,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
             namespace: "minio",
         },
         type: "Opaque",
-        stringData: {
+        data: {
             accesskey: accesskey,
             secretkey: secretkey,
         },
