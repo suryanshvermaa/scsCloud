@@ -1,19 +1,34 @@
-// Simple notification utility to replace alert()
+import toast from 'react-hot-toast';
+
+// Toast notification utility
 export const notifier = {
   success: (message: string) => {
-    // For now, using alert but this can be replaced with a toast library later
-    alert(`✓ ${message}`);
+    toast.success(message, {
+      duration: 4000,
+      position: 'top-right',
+    });
   },
   
   error: (message: string) => {
-    alert(`✗ ${message}`);
+    toast.error(message, {
+      duration: 4000,
+      position: 'top-right',
+    });
   },
   
   info: (message: string) => {
-    alert(`ℹ ${message}`);
+    toast(message, {
+      duration: 4000,
+      position: 'top-right',
+      icon: 'ℹ️',
+    });
   },
   
   warning: (message: string) => {
-    alert(`⚠ ${message}`);
+    toast(message, {
+      duration: 4000,
+      position: 'top-right',
+      icon: '⚠️',
+    });
   }
 };

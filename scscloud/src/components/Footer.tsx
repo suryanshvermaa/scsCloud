@@ -98,7 +98,7 @@ const Footer: React.FC = () => {
           <ul className="mt-4 space-y-2 text-sm">
             <li>
               <a
-                href="https://drive.google.com/file/d/1hQkWJJX0cm36t9yyoBCOUDoPgEKnM64j/view?usp=drivesdk"
+                href="https://drive.google.com/file/d/16tvACD2uHmADKMQz1iBkpWEquG0eHtYx/view?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-600 hover:text-slate-900 hover:underline dark:text-slate-300 dark:hover:text-slate-100"

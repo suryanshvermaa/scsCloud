@@ -3,6 +3,7 @@ import { IoCloudOutline } from "react-icons/io5";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie'
+import { notifier } from "../utils/notifier";
 
 
 const Register:React.FC=()=> {
@@ -14,28 +15,63 @@ const Register:React.FC=()=> {
   const [registerData,setRegisterData]=useState<object | undefined>();
   const [emailScreen,setEmailScreen]=useState<boolean>(false);
   const [OTP,setOTP]=useState<number|undefined>();
+  
   const handleVerify=async()=>{
-       setEmailLoading(true)
-      //  const data=registerData;
-       console.log(registerData);
-       //api call
-  const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/register`,registerData);
-  console.log(res.data.data);
-  Cookies.set("authCookie", res.data.data.cookie.value, {expires:Date.now()+900000})
-       setEmailLoading(false)
-       setEmailScreen(true);
-  }
-  const handleEmail=async()=>{
-    setVerifyingOtp(true)
-    console.log(OTP);
-    const cookie=Cookies.get("authCookie");
-    const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/verify-email`,{OTP:OTP,cookie});
-    if(res.data.data){
+    try {
+      setEmailLoading(true)
+      console.log(registerData);
+      
+      const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/register`,registerData);
       console.log(res.data.data);
-      setVerifyingOtp(false)
-       navigate('/login')
+      Cookies.set("authCookie", res.data.data.cookie.value, {expires:Date.now()+900000})
+      setEmailLoading(false)
+      setEmailScreen(true);
+      notifier.success("OTP sent to your email. Please check your inbox.");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setEmailLoading(false)
+      if (error.response?.data?.message) {
+        notifier.error(error.response.data.message);
+      } else if (error.response?.status === 409) {
+        notifier.error("Email already registered. Please login instead.");
+      } else if (error.response?.status === 400) {
+        notifier.error("Invalid data. Please check all fields.");
+      } else if (error.message) {
+        notifier.error(error.message);
+      } else {
+        notifier.error("Registration failed. Please try again.");
+      }
     }
-    
+  }
+  
+  const handleEmail=async()=>{
+    try {
+      setVerifyingOtp(true)
+      console.log(OTP);
+      const cookie=Cookies.get("authCookie");
+      const res=await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/verify-email`,{OTP:OTP,cookie});
+      
+      if(res.data.data){
+        console.log(res.data.data);
+        setVerifyingOtp(false)
+        notifier.success("Email verified successfully! Please login.");
+        navigate('/login')
+      }
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      setVerifyingOtp(false)
+      if (error.response?.data?.message) {
+        notifier.error(error.response.data.message);
+      } else if (error.response?.status === 400) {
+        notifier.error("Invalid OTP. Please check and try again.");
+      } else if (error.response?.status === 410) {
+        notifier.error("OTP expired. Please register again.");
+      } else if (error.message) {
+        notifier.error(error.message);
+      } else {
+        notifier.error("OTP verification failed. Please try again.");
+      }
+    }
   }
 
   return (
