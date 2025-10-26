@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { cashfree } from "../utils/PaymentService.config";
 import { useNavigate } from "react-router-dom";
+import {load} from '@cashfreepayments/cashfree-js';
 import { 
   CreditCard, 
   TrendingUp, 
@@ -43,7 +43,6 @@ const BillingDashboard: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [processing, setProcessing] = useState<boolean>(false);
   const navigate = useNavigate();
-
   // Mock usage stats - replace with actual API calls
   const [usageStats] = useState<IUsageStats>({
     hosting: 20,
@@ -108,32 +107,61 @@ const BillingDashboard: React.FC = () => {
         }
       );
 
-      const { payment_session_id, order_id } = orderRes.data.data;
+      console.log(orderRes.data.data.a);
+      const { payment_session_id, order_id } = orderRes.data.data.a;
+
+      // Load Cashfree SDK first
+      const cashfree = await load({
+        mode: "sandbox",
+      });
 
       const checkoutOptions = {
         paymentSessionId: payment_session_id,
-        redirectTarget: "_modal"
+        redirectTarget: "_modal",
       };
-
-      await cashfree.checkout(checkoutOptions);
-
-      // Verify payment
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,
-        {
-          AccessCookie: accessToken,
-          orderId: order_id
+      // Start checkout process
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {      
+        if (result.error) {
+          alert(`Payment cancelled or failed: ${result.error.message || 'Unknown error'}`);
+          setProcessing(false);
+          return;
         }
-      );
 
-      setShowAddFunds(false);
-      setInputAmount("");
-      setPhoneNumber("");
-      loadDashboardData();
-      alert('Payment successful!');
+        if (result.paymentDetails) {
+          // Payment successful, verify on backend
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,
+              {
+                AccessCookie: accessToken,
+                orderId: order_id
+              }
+            );
+
+            console.log('Payment Verified Successfully');
+            
+            // Update UI after successful payment
+            setShowAddFunds(false);
+            setInputAmount("");
+            setPhoneNumber("");
+            await loadDashboardData();
+            alert('Payment successful!');
+          } catch (verifyError: any) {
+            console.error('Verification Failed:', verifyError);
+            alert('Payment completed but verification failed. Please contact support.');
+          }
+        }
+        
+        setProcessing(false);
+      }).catch((error: any) => {
+        console.error('Checkout Failed:', error);
+        alert(`Checkout failed: ${error.message || 'Unknown error occurred'}`);
+        setProcessing(false);
+      });
+
     } catch (error: any) {
-      alert(`Payment failed: ${error.message}`);
-    } finally {
+      console.error('Payment Failed:', error);
+      alert(`Payment failed: ${error.message || 'Unknown error occurred'}`);
       setProcessing(false);
     }
   };

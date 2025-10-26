@@ -57,29 +57,29 @@ const HLSTranscoderService:React.FC=()=>{
       let email='';
       let videoKey='';
        if(data.accessKey && data.bucketName && data.destinationFolder && data.secretAccessKey && file){
-        setLoading('Uploading Video...')
         const fileType=file?.type;
         const fileName=file?.name;
         const fileSize=file?.size;
         const fileObj={fileType,fileName,fileSize}
         console.log(fileObj);
         console.log(data);
+        
         if(fileType==='video/mp4'){
+          setLoading('Uploading Video...')
           const accessToken=Cookies.get("AccessCookie");
           console.log(accessToken);
 
-          axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{fileName,AccessCookie:accessToken})
-          .then((res)=>{
-            console.log(res.data.data);
-             email=res.data.data.email;
-             videoKey=res.data.data.videoKey;
-            //one route after this
-            console.log(res.data.data.uploadUrl);
-            axios.put(res.data.data.uploadUrl,file).then((res)=>{
-              setLoading('transcoding...')
-              console.log(res);
-              
-              
+          try {
+            const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{fileName,AccessCookie:accessToken})
+            console.log(uploadRes.data.data);
+            email = uploadRes.data.data.email;
+            videoKey = uploadRes.data.data.videoKey;
+            console.log(uploadRes.data.data.uploadUrl);
+            
+            await axios.put(uploadRes.data.data.uploadUrl, file)
+            setLoading('Transcoding...')
+            console.log('Video uploaded successfully');
+            
             const transcodingdata={
               email,
               videoKey,
@@ -89,31 +89,27 @@ const HLSTranscoderService:React.FC=()=>{
               userBucketName:data.bucketName,
               AccessCookie:accessToken
             }
-            axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata).then((res)=>{
-              console.log(res.data.data);
-              setLoading('')
-              alert('we are transcoding your video. when transcoding is complete. we will notify you through email')
-             return navigate('/home')
-              
-            })
-            })
-            setLoading('');
-            return alert('error in transcoding video')
             
-          })
-          setLoading('');
-          setLoading('');
-            return alert('you have not sufficient amount')
+            const transcodingRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata)
+            console.log(transcodingRes.data.data);
+            setLoading('')
+            alert('We are transcoding your video. When transcoding is complete, we will notify you through email.')
+            navigate('/home')
+          } catch (error: any) {
+            setLoading('');
+            console.error('Error during transcoding:', error);
+            if (error.response?.status === 402 || error.response?.data?.message?.includes('sufficient')) {
+              alert('You do not have sufficient balance to transcode this video.')
+            } else {
+              alert('Error in transcoding video. Please try again.')
+            }
+          }
         }else{
           setLoading('');
-          return alert('video should be type of mp4')
-          
+          alert('Video should be type of mp4')
         }
-        
-        
-        //type should be video/mp4
        } else{
-        alert('all fields are required')
+        alert('All fields are required')
        } 
     }
     const setFileVideo=(e:React.ChangeEvent<HTMLInputElement>)=>{

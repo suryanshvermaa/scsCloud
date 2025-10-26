@@ -6,21 +6,15 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 export async function getGroqChatCompletion(messages: Groq.Chat.Completions.ChatCompletionMessageParam[]) {
 return await groq.chat.completions.create({
     messages: messages,
-    model: "openai/gpt-oss-20b",
-    temperature: 1,
+    model: "llama-3.1-8b-instant",
+    temperature: 0.7,
+    tool_choice: "auto",
     tools: [
         {
             type: "function",
             function: {
                 name: "getOverview",
                 description: "Provides a high-level overview of SCS Cloud features and quick links to documentation (HLS Transcoder, Static Website Hosting, and docs shortcuts)."
-            }
-        },
-        {
-            type: "function",
-            function: {
-                name: "getFeatureDetails",
-                description: "Retrieves detailed information about a specific SCS Cloud feature when asked (e.g., HLS Transcoder, Static Hosting)."
             }
         },
         {

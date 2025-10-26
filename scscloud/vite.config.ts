@@ -7,5 +7,13 @@ export default defineConfig({
   base: './',
   optimizeDeps: {
     exclude: ['react-syntax-highlighter']
+  },
+  server: {
+    host: true,
+    allowedHosts: [
+      'kelli-hostly-setsuko.ngrok-free.dev',
+      '.ngrok-free.dev',
+      '.ngrok.io'
+    ]
   }
 })

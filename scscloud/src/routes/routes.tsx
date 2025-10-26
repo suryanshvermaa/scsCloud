@@ -11,12 +11,17 @@ import Profile from '../pages/Profile.tsx';
 import HostingService from '../pages/HostingService.tsx';
 import StaticWebsiteHosting from '../pages/StaticWebsiteHosting.docs.tsx';
 import Redirect from '../components/Redirect.tsx';
+import LandingPage from '../pages/LandingPage.tsx';
 
 export const router=createBrowserRouter([
     {
         path:'/',
         element:<App/>,
         children:[
+            {
+                path:'/',
+                element:<LandingPage/>
+              },
             {
                 path:'/register',
                 element:<Register/>
@@ -55,11 +60,11 @@ export const router=createBrowserRouter([
                 path:'/hosting-service-docs',
                 element:<StaticWebsiteHosting/>
               },{
-                path:'/',
+                path:'/redirect',
                 element:<Redirect/>
               },{
                 path:"*",
-                element:<Login/>
+                element:<LandingPage/>
               }
         ]
     }  

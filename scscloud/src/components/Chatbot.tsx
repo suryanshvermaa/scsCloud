@@ -3,6 +3,10 @@ import { IoSend, IoClose, IoChatbubbleEllipsesOutline } from 'react-icons/io5';
 import { AiOutlineRobot } from 'react-icons/ai';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 interface Message {
   id: string;
@@ -62,7 +66,7 @@ const Chatbot: React.FC = () => {
         `${import.meta.env.VITE_API_URL}/api/v1/bot/chat`,
         requestBody
       );
-
+      console.log('Chat Response:', response.data);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: response.data.data.response || 'I received your message!',
@@ -100,49 +104,84 @@ const Chatbot: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 z-50"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 z-[9999]"
           aria-label="Open chat"
         >
-          <IoChatbubbleEllipsesOutline size={28} />
+          <IoChatbubbleEllipsesOutline className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-x-0 bottom-0 sm:inset-auto sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 w-full sm:w-[400px] md:w-[420px] lg:w-[450px] h-[100dvh] sm:h-[85vh] sm:max-h-[650px] bg-white dark:bg-gray-800 sm:rounded-lg shadow-2xl flex flex-col z-[9999] border-t sm:border border-gray-200 dark:border-gray-700">
           {/* Header */}
-          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <AiOutlineRobot size={28} />
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-3 sm:p-4 sm:rounded-t-lg flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <AiOutlineRobot className="w-6 h-6 sm:w-7 sm:h-7" />
               <div>
-                <h3 className="font-semibold text-lg">SCS Assistant</h3>
+                <h3 className="font-semibold text-base sm:text-lg">SCS Assistant</h3>
                 <p className="text-xs text-cyan-100">Always here to help</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20 p-2 rounded-full transition-colors"
+              className="hover:bg-white/20 p-1.5 sm:p-2 rounded-full transition-colors"
               aria-label="Close chat"
             >
-              <IoClose size={24} />
+              <IoClose className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-50 dark:bg-gray-900">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2.5 sm:p-3 ${
                     message.sender === 'user'
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                  {message.sender === 'bot' ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeHighlight]}
+                        components={{
+                          code: ({ node, inline, className, children, ...props }: any) => {
+                            return !inline ? (
+                              <pre className="bg-gray-900 dark:bg-gray-950 rounded-md p-2 sm:p-3 overflow-x-auto text-xs sm:text-sm">
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              </pre>
+                            ) : (
+                              <code className="bg-gray-200 dark:bg-gray-700 px-1 sm:px-1.5 py-0.5 rounded text-xs sm:text-sm" {...props}>
+                                {children}
+                              </code>
+                            );
+                          },
+                          p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                          ul: ({ children }) => <ul className="list-disc ml-4 mb-2 text-sm">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal ml-4 mb-2 text-sm">{children}</ol>,
+                          li: ({ children }) => <li className="mb-1 text-sm">{children}</li>,
+                          a: ({ href, children }) => (
+                            <a href={href} className="text-cyan-600 dark:text-cyan-400 hover:underline text-sm" target="_blank" rel="noopener noreferrer">
+                              {children}
+                            </a>
+                          ),
+                        }}
+                      >
+                        {message.text}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                  )}
                   <p
                     className={`text-xs mt-1 ${
                       message.sender === 'user' ? 'text-cyan-100' : 'text-gray-500 dark:text-gray-400'
@@ -173,27 +212,27 @@ const Chatbot: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <div className="flex gap-2">
+          <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shrink-0 safe-area-bottom">
+            <div className="flex gap-2 items-end">
               <textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                className="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                 rows={2}
                 disabled={isLoading}
               />
               <button
                 onClick={sendMessage}
                 disabled={!inputMessage.trim() || isLoading}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-2.5 sm:p-3 rounded-lg hover:shadow-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center justify-center min-w-[44px]"
                 aria-label="Send message"
               >
-                <IoSend size={20} />
+                <IoSend className="w-5 h-5 sm:w-5 sm:h-5" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1.5 sm:mt-2 text-center">
               Press Enter to send, Shift+Enter for new line
             </p>
           </div>

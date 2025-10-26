@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/middleware";
 import { chat } from "../controllers/bot.controller";
 
 const botRouter= Router();
-botRouter.post("/chat", authMiddleware, chat);
+botRouter.post("/chat", chat);
 export default botRouter;

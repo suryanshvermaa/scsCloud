@@ -30,14 +30,15 @@ export const createOrder=asyncHandler(async(req:Request,res:Response)=>{
         "customer_name": user!.name,
         "customer_email": user!.email,
         "customer_phone": String(phoneNumber)
-      },
+      }
     }
-    Cashfree.PGCreateOrder("2023-08-01", request).then((r) => {
+    
+    Cashfree.PGCreateOrder("2023-08-01", request).then((r:any) => {
       const a = r.data;
       console.log(a)
       response(res,200,"payment initiated successfully",{a});
     })
-    .catch((error) => {
+    .catch((error:any) => {
       console.error('Error setting up order request:', error.response.data);
       response(res, 400, 'error', { error: error.response.data });
     });
@@ -87,5 +88,5 @@ export const verifyPayment=asyncHandler(async(req:Request,res:Response)=>{
     await user?.save();
     await payment.save();
     response(res,200,'Payment successful',{payment});
-  }).catch(error=>{throw new AppError('Payment verification failed',500)});
+  }).catch((error:any)=>{throw new AppError('Payment verification failed',500)});
 });

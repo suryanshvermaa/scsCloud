@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {cashfree }from "../utils/PaymentService.config";
+import {load} from '@cashfreepayments/cashfree-js';
 import { useNavigate } from "react-router-dom";
 
 const AmountScreen:React.FC=()=>{
+
     const [paymentInputBox,setPaymentInputBox]=useState<boolean>(false);
     const [inputAmount,setInputAmount]=useState<number|undefined>();
     const [phoneNumber,setPhoneNumber]=useState<Number|undefined>();
@@ -39,14 +40,19 @@ const AmountScreen:React.FC=()=>{
           paymentSessionId,
           redirectTarget: "_modal"
       }
-      cashfree.checkout(checkoutOptions).then(()=>{
-        axios.post(`${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,{AccessCookie:accessToken,orderId}).then((res)=>{
-          alert(res.data.message);
-          navigate('/home');
-        })
+      load({
+            mode: "sandbox",
+      }).then((cashfree:any)=>{
+          cashfree.checkout(checkoutOptions).then(()=>{
+          axios.post(`${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,{AccessCookie:accessToken,orderId}).then((res)=>{
+            alert(res.data.message);
+            navigate('/home');
+          })
       })
         })
 
+      });
+      
 
     }
     return (
