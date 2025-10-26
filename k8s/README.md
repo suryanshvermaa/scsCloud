@@ -3,9 +3,10 @@
  kind create cluster --name=suryansh-cluster --config=./cluster.yaml
  ```
  ## installing NGINX Ingress Controller
- ```bash
-kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+```bash
+kubectl apply -f ./nginx-ingress-controller.yaml
 ```
+
 ## pods status
 ```bash
 kubectl get pods -n ingress-nginx --watch
