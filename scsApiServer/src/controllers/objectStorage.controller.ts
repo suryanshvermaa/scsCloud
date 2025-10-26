@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import User from "../models/user.model";
 import { AppError } from "../utils/error";
 import ObjectStorage from "../models/object-storage.model";
-import { createS3Bucket, enableBucketService, getS3Client, listBuckets } from "../services/objectStorage/methods";
+import { createS3Bucket, deleteS3Bucket, enableBucketService, getS3Client, listBuckets, putObjectSignedUrl } from "../services/objectStorage/methods";
 
 /**
  * @description generate random access key and secret key
@@ -88,7 +88,7 @@ export const getBuckets = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /**
- * @description
+ * @description Create an S3 bucket
  * @param req Request object
  * @param res Response object
  */
@@ -111,5 +111,59 @@ export const createBucket = asyncHandler(async (req: Request, res: Response) => 
     const result=await createS3Bucket(s3Client,bucketName);
     return response(res, 200, "Object Storage Bucket created successfully", {
         metadata: result.$metadata
+    });
+});
+
+/**
+ * @description Delete an S3 bucket
+ * @param req Request object
+ * @param res Response object
+ */
+export const deleteBucket = asyncHandler(async (req: Request, res: Response) => {
+    const {AccessCookie, bucketName} = req.body;
+    if (!AccessCookie) throw new AppError("AccessCookie is required", 401);
+    const isVerified = await jwt.verify(AccessCookie, process.env.ACCESS_TOKEN_SECRET as string);
+    if (!isVerified) throw new AppError("Unauthorized Access", 401);
+    const { userId } = JSON.parse(JSON.stringify(isVerified));
+    if(!userId) throw new AppError("Invalid token payload", 400);
+    const objectStorage = await ObjectStorage.findOne({ userId: userId });
+    if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    const s3Client=getS3Client({
+        region:"ap-south-1",
+        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
+        endpoint:`http://localhost:9000`, //for local testing
+        accessKeyId:objectStorage.accessKey,
+        secretAccessKey:objectStorage.secretAccessKey
+    });
+    const result=await deleteS3Bucket(s3Client,bucketName);
+    return response(res, 200, "Object Storage Bucket deleted successfully", {
+        metadata: result.$metadata
+    });
+});
+
+/**
+ * @description
+ * @param req Request object
+ * @param res Response object
+ */
+export const putObject = asyncHandler(async (req: Request, res: Response) => {
+    const { AccessCookie, bucketName, objectKey, contentType } = req.body;
+    if (!AccessCookie) throw new AppError("AccessCookie is required", 401);
+    const isVerified = await jwt.verify(AccessCookie, process.env.ACCESS_TOKEN_SECRET as string);
+    if (!isVerified) throw new AppError("Unauthorized Access", 401);
+    const { userId } = JSON.parse(JSON.stringify(isVerified));
+    if (!userId) throw new AppError("Invalid token payload", 400);
+    const objectStorage = await ObjectStorage.findOne({ userId: userId });
+    if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    const s3Client = getS3Client({
+        region: "ap-south-1",
+        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
+        endpoint: `http://localhost:9000`, //for local testing
+        accessKeyId: objectStorage.accessKey,
+        secretAccessKey: objectStorage.secretAccessKey
+    });
+    const result = await putObjectSignedUrl(s3Client, bucketName, objectKey, contentType);
+    return response(res, 200, "Storage Object created successfully", {
+        signedUrl: result
     });
 });
