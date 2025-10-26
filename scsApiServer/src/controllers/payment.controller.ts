@@ -35,11 +35,9 @@ export const createOrder=asyncHandler(async(req:Request,res:Response)=>{
     
     Cashfree.PGCreateOrder("2023-08-01", request).then((r:any) => {
       const a = r.data;
-      console.log(a)
       response(res,200,"payment initiated successfully",{a});
     })
     .catch((error:any) => {
-      console.error('Error setting up order request:', error.response.data);
       response(res, 400, 'error', { error: error.response.data });
     });
 });
@@ -69,24 +67,33 @@ export const verifyPayment=asyncHandler(async(req:Request,res:Response)=>{
   const isVerified=await jwt.verify(AccessCookie,process.env.ACCESS_TOKEN_SECRET!);
   if(!isVerified) throw new AppError('Unauthenticated',401);
   const {email,userId}=JSON.parse(JSON.stringify(isVerified));
-  Cashfree.PGOrderFetchPayments("2023-08-01",orderId).then(async(response:any)=>{
-    const dataObj=response.data[0];
-    const amount=dataObj.order_amount;
-    const paymentId=dataObj.cf_payment_id;
-    const user=await User.findById(userId);
-    user!.SCSCoins=user?.SCSCoins+amount;
-    const payment=await Payment.create({
-      paymentId:dataObj.cf_payment_id,
-      orderId:dataObj.order_id,
-      amount:dataObj.payment_amount,
+  
+  try {
+    const paymentResponse = await Cashfree.PGOrderFetchPayments("2023-08-01", orderId);
+    const dataObj = paymentResponse.data[0];
+    const amount = dataObj.order_amount;
+    const paymentId = dataObj.cf_payment_id;
+    const user = await User.findById(userId);
+    
+    if (!user) throw new AppError('User not found', 404);
+    
+    user.SCSCoins = user.SCSCoins + amount!;
+    const payment = await Payment.create({
+      paymentId: dataObj.cf_payment_id,
+      orderId: dataObj.order_id,
+      amount: dataObj.payment_amount,
       userId,
-      payment_currency:dataObj.payment_currency
+      payment_currency: dataObj.payment_currency
     });
-    await paymentQueue.add('payment'+Date.now(),JSON.stringify({email,amount,paymentId}))
-    user!.paymentCount=user!.paymentCount+1;
-    user!.paymentAmount=user!.paymentAmount+amount;
-    await user?.save();
+    
+    await paymentQueue.add('payment' + Date.now(), JSON.stringify({email, amount, paymentId}));
+    user.paymentCount = user.paymentCount + 1;
+    user.paymentAmount = user.paymentAmount + amount!;
+    await user.save();
     await payment.save();
-    response(res,200,'Payment successful',{payment});
-  }).catch((error:any)=>{throw new AppError('Payment verification failed',500)});
+    
+    response(res, 200, 'Payment successful', {payment});
+  } catch (error: any) {
+    throw new AppError('Payment verification failed: ' + (error.message || 'Unknown error'), 500);
+  }
 });
