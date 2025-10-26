@@ -29,7 +29,7 @@ const enableBucketService=async(userId:string,storageInGB:number,accesskey:strin
     await k8sObjectApi.create(deployment); // deployment
     await k8sObjectApi.create(service); // service
     await k8sObjectApi.create(ingress); // ingress
-    return {StorageEndpoint:`http://minio-${userIdSanitized}.${process.env.HOSTING_DOMAIN!}`,serviceName:`minio-service-${userIdSanitized}`};
+    return {StorageEndpoint:`http://minio-${userIdSanitized}.${process.env.HOSTING_DOMAIN!}`,serviceName:`minio-service-${userIdSanitized}`,ingressEndpoint:`http://minio-${userIdSanitized}.${process.env.HOSTING_DOMAIN!}`};
 } 
 
 /**

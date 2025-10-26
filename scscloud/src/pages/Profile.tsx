@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
+import { notifier } from "../utils/notifier";
 import { 
   Mail, 
   Wallet, 
@@ -109,7 +110,7 @@ const Profile:React.FC=()=>{
             setCredentialsModal2(true);
 
         }).catch((err:any)=>{
-            alert(`error: ${err.message}`)
+            notifier.error(`error: ${err.message}`)
         })
     }
  return (

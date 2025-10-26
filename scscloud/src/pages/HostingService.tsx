@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { ImCross } from "react-icons/im";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { notifier } from "../utils/notifier";
 
 const HostingService:React.FC=()=>{
     const [loading,setLoading]=useState<string|undefined>();
@@ -73,14 +74,14 @@ const HostingService:React.FC=()=>{
             const data:any=res.data.data;
             console.log('hosted',data);
             setLoading(undefined);
-            alert(`your website url is ${data.websiteUrl} it will take upto 1 min to active url`);
+            notifier.success(`your website url is ${data.websiteUrl} it will take upto 1 min to active url`);
           return  setHostingServiceScreen(false);
         }
         ).catch((err:any)=>{
-          alert(`error in hosting website .Insufficient amount ${err.message}`)
+          notifier.error(`error in hosting website .Insufficient amount ${err.message}`)
         })
        }else{
-       return alert('all fields are required');
+       return notifier.warning('all fields are required');
        }
         
        
@@ -93,10 +94,10 @@ const HostingService:React.FC=()=>{
     axios.post(`${import.meta.env.VITE_API_URL}/api/host/renew-validity`,{AccessCookie:accessToken,websiteId}).then((res)=>{
       console.log(res.data.data);
             setOpen(false);
-            alert('renewed successful')
+            notifier.success('renewed successful')
             
         }).catch((err:any)=>{
-          alert(`error in renewal. you have not sufficient amount to renew your website or unauthorised ${err.message}`)
+          notifier.error(`error in renewal. you have not sufficient amount to renew your website or unauthorised ${err.message}`)
         })
     }
     return (

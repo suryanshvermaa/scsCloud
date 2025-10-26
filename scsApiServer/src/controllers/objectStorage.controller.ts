@@ -7,6 +7,14 @@ import { AppError } from "../utils/error";
 import ObjectStorage from "../models/object-storage.model";
 import { createS3Bucket, deleteObject, deleteS3Bucket, enableBucketService, getObjectSignedUrl, getS3Client, listBuckets, listObjects, putObjectSignedUrl } from "../services/objectStorage/methods";
 
+const getEndpointUrl=(serviceName:string,signedUrl?:string)=>{
+    const k8sServiceUrl=`http://${serviceName}.minio.svc.cluster.local:9000`; //inside k8s cluster service URL
+    const localServiceUrl=`http://localhost:9000`; //for local testing
+    if(process.env.IS_UNDER_KUBERNETES==="true"&&signedUrl) return signedUrl;
+    else if(process.env.IS_UNDER_KUBERNETES==="true") return k8sServiceUrl;
+    else return localServiceUrl;
+}
+
 /**
  * @description generate random access key and secret key
  * @returns {Object} accessKey and secretKey
@@ -36,7 +44,7 @@ export const enableMinioBucketService = asyncHandler(async (req:Request, res:Res
     if(user&&user.SCSCoins<storagePrice) throw new AppError("Insufficient SCS Coins. Please recharge your account.",400);
     user.objectStorageServiceEnabled=true;
     user.SCSCoins-=storagePrice;
-    const {StorageEndpoint,serviceName}=await enableBucketService(userId,storageInGB,accessKey,secretKey);
+    const {StorageEndpoint,serviceName,ingressEndpoint}=await enableBucketService(userId,storageInGB,accessKey,secretKey);
     const objectStorage=await ObjectStorage.create({
         userId:user._id,
         accessKey,
@@ -44,7 +52,8 @@ export const enableMinioBucketService = asyncHandler(async (req:Request, res:Res
         storageInGB,
         storageEndpoint:StorageEndpoint,
         expiryDate:new Date(new Date().setMonth(new Date().getMonth()+1)),
-        service:serviceName
+        service:serviceName,
+        ingressEndpoint:ingressEndpoint,
     })
     
     await user.save();
@@ -76,8 +85,7 @@ export const getBuckets = asyncHandler(async (req: Request, res: Response) => {
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint:`http://localhost:9000`, //for local testing
+        endpoint:getEndpointUrl(objectStorage.service),
         accessKeyId:objectStorage.accessKey,
         secretAccessKey:objectStorage.secretAccessKey
     });
@@ -104,8 +112,7 @@ export const createBucket = asyncHandler(async (req: Request, res: Response) => 
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint:`http://localhost:9000`, //for local testing
+        endpoint:getEndpointUrl(objectStorage.service),
         accessKeyId:objectStorage.accessKey,
         secretAccessKey:objectStorage.secretAccessKey
     });
@@ -132,8 +139,7 @@ export const deleteBucket = asyncHandler(async (req: Request, res: Response) => 
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint:`http://localhost:9000`, //for local testing
+        endpoint:getEndpointUrl(objectStorage.service),
         accessKeyId:objectStorage.accessKey,
         secretAccessKey:objectStorage.secretAccessKey
     });
@@ -160,8 +166,7 @@ export const putObject = asyncHandler(async (req: Request, res: Response) => {
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint: `http://localhost:9000`, //for local testing
+        endpoint: getEndpointUrl(objectStorage.service,objectStorage.ingressEndpoint),
         accessKeyId: objectStorage.accessKey,
         secretAccessKey: objectStorage.secretAccessKey
     });
@@ -189,8 +194,7 @@ export const getObjects = asyncHandler(async (req: Request, res: Response) => {
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint: `http://localhost:9000`, //for local testing
+        endpoint: getEndpointUrl(objectStorage.service), 
         accessKeyId: objectStorage.accessKey,
         secretAccessKey: objectStorage.secretAccessKey
     });
@@ -218,8 +222,7 @@ export const getObject = asyncHandler(async (req: Request, res: Response) => {
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint: `http://localhost:9000`, //for local testing
+        endpoint: getEndpointUrl(objectStorage.service,objectStorage.ingressEndpoint),
         accessKeyId: objectStorage.accessKey,
         secretAccessKey: objectStorage.secretAccessKey
     });
@@ -246,8 +249,7 @@ export const deleteObjectController = asyncHandler(async (req: Request, res: Res
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
-        // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
-        endpoint: `http://localhost:9000`, //for local testing
+        endpoint: getEndpointUrl(objectStorage.service),
         accessKeyId: objectStorage.accessKey,
         secretAccessKey: objectStorage.secretAccessKey
     });
@@ -255,7 +257,7 @@ export const deleteObjectController = asyncHandler(async (req: Request, res: Res
     return response(res, 204, "Object deleted successfully",{});
 });
 
-/**
+/** 
  * @description Get Object Storage information
  * @param req Request object
  * @param res Response object

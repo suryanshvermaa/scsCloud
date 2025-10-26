@@ -8,6 +8,7 @@ interface IObjectStorage extends Document{
     expiryDate:Date;
     storageEndpoint:string;
     service: string;
+    ingressEndpoint:string;
 }
 
 const objectStorageSchema:Schema<IObjectStorage>=new Schema({
@@ -37,6 +38,10 @@ const objectStorageSchema:Schema<IObjectStorage>=new Schema({
         required:true
     },
     service:{
+        type:String,
+        required:true,
+    },
+    ingressEndpoint:{
         type:String,
         required:true,
     }

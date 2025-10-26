@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { notifier } from "../utils/notifier";
 import {
   FolderIcon,
   ArrowUpTrayIcon,
@@ -83,7 +84,7 @@ const ObjectStorageDashboard: React.FC = () => {
       setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
-      alert("Failed to copy to clipboard");
+      notifier.error("Failed to copy to clipboard");
     }
   };
 
@@ -165,7 +166,7 @@ const ObjectStorageDashboard: React.FC = () => {
       setBuckets(bucketsData);
     } catch (error) {
       console.error("Error loading buckets:", error);
-      alert("Failed to load buckets");
+      notifier.error("Failed to load buckets");
     } finally {
       setLoadingBuckets(false);
     }
@@ -178,7 +179,7 @@ const ObjectStorageDashboard: React.FC = () => {
       setObjects(objectsData || []);
     } catch (error) {
       console.error("Error loading objects:", error);
-      alert("Failed to load objects");
+      notifier.error("Failed to load objects");
       setObjects([]);
     } finally {
       setLoadingObjects(false);
@@ -196,20 +197,20 @@ const ObjectStorageDashboard: React.FC = () => {
       await checkServiceStatus();
     } catch (error: any) {
       console.error("Error enabling service:", error);
-      alert(error.response?.data?.message || "Failed to enable service. Please check your SCS Coins balance.");
+      notifier.error(error.response?.data?.message || "Failed to enable service. Please check your SCS Coins balance.");
     }
   };
 
   const handleCreateBucket = async () => {
     if (!newBucketName.trim()) {
-      alert("Please enter a bucket name");
+      notifier.warning("Please enter a bucket name");
       return;
     }
 
     // Validate bucket name
     const bucketNameRegex = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
     if (!bucketNameRegex.test(newBucketName)) {
-      alert("Invalid bucket name. Must be 3-63 characters, lowercase, start/end with letter or number.");
+      notifier.error("Invalid bucket name. Must be 3-63 characters, lowercase, start/end with letter or number.");
       return;
     }
 
@@ -218,10 +219,10 @@ const ObjectStorageDashboard: React.FC = () => {
       setShowCreateBucketModal(false);
       setNewBucketName("");
       loadBuckets();
-      alert("Bucket created successfully!");
+      notifier.success("Bucket created successfully!");
     } catch (error: any) {
       console.error("Error creating bucket:", error);
-      alert(error.response?.data?.message || "Failed to create bucket");
+      notifier.error(error.response?.data?.message || "Failed to create bucket");
     }
   };
 
@@ -235,16 +236,16 @@ const ObjectStorageDashboard: React.FC = () => {
         setObjects([]);
       }
       loadBuckets();
-      alert("Bucket deleted successfully!");
+      notifier.success("Bucket deleted successfully!");
     } catch (error: any) {
       console.error("Error deleting bucket:", error);
-      alert(error.response?.data?.message || "Failed to delete bucket. Ensure the bucket is empty.");
+      notifier.error(error.response?.data?.message || "Failed to delete bucket. Ensure the bucket is empty.");
     }
   };
 
   const handleFileUpload = async () => {
     if (!uploadFileState || !selectedBucket) {
-      alert("Please select a file");
+      notifier.warning("Please select a file");
       return;
     }
 
@@ -256,10 +257,10 @@ const ObjectStorageDashboard: React.FC = () => {
       setShowUploadModal(false);
       setUploadFileState(null);
       loadObjects(selectedBucket);
-      alert("File uploaded successfully!");
+      notifier.success("File uploaded successfully!");
     } catch (error: any) {
       console.error("Error uploading file:", error);
-      alert(error.response?.data?.message || "Failed to upload file");
+      notifier.error(error.response?.data?.message || "Failed to upload file");
     } finally {
       setUploading(false);
     }
@@ -273,7 +274,7 @@ const ObjectStorageDashboard: React.FC = () => {
       window.open(downloadUrl, "_blank");
     } catch (error: any) {
       console.error("Error downloading object:", error);
-      alert(error.response?.data?.message || "Failed to download object");
+      notifier.error(error.response?.data?.message || "Failed to download object");
     }
   };
 
@@ -285,10 +286,10 @@ const ObjectStorageDashboard: React.FC = () => {
       setShowDeleteObjectModal(false);
       setObjectToDelete("");
       loadObjects(selectedBucket);
-      alert("Object deleted successfully!");
+      notifier.success("Object deleted successfully!");
     } catch (error: any) {
       console.error("Error deleting object:", error);
-      alert(error.response?.data?.message || "Failed to delete object");
+      notifier.error(error.response?.data?.message || "Failed to delete object");
     }
   };
 
@@ -296,12 +297,12 @@ const ObjectStorageDashboard: React.FC = () => {
     try {
       await extendStorageExpiration();
       setShowRenewalModal(false);
-      alert("Storage expiration extended successfully for 1 month!");
+      notifier.success("Storage expiration extended successfully for 1 month!");
       // Refresh service status to get updated expiry date
       await checkServiceStatus();
     } catch (error: any) {
       console.error("Error renewing storage:", error);
-      alert(error.response?.data?.message || "Failed to renew storage. Please check your SCS Coins balance.");
+      notifier.error(error.response?.data?.message || "Failed to renew storage. Please check your SCS Coins balance.");
     }
   };
 

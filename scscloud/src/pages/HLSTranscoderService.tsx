@@ -5,6 +5,7 @@ import axios from "axios";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { FaVideo, FaCloud, FaRocket } from 'react-icons/fa';
+import { notifier } from "../utils/notifier";
 
 const HLSTranscoderService:React.FC=()=>{
   const [hlsInputScreen,setHlsInputScreen]=useState<boolean>(false);
@@ -93,23 +94,23 @@ const HLSTranscoderService:React.FC=()=>{
             const transcodingRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata)
             console.log(transcodingRes.data.data);
             setLoading('')
-            alert('We are transcoding your video. When transcoding is complete, we will notify you through email.')
+            notifier.success('We are transcoding your video. When transcoding is complete, we will notify you through email.')
             navigate('/home')
           } catch (error: any) {
             setLoading('');
             console.error('Error during transcoding:', error);
             if (error.response?.status === 402 || error.response?.data?.message?.includes('sufficient')) {
-              alert('You do not have sufficient balance to transcode this video.')
+              notifier.error('You do not have sufficient balance to transcode this video.')
             } else {
-              alert('Error in transcoding video. Please try again.')
+              notifier.error('Error in transcoding video. Please try again.')
             }
           }
         }else{
           setLoading('');
-          alert('Video should be type of mp4')
+          notifier.error('Video should be type of mp4')
         }
        } else{
-        alert('All fields are required')
+        notifier.warning('All fields are required')
        } 
     }
     const setFileVideo=(e:React.ChangeEvent<HTMLInputElement>)=>{
