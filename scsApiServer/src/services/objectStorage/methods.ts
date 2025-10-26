@@ -108,14 +108,6 @@ const deleteObject=async(s3Client:S3Client,bucketName:string,objectKey:string)=>
     return await s3Client.send(command);
 }
 
-const getObjectMetadata=async(s3Client:S3Client,bucketName:string,objectKey:string)=>{
-    const command = new GetObjectCommand({
-        Bucket: bucketName,
-        Key: objectKey
-    });
-    return (await s3Client.send(command)).Metadata;
-}
-
 const createS3Bucket=async(s3Client:S3Client,bucketName:string)=>{
     const command = new CreateBucketCommand({
         Bucket: bucketName,
