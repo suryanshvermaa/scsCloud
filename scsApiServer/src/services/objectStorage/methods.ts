@@ -1,5 +1,7 @@
 import { S3Client, ListObjectsV2Command, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import getMinioManifests from "../k8s/getMinioManifests";
+import { k8sAppsV1Api, k8sCoreV1Api, k8sObjectApi } from "../k8s/k8s";
 
 interface IS3ClientConfig{
     region: string;
@@ -7,6 +9,25 @@ interface IS3ClientConfig{
     accessKeyId:string;
     secretAccessKey?:string;
 }
+
+/**
+ * @description enable bucket service for a user by deploying Minio in k8s
+ * @param userId userId 
+ * @param storageInGB storage size in GB
+ * @param accesskey accesskey for Minio
+ * @param secretkey secretkey for Minio
+ * @returns {StorageEndpoint:string} endpoint
+ */
+const enableBucketService=async(userId:string,storageInGB:number,accesskey:string,secretkey:string)=>{
+    const {deployment,persistentVolume,persistentVolumeClaim,secrets,service,ingress}=getMinioManifests(userId,storageInGB,accesskey,secretkey);
+    await k8sCoreV1Api.createNamespacedSecret("minio",secrets); //secret
+    await k8sObjectApi.create(persistentVolume);//pv
+    await k8sCoreV1Api.createNamespacedPersistentVolumeClaim("minio",persistentVolumeClaim); // pvc
+    await k8sAppsV1Api.createNamespacedDeployment("minio",deployment); // deployment
+    await k8sObjectApi.create(service); // service
+    await k8sObjectApi.create(ingress); // ingress
+    return {StorageEndpoint:`http://minio-${userId}.${process.env.HOSTING_DOMAIN!}`,accessKeyId:accesskey,secretAccessKey:secretkey};
+} 
 
 /**
  * @description get S3 Client instance
@@ -99,5 +120,6 @@ export {
     listBuckets,
     getObjectSignedUrl,
     deleteObject,
-    getObjectMetadata
+    getObjectMetadata,
+    enableBucketService,
 }

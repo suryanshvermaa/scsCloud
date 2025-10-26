@@ -1,6 +1,6 @@
-import { V1Deployment, V1PersistentVolume, V1Secret, V1Service } from "@kubernetes/client-node";
+import { V1Deployment, V1PersistentVolume, V1Secret } from "@kubernetes/client-node";
 
-const getMinioManifests = async (user:string,storageInGB:number,accesskey:string,secretkey:string) => {
+const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secretkey:string) => {
     const deployment:V1Deployment={
         apiVersion: "apps/v1",
         kind: "Deployment",
@@ -81,6 +81,7 @@ const getMinioManifests = async (user:string,storageInGB:number,accesskey:string
         kind: "PersistentVolume",
         metadata: {
             name: "minio-pv"+user,
+            namespace: "minio",
         },
         spec: {
             capacity: {
@@ -182,3 +183,5 @@ const getMinioManifests = async (user:string,storageInGB:number,accesskey:string
     };
     return {deployment,persistentVolume,persistentVolumeClaim,secrets,service,ingress};
 };
+
+export default getMinioManifests;
