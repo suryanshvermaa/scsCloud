@@ -1,8 +1,7 @@
-import { S3Client, ListObjectsV2Command, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand, DeleteBucketCommand  } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import getMinioManifests from "../k8s/getMinioManifests";
 import { k8sObjectApi } from "../k8s/k8s";
-import { AppError } from "../../utils/error";
 
 interface IS3ClientConfig{
     region: string;
@@ -57,11 +56,11 @@ const getS3Client=(s3ClientConfig:IS3ClientConfig):S3Client=>{
  * @param prefix 
  */
 const listObjects=async(s3Client:S3Client,bucketName:string,prefix?:string)=>{
-    const command = new ListObjectsV2Command({
+    const command = new ListObjectsCommand({
         Bucket: bucketName,
         Prefix: prefix
     });
-    return await s3Client.send(command);
+    return (await s3Client.send(command)).Contents;
 }
 
 /**
@@ -79,11 +78,10 @@ const listBuckets=async(s3Client:S3Client)=>{
  * @param objectKey 
  * @param contentType 
  */
-const putObjectSignedUrl=async(s3Client:S3Client,bucketName:string,objectKey:string,contentType?:string,expiresIn?:number)=>{
+const putObjectSignedUrl=async(s3Client:S3Client,bucketName:string,objectKey:string,expiresIn?:number)=>{
     const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: objectKey,
-        ContentType: contentType
     });
     return await getSignedUrl(s3Client,command,{expiresIn:expiresIn || 3600});
 }
