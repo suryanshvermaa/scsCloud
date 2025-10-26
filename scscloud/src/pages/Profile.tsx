@@ -31,7 +31,7 @@ const Profile:React.FC=()=>{
        updatedAt:Date;
        paymentCount:number;
        paymentAmount:number;
-
+       objectStorageServiceEnabled?: boolean;
     }
     interface IPaymentHistory{
         _id:number;
@@ -189,7 +189,9 @@ const Profile:React.FC=()=>{
                  <div className="space-y-3">
                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                      <span className="text-sm text-muted-foreground">Active Services</span>
-                     <span className="text-lg font-bold text-primary">2</span>
+                     <span className="text-lg font-bold text-primary">
+                       {(user?.objectStorageServiceEnabled ? 1 : 0) + 2}
+                     </span>
                    </div>
                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                      <span className="text-sm text-muted-foreground">API Keys</span>
@@ -287,6 +289,19 @@ const Profile:React.FC=()=>{
                      <div>
                        <p className="font-medium text-foreground">HLS Transcoding</p>
                        <p className="text-xs text-muted-foreground">Transcode videos</p>
+                     </div>
+                   </button>
+
+                   <button 
+                     onClick={() => navigate('/object-storage')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-purple-500/10">
+                       <Activity className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Object Storage</p>
+                       <p className="text-xs text-muted-foreground">S3-compatible storage</p>
                      </div>
                    </button>
 

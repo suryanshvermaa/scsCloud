@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { FaVideo, FaChartLine, FaServer, FaRocket, FaClock, FaShieldAlt } from "react-icons/fa";
+import { FaVideo, FaChartLine, FaServer, FaRocket, FaClock, FaShieldAlt, FaDatabase } from "react-icons/fa";
 import { IoIosCodeWorking } from "react-icons/io";
 import { MdSpeed } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -93,7 +93,7 @@ const Home:React.FC=()=>{
 
       {/* Quick Actions */}
       <section className="max-w-7xl mx-auto px-6 -mt-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div 
             className="group relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
             onClick={() => navigate('/hls-transcoding-service')}
@@ -144,11 +144,35 @@ const Home:React.FC=()=>{
 
           <div 
             className="group relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+            onClick={() => navigate('/object-storage')}
+          >
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/10 to-violet-600/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg group-hover:shadow-purple-500/50 group-hover:scale-110 transition-all duration-300">
+                <FaDatabase className="text-2xl" />
+              </div>
+              <h3 className="mt-5 text-xl font-bold text-slate-900 dark:text-slate-50">
+                Object Storage
+              </h3>
+              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                S3-compatible scalable storage for files, backups, and application data.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 group-hover:gap-3 transition-all">
+                Go to service
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div 
+            className="group relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
             onClick={() => navigate('/amount-dashboard')}
           >
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/10 to-pink-600/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-500/10 to-orange-600/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg group-hover:shadow-purple-500/50 group-hover:scale-110 transition-all duration-300">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg group-hover:shadow-amber-500/50 group-hover:scale-110 transition-all duration-300">
                 <FaChartLine className="text-2xl" />
               </div>
               <h3 className="mt-5 text-xl font-bold text-slate-900 dark:text-slate-50">
@@ -157,7 +181,7 @@ const Home:React.FC=()=>{
               <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Monitor your usage, track costs, and manage billing with real-time insights.
               </p>
-              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 group-hover:gap-3 transition-all">
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-amber-600 dark:text-amber-400 group-hover:gap-3 transition-all">
                 View dashboard
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

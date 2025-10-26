@@ -12,6 +12,8 @@ import HostingService from '../pages/HostingService.tsx';
 import StaticWebsiteHosting from '../pages/StaticWebsiteHosting.docs.tsx';
 import Redirect from '../components/Redirect.tsx';
 import LandingPage from '../pages/LandingPage.tsx';
+import ObjectStorageDashboard from '../pages/ObjectStorageDashboard.tsx';
+import ObjectStorageDocs from '../pages/ObjectStorage.docs.tsx';
 
 export const router=createBrowserRouter([
     {
@@ -59,6 +61,12 @@ export const router=createBrowserRouter([
               {
                 path:'/hosting-service-docs',
                 element:<StaticWebsiteHosting/>
+              },{
+                path:'/object-storage',
+                element:<ObjectStorageDashboard/>
+              },{
+                path:'/object-storage-docs',
+                element:<ObjectStorageDocs/>
               },{
                 path:'/redirect',
                 element:<Redirect/>
