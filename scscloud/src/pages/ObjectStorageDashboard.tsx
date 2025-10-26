@@ -15,6 +15,8 @@ import {
   FolderPlusIcon,
   DocumentIcon,
   ArrowLeftIcon,
+  ClipboardDocumentIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import {
   enableBucketService,
@@ -26,9 +28,12 @@ import {
   uploadFile,
   getDownloadUrl,
   deleteObject,
+  getStorageInfo,
+  extendStorageExpiration,
   Bucket,
   StorageObject,
   EnableServiceResponse,
+  StorageInfo,
 } from "../utils/objectStorageApi";
 
 const ObjectStorageDashboard: React.FC = () => {
@@ -38,6 +43,8 @@ const ObjectStorageDashboard: React.FC = () => {
   const [serviceEnabled, setServiceEnabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [credentials, setCredentials] = useState<EnableServiceResponse | null>(null);
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
   
   // Buckets state
   const [buckets, setBuckets] = useState<Bucket[]>([]);
@@ -55,6 +62,7 @@ const ObjectStorageDashboard: React.FC = () => {
   const [showDeleteObjectModal, setShowDeleteObjectModal] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState<boolean>(false);
+  const [showRenewalModal, setShowRenewalModal] = useState<boolean>(false);
   
   // Form state
   const [storageSize, setStorageSize] = useState<number>(10);
@@ -63,6 +71,21 @@ const ObjectStorageDashboard: React.FC = () => {
   const [objectToDelete, setObjectToDelete] = useState<string>("");
   const [uploadFileState, setUploadFileState] = useState<File | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
+  
+  // Copy state
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Copy to clipboard function
+  const copyToClipboard = async (text: string, fieldName: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      alert("Failed to copy to clipboard");
+    }
+  };
 
   // Check if service is enabled
   useEffect(() => {
@@ -107,10 +130,23 @@ const ObjectStorageDashboard: React.FC = () => {
         return;
       }
 
-      // If service is enabled, fetch buckets
-      const bucketsData = await getBuckets();
+      // If service is enabled, fetch storage info and check expiry
+      const storageInfoData = await getStorageInfo();
+      setStorageInfo(storageInfoData);
+      
+      // Check if storage has expired
+      const expiryDate = new Date(storageInfoData.expiryDate);
+      const today = new Date();
+      const expired = today > expiryDate;
+      setIsExpired(expired);
+      
+      // Fetch buckets only if not expired
+      if (!expired) {
+        const bucketsData = await getBuckets();
+        setBuckets(bucketsData);
+      }
+      
       setServiceEnabled(true);
-      setBuckets(bucketsData);
     } catch (error: any) {
       if (error.response?.status === 404 || error.response?.status === 401) {
         setServiceEnabled(false);
@@ -253,6 +289,19 @@ const ObjectStorageDashboard: React.FC = () => {
     } catch (error: any) {
       console.error("Error deleting object:", error);
       alert(error.response?.data?.message || "Failed to delete object");
+    }
+  };
+
+  const handleRenewStorage = async () => {
+    try {
+      await extendStorageExpiration();
+      setShowRenewalModal(false);
+      alert("Storage expiration extended successfully for 1 month!");
+      // Refresh service status to get updated expiry date
+      await checkServiceStatus();
+    } catch (error: any) {
+      console.error("Error renewing storage:", error);
+      alert(error.response?.data?.message || "Failed to renew storage. Please check your SCS Coins balance.");
     }
   };
 
@@ -402,37 +451,96 @@ const ObjectStorageDashboard: React.FC = () => {
         <Dialog open={showCredentialsModal} onClose={() => setShowCredentialsModal(false)} className="relative z-50">
           <DialogBackdrop className="fixed inset-0 bg-black/30 dark:bg-black/60" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <DialogPanel className="max-w-2xl rounded-xl bg-white dark:bg-slate-800 p-6">
+            <DialogPanel className="max-w-2xl w-full rounded-xl bg-white dark:bg-slate-800 p-6">
               <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                 <div className="flex items-center gap-2">
-                  <ExclamationTriangleIcon className="h-6 w-6 text-amber-500" />
-                  Important: Save Your Credentials
+                  <KeyIcon className="h-6 w-6 text-purple-500" />
+                  Storage Credentials
                 </div>
               </DialogTitle>
               <div className="mb-4 space-y-3">
+                {/* Storage Endpoint */}
                 <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Storage Endpoint</p>
-                  <code className="text-sm text-slate-900 dark:text-white break-all">{credentials?.StorageEndpoint}</code>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Storage Endpoint</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.StorageEndpoint || "", "endpoint")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "endpoint" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.StorageEndpoint || "N/A"}</code>
                 </div>
+
+                {/* Access Key ID */}
                 <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Access Key ID</p>
-                  <code className="text-sm text-slate-900 dark:text-white break-all">{credentials?.accessKeyId}</code>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Access Key ID</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.accessKeyId || "", "accessKey")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "accessKey" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.accessKeyId || "N/A"}</code>
                 </div>
+
+                {/* Secret Access Key */}
                 <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Secret Access Key</p>
-                  <code className="text-sm text-slate-900 dark:text-white break-all">{credentials?.secretAccessKey}</code>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Secret Access Key</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.secretAccessKey || "", "secretKey")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "secretKey" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.secretAccessKey || "N/A"}</code>
                 </div>
               </div>
               <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 mb-4">
                 <p className="text-sm text-amber-800 dark:text-amber-200">
-                  ⚠️ Save these credentials securely. You won't be able to see the secret key again.
+                  ⚠️ Keep these credentials secure. Use them to connect your applications to the storage service.
                 </p>
               </div>
               <button
                 onClick={() => setShowCredentialsModal(false)}
                 className="w-full rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
               >
-                I've Saved My Credentials
+                Close
               </button>
             </DialogPanel>
           </div>
@@ -462,6 +570,74 @@ const ObjectStorageDashboard: React.FC = () => {
               Back to Home
             </button>
           </div>
+
+          {/* Storage Info Banner */}
+          {storageInfo && (
+            <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 p-4 mb-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Storage Size</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{storageInfo.storageInGB} GB</p>
+                  </div>
+                  <div className="h-8 w-px bg-slate-200 dark:bg-slate-700"></div>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Expiry Date</p>
+                    <p className={`text-sm font-semibold ${isExpired ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
+                      {formatDate(storageInfo.expiryDate)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      console.log("View Credentials clicked");
+                      console.log("storageInfo:", storageInfo);
+                      const creds = {
+                        StorageEndpoint: storageInfo.storageEndpoint,
+                        accessKeyId: storageInfo.accessKey,
+                        secretAccessKey: storageInfo.secretKey,
+                      };
+                      console.log("Setting credentials:", creds);
+                      setCredentials(creds);
+                      setShowCredentialsModal(true);
+                      console.log("Modal should open now");
+                    }}
+                    className="inline-flex items-center gap-2 rounded-md bg-purple-500 hover:bg-purple-600 px-4 py-2 text-white font-medium"
+                  >
+                    <KeyIcon className="h-5 w-5" />
+                    View Credentials
+                  </button>
+                  {isExpired && (
+                    <button
+                      onClick={() => setShowRenewalModal(true)}
+                      className="inline-flex items-center gap-2 rounded-md bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-medium"
+                    >
+                      Renew Storage
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Expiration Warning */}
+          {isExpired && (
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-red-800 dark:text-red-200 mb-1">
+                    Storage Service Expired
+                  </h3>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    Your object storage service has expired. Please renew to continue using buckets and objects.
+                    Click the "Renew Storage" button to extend your service for another month.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bucket View or Object View */}
@@ -474,7 +650,8 @@ const ObjectStorageDashboard: React.FC = () => {
               </h2>
               <button
                 onClick={() => setShowCreateBucketModal(true)}
-                className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+                disabled={isExpired}
+                className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2 text-slate-900 font-medium"
               >
                 <FolderPlusIcon className="h-5 w-5" />
                 Create Bucket
@@ -497,7 +674,8 @@ const ObjectStorageDashboard: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setShowCreateBucketModal(true)}
-                  className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+                  disabled={isExpired}
+                  className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2 text-slate-900 font-medium"
                 >
                   <FolderPlusIcon className="h-5 w-5" />
                   Create Bucket
@@ -567,7 +745,8 @@ const ObjectStorageDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+                disabled={isExpired}
+                className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2 text-slate-900 font-medium"
               >
                 <ArrowUpTrayIcon className="h-5 w-5" />
                 Upload Object
@@ -590,7 +769,8 @@ const ObjectStorageDashboard: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+                  disabled={isExpired}
+                  className="inline-flex items-center gap-2 rounded-md bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2 text-slate-900 font-medium"
                 >
                   <ArrowUpTrayIcon className="h-5 w-5" />
                   Upload Object
@@ -824,6 +1004,147 @@ const ObjectStorageDashboard: React.FC = () => {
                   Cancel
                 </button>
               </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+
+        {/* Renewal Modal */}
+        <Dialog open={showRenewalModal} onClose={() => setShowRenewalModal(false)} className="relative z-50">
+          <DialogBackdrop className="fixed inset-0 bg-black/30 dark:bg-black/60" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <DialogPanel className="max-w-md rounded-xl bg-white dark:bg-slate-800 p-6">
+              <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                Renew Object Storage
+              </DialogTitle>
+              <div className="mb-4 space-y-3">
+                <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Current Storage Size</p>
+                  <p className="text-lg font-semibold text-slate-900 dark:text-white">{storageInfo?.storageInGB} GB</p>
+                </div>
+                <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Current Expiry</p>
+                  <p className="text-sm text-slate-900 dark:text-white">{storageInfo && formatDate(storageInfo.expiryDate)}</p>
+                </div>
+                <div className="rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 p-4">
+                  <p className="text-sm text-cyan-800 dark:text-cyan-200">
+                    ℹ️ Renewal will extend your service by 1 month from the current expiry date.
+                    Cost will be calculated based on your storage size.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRenewStorage}
+                  className="flex-1 rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+                >
+                  Renew for 1 Month
+                </button>
+                <button
+                  onClick={() => setShowRenewalModal(false)}
+                  className="flex-1 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+
+        {/* Credentials Modal */}
+        <Dialog open={showCredentialsModal} onClose={() => setShowCredentialsModal(false)} className="relative z-50">
+          <DialogBackdrop className="fixed inset-0 bg-black/30 dark:bg-black/60" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <DialogPanel className="max-w-2xl w-full rounded-xl bg-white dark:bg-slate-800 p-6">
+              <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                <div className="flex items-center gap-2">
+                  <KeyIcon className="h-6 w-6 text-purple-500" />
+                  Storage Credentials
+                </div>
+              </DialogTitle>
+              <div className="mb-4 space-y-3">
+                {/* Storage Endpoint */}
+                <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Storage Endpoint</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.StorageEndpoint || "", "endpoint")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "endpoint" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.StorageEndpoint || "N/A"}</code>
+                </div>
+
+                {/* Access Key ID */}
+                <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Access Key ID</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.accessKeyId || "", "accessKey")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "accessKey" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.accessKeyId || "N/A"}</code>
+                </div>
+
+                {/* Secret Access Key */}
+                <div className="rounded-lg bg-slate-100 dark:bg-slate-900 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Secret Access Key</p>
+                    <button
+                      onClick={() => copyToClipboard(credentials?.secretAccessKey || "", "secretKey")}
+                      className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      {copiedField === "secretKey" ? (
+                        <>
+                          <CheckIcon className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardDocumentIcon className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <code className="text-sm text-slate-900 dark:text-white break-all block">{credentials?.secretAccessKey || "N/A"}</code>
+                </div>
+              </div>
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 mb-4">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  ⚠️ Keep these credentials secure. Use them to connect your applications to the storage service.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCredentialsModal(false)}
+                className="w-full rounded-md bg-cyan-500 hover:bg-cyan-400 px-4 py-2 text-slate-900 font-medium"
+              >
+                Close
+              </button>
             </DialogPanel>
           </div>
         </Dialog>

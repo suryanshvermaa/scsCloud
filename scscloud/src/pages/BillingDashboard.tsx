@@ -75,7 +75,8 @@ const BillingDashboard: React.FC = () => {
         const historyRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`
         );
-        const history = historyRes.data?.data || [];
+        const history = historyRes.data?.data.data || [];
+        console.log(history);
         setPaymentHistory(Array.isArray(history) ? history : []);
       } catch (e) {
         console.error('Failed to load payment history:', e);

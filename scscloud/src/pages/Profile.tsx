@@ -17,7 +17,6 @@ import {
   Copy,
   Edit,
   Settings,
-  Shield,
   Activity,
   DollarSign
 } from 'lucide-react';
@@ -80,7 +79,7 @@ const Profile:React.FC=()=>{
 
           try {
             const { data: historyRes } = await axios.get(`${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`);
-            const maybeArr = (historyRes as any)?.data;
+            const maybeArr = (historyRes as any)?.data.data;
             setPaymentHistory(Array.isArray(maybeArr) ? maybeArr : []);
           } catch (e) {
             // history may fail independently; keep UI usable
@@ -315,18 +314,6 @@ const Profile:React.FC=()=>{
                      <div>
                        <p className="font-medium text-foreground">Billing Dashboard</p>
                        <p className="text-xs text-muted-foreground">View payments</p>
-                     </div>
-                   </button>
-
-                   <button 
-                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
-                   >
-                     <div className="p-2 rounded-lg bg-violet-500/10">
-                       <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                     </div>
-                     <div>
-                       <p className="font-medium text-foreground">Security Settings</p>
-                       <p className="text-xs text-muted-foreground">Manage security</p>
                      </div>
                    </button>
                  </div>

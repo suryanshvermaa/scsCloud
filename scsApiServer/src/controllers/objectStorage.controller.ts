@@ -73,7 +73,7 @@ export const getBuckets = asyncHandler(async (req: Request, res: Response) => {
     if(!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
-
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -101,6 +101,7 @@ export const createBucket = asyncHandler(async (req: Request, res: Response) => 
     if(!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -128,6 +129,7 @@ export const deleteBucket = asyncHandler(async (req: Request, res: Response) => 
     if(!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client=getS3Client({
         region:"ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -155,6 +157,7 @@ export const putObject = asyncHandler(async (req: Request, res: Response) => {
     if (!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -183,6 +186,7 @@ export const getObjects = asyncHandler(async (req: Request, res: Response) => {
     if (!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -211,6 +215,7 @@ export const getObject = asyncHandler(async (req: Request, res: Response) => {
     if (!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -238,6 +243,7 @@ export const deleteObjectController = asyncHandler(async (req: Request, res: Res
     if (!userId) throw new AppError("Invalid token payload", 400);
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
     const s3Client = getS3Client({
         region: "ap-south-1",
         // endpoint:`http://${objectStorage.service}.minio.svc.cluster.local:9000`, //inside k8s cluster
@@ -247,4 +253,54 @@ export const deleteObjectController = asyncHandler(async (req: Request, res: Res
     });
     await deleteObject(s3Client, bucket as string, objectKey as string);
     return response(res, 204, "Object deleted successfully",{});
+});
+
+/**
+ * @description Get Object Storage information
+ * @param req Request object
+ * @param res Response object
+ */
+export const getObjectStorageInfo = asyncHandler(async (req: Request, res: Response) => {
+    const { AccessCookie } = req.params;
+    if (!AccessCookie) throw new AppError("AccessCookie is required", 401);
+    const isVerified = await jwt.verify(AccessCookie, process.env.ACCESS_TOKEN_SECRET as string);
+    if (!isVerified) throw new AppError("Unauthorized Access", 401);
+    const { userId } = JSON.parse(JSON.stringify(isVerified));
+    if (!userId) throw new AppError("Invalid token payload", 400);
+    const objectStorage = await ObjectStorage.findOne({ userId: userId });
+    if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    return response(res, 200, "Object Storage credentials retrieved successfully", {
+        accessKey: objectStorage.accessKey,
+        secretKey: objectStorage.secretAccessKey,
+        storageEndpoint: objectStorage.storageEndpoint,
+        storageInGB: objectStorage.storageInGB,
+        expiryDate: objectStorage.expiryDate,
+    });
+});
+
+
+/**
+ * @description
+ * @param req Request object
+ * @param res Response object
+ */
+export const extendExpirationOfStorage = asyncHandler(async (req: Request, res: Response) => {
+    const { AccessCookie } = req.body;
+    if (!AccessCookie) throw new AppError("AccessCookie is required", 401);
+    const isVerified = await jwt.verify(AccessCookie, process.env.ACCESS_TOKEN_SECRET as string);
+    if (!isVerified) throw new AppError("Unauthorized Access", 401);
+    const { userId } = JSON.parse(JSON.stringify(isVerified));
+    if (!userId) throw new AppError("Invalid token payload", 400);
+    const user=await User.findById(userId);
+    if(!user) throw new AppError("User not found",404);
+    const objectStoragePricePerGBPerMonth=parseInt(process.env.STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES!);
+    const objectStorage = await ObjectStorage.findOne({ userId: userId });
+    if (!objectStorage) throw new AppError("Object Storage not found", 404);
+    objectStorage.expiryDate=new Date(new Date(objectStorage.expiryDate).setMonth(new Date(objectStorage.expiryDate).getMonth()+1));
+    const totalPrice=objectStoragePricePerGBPerMonth * objectStorage.storageInGB;
+    if(user.SCSCoins<totalPrice) throw new AppError("Insufficient SCS Coins. Please recharge your account.",400);
+    user.SCSCoins-=totalPrice;
+    await user.save();
+    await objectStorage.save();
+    return response(res, 200, "Object Storage expiration extended successfully", {});
 });

@@ -18,6 +18,8 @@ The Object Storage API provides endpoints for managing S3-compatible object stor
 - [List Objects](#6-list-objects)
 - [Get Object (Download)](#7-get-object-download)
 - [Delete Object](#8-delete-object)
+- [Get Object Storage Info](#9-get-object-storage-info)
+- [Extend Storage Expiration](#10-extend-storage-expiration)
 - [Error Responses](#error-responses)
 
 ---
@@ -346,6 +348,96 @@ Delete an object from a bucket.
 - `401`: AccessCookie is required or Unauthorized Access
 - `400`: Invalid token payload or missing parameters
 - `404`: Object Storage, bucket, or object not found
+
+---
+
+### 9. Get Object Storage Info
+
+Retrieve object storage service information and credentials for the authenticated user.
+
+**Endpoint:** `GET /api/v1/object-storage/getStorageInfo/:AccessCookie`
+
+**URL Parameters:**
+- `AccessCookie` (required) - JWT access token
+
+**Example Request:**
+```
+GET /api/v1/object-storage/getStorageInfo/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response:**
+```json
+{
+  "statusCode": 200,
+  "message": "Object Storage credentials retrieved successfully",
+  "data": {
+    "accessKey": "string - S3 access key",
+    "secretKey": "string - S3 secret key",
+    "storageEndpoint": "string - Storage endpoint URL",
+    "storageInGB": "number - Allocated storage size in GB",
+    "expiryDate": "string - ISO 8601 date when service expires"
+  }
+}
+```
+
+**Use Cases:**
+- Retrieve storage credentials for direct S3 client configuration
+- Check storage allocation and expiry date
+- Get endpoint URL for accessing the storage service
+
+**Error Scenarios:**
+- `401`: AccessCookie is required or Unauthorized Access
+- `400`: Invalid token payload
+- `404`: Object Storage not found (service not enabled)
+
+---
+
+### 10. Extend Storage Expiration
+
+Extend the expiration date of the object storage service by one month.
+
+**Endpoint:** `POST /api/v1/object-storage/extendStorageExpiration`
+
+**Request Body:**
+```json
+{
+  "AccessCookie": "string (required) - JWT access token"
+}
+```
+
+**Response:**
+```json
+{
+  "statusCode": 200,
+  "message": "Object Storage expiration extended successfully",
+  "data": {}
+}
+```
+
+**Behavior:**
+- Extends the expiration date by exactly 1 month from the current expiry date
+- Charges based on the formula: `storageInGB * STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES`
+- Amount is deducted from user's SCS Coins
+- Can be called multiple times to extend further
+
+**Example:**
+- Current expiry: 2025-11-27
+- After extension: 2025-12-27
+
+**Cost Calculation:**
+```
+Total Cost = storageInGB × Price per GB per Month
+```
+
+**Error Scenarios:**
+- `401`: AccessCookie is required or Unauthorized Access
+- `400`: Invalid token payload or Insufficient SCS Coins
+- `404`: User not found or Object Storage not found
+
+**Important Notes:**
+- Ensure sufficient SCS Coins balance before extending
+- Extension is calculated from the current expiry date, not today's date
+- Service remains active during the extension process
 
 ---
 

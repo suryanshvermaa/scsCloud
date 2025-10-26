@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createBucket, deleteBucket, deleteObjectController, enableMinioBucketService, getBuckets, getObject, getObjects, putObject } from "../controllers/objectStorage.controller";
+import { createBucket, deleteBucket, deleteObjectController, enableMinioBucketService, extendExpirationOfStorage, getBuckets, getObject, getObjects, getObjectStorageInfo, putObject } from "../controllers/objectStorage.controller";
 
 const objectStorageRouter=Router();
 
@@ -12,5 +12,7 @@ objectStorageRouter
 .get('/getObjects/:AccessCookie',getObjects) // bucket as query param
 .get('/getObject/:AccessCookie',getObject) // bucket and objectKey as query params
 .delete('/delete-object',deleteObjectController)
+.get('/getStorageInfo/:AccessCookie',getObjectStorageInfo)
+.post('/extendStorageExpiration',extendExpirationOfStorage)
 
 export default objectStorageRouter;

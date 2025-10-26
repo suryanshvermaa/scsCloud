@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoCloudOutline } from 'react-icons/io5';
-import { FaVideo, FaServer, FaShieldAlt, FaRocket, FaCode, FaChartLine } from 'react-icons/fa';
+import { FaVideo, FaDatabase, FaServer, FaRocket, FaCode } from 'react-icons/fa';
 import { IoIosCodeWorking } from 'react-icons/io';
 import { HiLightningBolt } from 'react-icons/hi';
 import SCSCloudImage from '../assets/SCSCloud.png';
@@ -102,47 +102,17 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Scalability */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-all dark:border-slate-600 dark:bg-slate-700">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg">
-              <FaRocket className="text-2xl" />
+          {/* Object Storage */}
+          <div 
+            className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer dark:border-slate-600 dark:bg-slate-700 dark:hover:border-purple-500"
+            onClick={() => navigate('/object-storage')}
+          >
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg">
+              <FaDatabase className="text-2xl" />
             </div>
-            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Auto Scaling</h3>
+            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Object Storage</h3>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Handle traffic spikes effortlessly with automatic resource scaling and load balancing.
-            </p>
-          </div>
-
-          {/* Security */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-all dark:border-slate-600 dark:bg-slate-700">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg">
-              <FaShieldAlt className="text-2xl" />
-            </div>
-            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Enterprise Security</h3>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Built-in DDoS protection, SSL certificates, and compliance-ready infrastructure.
-            </p>
-          </div>
-
-          {/* Developer Tools */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-all dark:border-slate-600 dark:bg-slate-700">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
-              <FaCode className="text-2xl" />
-            </div>
-            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Developer First</h3>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              RESTful APIs, comprehensive docs, and SDKs for seamless integration into your workflow.
-            </p>
-          </div>
-
-          {/* Analytics */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg transition-all dark:border-slate-600 dark:bg-slate-700">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-lg">
-              <FaChartLine className="text-2xl" />
-            </div>
-            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Real-time Analytics</h3>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Monitor performance, track usage, and optimize costs with detailed insights and dashboards.
+              S3-compatible storage with unlimited scalability, versioning, and powerful bucket management.
             </p>
           </div>
         </div>

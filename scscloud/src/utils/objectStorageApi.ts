@@ -22,6 +22,14 @@ export interface EnableServiceResponse {
   secretAccessKey: string;
 }
 
+export interface StorageInfo {
+  accessKey: string;
+  secretKey: string;
+  storageEndpoint: string;
+  storageInGB: number;
+  expiryDate: string;
+}
+
 /**
  * Enable Object Storage service for the user
  */
@@ -141,4 +149,26 @@ export const uploadFile = async (signedUrl: string, file: File): Promise<void> =
       "Content-Type": file.type || "application/octet-stream",
     },
   });
+};
+
+/**
+ * Get object storage service information and credentials
+ */
+export const getStorageInfo = async (): Promise<StorageInfo> => {
+  const accessToken = Cookies.get("AccessCookie");
+  const response = await axios.get(
+    `${API_BASE_URL}/getStorageInfo/${accessToken}`
+  );
+  return response.data.data;
+};
+
+/**
+ * Extend storage expiration by one month
+ */
+export const extendStorageExpiration = async (): Promise<any> => {
+  const accessToken = Cookies.get("AccessCookie");
+  const response = await axios.post(`${API_BASE_URL}/extendStorageExpiration`, {
+    AccessCookie: accessToken,
+  });
+  return response.data;
 };
