@@ -14,6 +14,7 @@ export interface IUser extends Document{
     credentialsActive:boolean;
     accessKey:string;
     secretAccessKey:string;
+    objectStorageServiceEnabled:boolean;
 }
 const userSchema:Schema<IUser>=new Schema({
     name:{
@@ -59,9 +60,11 @@ const userSchema:Schema<IUser>=new Schema({
      credentialsActive:{
         type:Boolean,
         default:false
-     }
-    
-
+     },
+     objectStorageServiceEnabled:{
+        type:Boolean,
+        default:false
+     },
 },{timestamps:true})
 
 userSchema.pre<IUser>('save',async function(next){

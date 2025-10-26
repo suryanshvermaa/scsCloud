@@ -1,7 +1,8 @@
 import { S3Client, ListObjectsV2Command, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import getMinioManifests from "../k8s/getMinioManifests";
-import { k8sAppsV1Api, k8sCoreV1Api, k8sObjectApi } from "../k8s/k8s";
+import { k8sObjectApi } from "../k8s/k8s";
+import { AppError } from "../../utils/error";
 
 interface IS3ClientConfig{
     region: string;
@@ -19,14 +20,17 @@ interface IS3ClientConfig{
  * @returns {StorageEndpoint:string} endpoint
  */
 const enableBucketService=async(userId:string,storageInGB:number,accesskey:string,secretkey:string)=>{
-    const {deployment,persistentVolume,persistentVolumeClaim,secrets,service,ingress}=getMinioManifests(userId,storageInGB,accesskey,secretkey);
-    await k8sCoreV1Api.createNamespacedSecret("minio",secrets); //secret
+    const base64encodedSecretKey=Buffer.from(secretkey).toString('base64');
+    const base64encodedAccessKey=Buffer.from(accesskey).toString('base64');
+    const userIdSanitized=userId.replace(/[^a-z0-9]/gi,'n').toLowerCase();//k8s resource name sanitization
+    const {deployment,persistentVolume,persistentVolumeClaim,secrets,service,ingress}=getMinioManifests(userIdSanitized,storageInGB,base64encodedAccessKey,base64encodedSecretKey);
+    await k8sObjectApi.create(secrets); //secret
     await k8sObjectApi.create(persistentVolume);//pv
-    await k8sCoreV1Api.createNamespacedPersistentVolumeClaim("minio",persistentVolumeClaim); // pvc
-    await k8sAppsV1Api.createNamespacedDeployment("minio",deployment); // deployment
+    await k8sObjectApi.create(persistentVolumeClaim); // pvc
+    await k8sObjectApi.create(deployment); // deployment
     await k8sObjectApi.create(service); // service
     await k8sObjectApi.create(ingress); // ingress
-    return {StorageEndpoint:`http://minio-${userId}.${process.env.HOSTING_DOMAIN!}`,accessKeyId:accesskey,secretAccessKey:secretkey};
+    return {StorageEndpoint:`http://minio-${userIdSanitized}.${process.env.HOSTING_DOMAIN!}`,serviceName:`minio-service-${userIdSanitized}`};
 } 
 
 /**
@@ -41,7 +45,8 @@ const getS3Client=(s3ClientConfig:IS3ClientConfig):S3Client=>{
         credentials:{
             accessKeyId:s3ClientConfig.accessKeyId!,
             secretAccessKey:s3ClientConfig.secretAccessKey!
-        }
+        },
+        forcePathStyle:true,
     })
 }
 
@@ -64,7 +69,7 @@ const listObjects=async(s3Client:S3Client,bucketName:string,prefix?:string)=>{
  * @param s3Client 
  */
 const listBuckets=async(s3Client:S3Client)=>{
-    return await s3Client.send(new ListBucketsCommand());
+    return (await s3Client.send(new ListBucketsCommand())).Buckets;
 }
 
 /**

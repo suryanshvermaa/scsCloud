@@ -6,8 +6,9 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         kind: "Deployment",
         metadata: {
             name: "minio-deployment"+user,
+            namespace: "minio",
             labels: {
-                app: "minio"+user
+                app: "minio"+user,
             },
         },
         spec: {
@@ -101,6 +102,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         kind: "PersistentVolumeClaim",
         metadata: {
             name: "minio-pvc"+user,
+            namespace: "minio",
         },
         spec: {
             accessModes: ["ReadWriteOnce"],
@@ -117,6 +119,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         kind: "Secret",
         metadata: {
             name: "minio-secret"+user,
+            namespace: "minio",
         },
         type: "Opaque",
         stringData: {
