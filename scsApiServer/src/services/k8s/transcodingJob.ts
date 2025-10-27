@@ -67,7 +67,7 @@ const transcodingJob = (runProps: IRunProps) => {
           restartPolicy: "Never",
         },
       },
-      backoffLimit: 2
+      backoffLimit: 1
     }
   }
 

@@ -83,7 +83,7 @@ const putObjectSignedUrl=async(s3Client:S3Client,bucketName:string,objectKey:str
         Bucket: bucketName,
         Key: objectKey,
     });
-    return await getSignedUrl(s3Client,command,{expiresIn:expiresIn || 3600});
+    return await getSignedUrl(s3Client,command,{expiresIn:3600});
 }
 
 /**
