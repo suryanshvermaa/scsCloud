@@ -93,6 +93,18 @@ return await groq.chat.completions.create({
                 name: "getHlsTranscodingExample",
                 description: "Provides a pseudocode example demonstrating starting a transcoding job with the TranscodingVideo function and typical parameters (apiKey, fileName, bucket, AWS keys)."
             }
+        },{
+            type: "function",
+            function: {
+                name: "getObjectStorageApiSetupNodejs",
+                description: "Provides a Node.js code snippet to set up the S3Client from AWS SDK for interacting with SCS Object Storage.",
+            }
+        },{
+            type: "function",
+            function: {
+                name: "objectStorageOverview",
+                description: "Explains the Object Storage API: programmatically interact with SCS Object Storage using S3-compatible SDKs for operations like upload, download, and management of objects.",
+            }
         }
     ]
 });

@@ -4,10 +4,12 @@ export function getOverview(): string {
     '-',
     '• HLS Transcoder: Upload a 1080p source video and get adaptive HLS outputs (1080p/720p/480p/360p) with a master.m3u8.',
     '• Static Website Hosting: Deploy React/Vite (or other static) sites and receive a fast CDN-backed URL.',
+    '• Object Storage API: Programmatically manage your storage using S3-compatible SDKs (upload, download, etc).',
     '-',
     'Docs quick links:',
     '• HLS Transcoder guide: Ask "hls guide" or "how to transcode"',
     '• Static Hosting guide: Ask "hosting guide" or "how to host static site"',
+    '• Object Storage API guide: Ask "object storage guide" or "how to use object storage api"',
   ].join('\n');
 }
 
@@ -126,5 +128,29 @@ export function getHlsTranscodingExample(): string {
     '});',
     '',
     '// out: { success, message, videoPath }',
+  ].join('\n');
+}
+
+export const objectStorageOverview =()=> {
+  return [  
+  'Object Storage API allows you to programmatically interact with SCS Object Storage using S3-compatible SDKs.',
+  'You can perform operations like uploading, downloading, and managing objects in your storage buckets.',
+].join('\n');
+};
+
+export const getObjectStorageApiSetupNodejs=(): string => {
+  return [
+    'Node.js Object Storage API setup:',
+    "import { S3Client } from '@aws-sdk/client-s3';",
+    '',
+    'const s3Client = new S3Client({',
+    "  region: 'us-east-1',",
+    "  endpoint: 'https://your-s3-endpoint.com',",
+    "  credentials: {",
+    "    accessKeyId: 'your-aws-access-key',",
+    "    secretAccessKey: 'your-aws-secret-key'",
+    "  }",
+    "  forcePathStyle: true,",
+    '});',
   ].join('\n');
 }

@@ -14,7 +14,7 @@ export const scheduleHostingJob=async(runObj:IRunPropsHost)=>{
     await k8sObjectApi.create(
         getIngressConfig(
             runObj.webUrl,
-            `${runObj.webUrl}.${process.env.HOSTING_DOMAIN!}`,
+            `${runObj.webUrl}.${(process.env.HOSTING_DOMAIN!).split(":")[0]}`, // Remove port if present
             "scs-cloud-app-service",
             3000,
             "scs-cloud",

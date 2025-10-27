@@ -18,6 +18,8 @@ import {
     getHlsImports,
     getHlsUploadExample,
     getHlsTranscodingExample,
+    getObjectStorageApiSetupNodejs,
+    objectStorageOverview,
 } from "../bot/functions";
 import Groq from "groq-sdk";
 import response from "../utils/response";
@@ -102,4 +104,6 @@ export const availableFunctions: Record<string, Function> = {
     "getHlsImports": getHlsImports,
     "getHlsUploadExample": getHlsUploadExample,
     "getHlsTranscodingExample": getHlsTranscodingExample,
+    "getObjectStorageApiSetupNodejs": getObjectStorageApiSetupNodejs,
+    "objectStorageOverview": objectStorageOverview,
 } as const;
