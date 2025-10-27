@@ -12,7 +12,7 @@ export const getCostDetailsInRupees = asyncHandler(async (req: Request, res: Res
     const costDetails ={
         transcodingCostPerMBinRupees: process.env.TRANSCODER_SERVICE_CHARGE,
         hostingCostPer30DaysInRupees: process.env.HOSTING_SERVICE_CHARGE_PER_30_DAYS,
-        objectStorageCostPerGBInRupeesFor30Days: process.env.OBJECT_STORAGE_COST_PER_GB,
+        objectStorageCostPerGBInRupeesFor30Days: process.env.STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES,
     }
     response(res, 200, "Cost details fetched successfully", costDetails);
 });
@@ -46,6 +46,6 @@ export const getHostingCostPer30Days = asyncHandler(async (req: Request, res: Re
  */
 export const getObjectStorageCostPerGBFor30Days = asyncHandler(async (req: Request, res: Response) => {
     response(res, 200, "Object storage cost per GB for 30 days fetched successfully", {
-        objectStorageCostPerGBInRupeesFor30Days: process.env.OBJECT_STORAGE_COST_PER_GB,
+        objectStorageCostPerGBInRupeesFor30Days: process.env.STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES,
     });
 }); 

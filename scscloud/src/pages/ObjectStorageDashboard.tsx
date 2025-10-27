@@ -4,6 +4,7 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/re
 import axios from "axios";
 import Cookies from "js-cookie";
 import { notifier } from "../utils/notifier";
+import { getObjectStorageCost, formatCost, calculateTotalCost } from "../utils/costApi";
 import {
   FolderIcon,
   ArrowUpTrayIcon,
@@ -73,6 +74,10 @@ const ObjectStorageDashboard: React.FC = () => {
   const [uploadFileState, setUploadFileState] = useState<File | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   
+  // Cost state
+  const [storageCostPerGB, setStorageCostPerGB] = useState<string>('0');
+  const [loadingCost, setLoadingCost] = useState<boolean>(true);
+  
   // Copy state
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -91,6 +96,21 @@ const ObjectStorageDashboard: React.FC = () => {
   // Check if service is enabled
   useEffect(() => {
     checkServiceStatus();
+    
+    // Fetch storage cost
+    const fetchCost = async () => {
+      try {
+        setLoadingCost(true);
+        const cost = await getObjectStorageCost();
+        setStorageCostPerGB(cost);
+      } catch (error) {
+        console.error('Error fetching storage cost:', error);
+        notifier.error('Failed to load pricing information');
+      } finally {
+        setLoadingCost(false);
+      }
+    };
+    fetchCost();
   }, []);
 
   // Load buckets when service is enabled
@@ -131,28 +151,41 @@ const ObjectStorageDashboard: React.FC = () => {
         return;
       }
 
-      // If service is enabled, fetch storage info and check expiry
-      const storageInfoData = await getStorageInfo();
-      setStorageInfo(storageInfoData);
-      
-      // Check if storage has expired
-      const expiryDate = new Date(storageInfoData.expiryDate);
-      const today = new Date();
-      const expired = today > expiryDate;
-      setIsExpired(expired);
-      
-      // Fetch buckets only if not expired
-      if (!expired) {
-        const bucketsData = await getBuckets();
-        setBuckets(bucketsData);
+      // Service is enabled according to profile
+      setServiceEnabled(true);
+
+      // Try to fetch storage info and check expiry
+      try {
+        const storageInfoData = await getStorageInfo();
+        setStorageInfo(storageInfoData);
+        
+        // Check if storage has expired
+        const expiryDate = new Date(storageInfoData.expiryDate);
+        const today = new Date();
+        const expired = today > expiryDate;
+        setIsExpired(expired);
+        
+        // Try to fetch buckets only if not expired
+        if (!expired) {
+          try {
+            const bucketsData = await getBuckets();
+            setBuckets(bucketsData);
+          } catch (bucketError) {
+            console.error("Error loading buckets:", bucketError);
+            // Don't change serviceEnabled status - just log the error
+            setBuckets([]);
+          }
+        }
+      } catch (storageError) {
+        console.error("Error fetching storage info:", storageError);
+        // Service is still enabled, just couldn't fetch details
       }
       
-      setServiceEnabled(true);
     } catch (error: any) {
+      // Only errors from profile API should affect serviceEnabled status
+      console.error("Error checking service status:", error);
       if (error.response?.status === 404 || error.response?.status === 401) {
         setServiceEnabled(false);
-      } else {
-        console.error("Error checking service status:", error);
       }
     } finally {
       setLoading(false);
@@ -341,6 +374,11 @@ const ObjectStorageDashboard: React.FC = () => {
             <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8">
               Scalable, S3-compatible object storage for your applications. Store and retrieve any amount of data at any time.
             </p>
+            {!loadingCost && (
+              <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 ring-1 ring-purple-500/20 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 mb-8">
+                <span className="font-semibold">Pricing:</span> {formatCost(storageCostPerGB)} per GB / 30 days
+              </div>
+            )}
             <div className="flex items-center justify-center gap-4 mb-8">
               <button
                 onClick={() => setShowEnableModal(true)}
@@ -426,8 +464,18 @@ const ObjectStorageDashboard: React.FC = () => {
                   onChange={(e) => setStorageSize(parseInt(e.target.value) || 1)}
                   className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-white"
                 />
+                {!loadingCost && (
+                  <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                      Cost per GB: {formatCost(storageCostPerGB)} / 30 days
+                    </p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                      Total Cost: {formatCost(calculateTotalCost(storageCostPerGB, storageSize).toString())}
+                    </p>
+                  </div>
+                )}
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Valid for 1 month. Cost will be deducted from your SCS Coins.
+                  Valid for 30 days. Cost will be deducted from your SCS Coins.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -1026,10 +1074,20 @@ const ObjectStorageDashboard: React.FC = () => {
                   <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Current Expiry</p>
                   <p className="text-sm text-slate-900 dark:text-white">{storageInfo && formatDate(storageInfo.expiryDate)}</p>
                 </div>
+                {!loadingCost && storageInfo && (
+                  <div className="rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 p-4">
+                    <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-1">Renewal Cost</p>
+                    <p className="text-lg font-semibold text-purple-900 dark:text-purple-100">
+                      {formatCost(calculateTotalCost(storageCostPerGB, storageInfo.storageInGB).toString())}
+                    </p>
+                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                      ({formatCost(storageCostPerGB)} per GB × {storageInfo.storageInGB} GB)
+                    </p>
+                  </div>
+                )}
                 <div className="rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 p-4">
                   <p className="text-sm text-cyan-800 dark:text-cyan-200">
-                    ℹ️ Renewal will extend your service by 1 month from the current expiry date.
-                    Cost will be calculated based on your storage size.
+                    ℹ️ Renewal will extend your service by 30 days from the current expiry date.
                   </p>
                 </div>
               </div>
