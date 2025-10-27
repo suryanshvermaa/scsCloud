@@ -12,11 +12,6 @@ kubectl apply -f ./nginx-ingress-controller.yaml
 kubectl get pods -n ingress-nginx --watch
 ```
 
-## port-forwarding to access services
-```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
-```
-
 ## applying manifests
 ```bash
 kubectl apply -f ./namespace.yaml -f ./db -f ./redis-server
@@ -39,3 +34,8 @@ kubectl delete -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -
 ```bash
  kind delete cluster --name=suryansh-cluster
  ```
+
+ ## port-forwarding to access services
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
+```
