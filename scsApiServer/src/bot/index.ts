@@ -6,7 +6,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 export async function getGroqChatCompletion(messages: Groq.Chat.Completions.ChatCompletionMessageParam[]) {
 return await groq.chat.completions.create({
     messages: messages,
-    model: "llama-3.1-8b-instant",
+    model: "openai/gpt-oss-120b",
     temperature: 0.7,
     tool_choice: "auto",
     tools: [
