@@ -61,6 +61,7 @@ const HLSTranscoderService:React.FC=()=>{
         const fileType=file?.type;
         const fileName=file?.name;
         const fileSize=file?.size;
+        const videoSizeInMB = fileSize ? (fileSize / (1024 * 1024)) : 0; // Convert bytes to MB
         const fileObj={fileType,fileName,fileSize}
         console.log(fileObj);
         console.log(data);
@@ -71,7 +72,11 @@ const HLSTranscoderService:React.FC=()=>{
           console.log(accessToken);
 
           try {
-            const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{fileName,AccessCookie:accessToken})
+            const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{
+              fileName,
+              AccessCookie:accessToken,
+              videoSizeInMB
+            })
             console.log(uploadRes.data.data);
             email = uploadRes.data.data.email;
             videoKey = uploadRes.data.data.videoKey;
@@ -88,7 +93,8 @@ const HLSTranscoderService:React.FC=()=>{
               userSecretAccessKey:data.secretAccessKey,
               bucketPath:data.destinationFolder,
               userBucketName:data.bucketName,
-              AccessCookie:accessToken
+              AccessCookie:accessToken,
+              videoSizeInMB
             }
             
             const transcodingRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata)
