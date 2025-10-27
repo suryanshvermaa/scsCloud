@@ -18,6 +18,7 @@ export const register=asyncHandler(async(req:Request,res:Response)=>{
     const {email,password,name}=req.body;
     if(!email || !password || !name) throw new AppError('Please provide all the fields',400);
     const otp=Math.floor(Math.random()*1000000);
+    if(await User.findOne({email})) throw new AppError('User already exists with this email',400);
     emailQueue.add('email'+Date.now(),JSON.stringify({email,otp}))
     const tokenData={
         email,password,name,otp

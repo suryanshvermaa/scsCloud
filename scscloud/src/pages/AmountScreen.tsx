@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {load} from '@cashfreepayments/cashfree-js';
 import { useNavigate } from "react-router-dom";
+import { notifier } from "../utils/notifier";
 
 const AmountScreen:React.FC=()=>{
 
@@ -25,7 +26,7 @@ const AmountScreen:React.FC=()=>{
      },[])
     const handlePayment=()=>{
       if(!phoneNumber && !inputAmount){
-        return alert('Enter all required fields')
+        return notifier.warning('Enter all required fields')
       }
       const accessToken= Cookies.get("AccessCookie");
       let orderId='';
@@ -45,7 +46,7 @@ const AmountScreen:React.FC=()=>{
       }).then((cashfree:any)=>{
           cashfree.checkout(checkoutOptions).then(()=>{
           axios.post(`${import.meta.env.VITE_API_URL}/api/payment/verify-payment`,{AccessCookie:accessToken,orderId}).then((res)=>{
-            alert(res.data.message);
+            notifier.success(res.data.message);
             navigate('/home');
           })
       })

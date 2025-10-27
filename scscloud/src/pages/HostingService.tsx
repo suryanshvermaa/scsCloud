@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { ImCross } from "react-icons/im";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { notifier } from "../utils/notifier";
+import { getHostingCost, formatCost } from "../utils/costApi";
 
 const HostingService:React.FC=()=>{
     const [loading,setLoading]=useState<string|undefined>();
@@ -14,6 +16,8 @@ const HostingService:React.FC=()=>{
   const [websiteType,setWebsiteType]=useState<string>('ViteReact');
     const [hostingServiceScreen,setHostingServiceScreen]=useState<boolean>(false);
     const [loadingData,setLoadingData]=useState<boolean>(false);
+    const [hostingCost, setHostingCost] = useState<string>('0');
+    const [loadingCost, setLoadingCost] = useState<boolean>(true);
    
     
 
@@ -46,6 +50,21 @@ const HostingService:React.FC=()=>{
       setWebsites([]);
       setLoadingData(false);
     })
+    
+    // Fetch hosting cost
+    const fetchCost = async () => {
+      try {
+        setLoadingCost(true);
+        const cost = await getHostingCost();
+        setHostingCost(cost);
+      } catch (error) {
+        console.error('Error fetching hosting cost:', error);
+        notifier.error('Failed to load pricing information');
+      } finally {
+        setLoadingCost(false);
+      }
+    };
+    fetchCost();
     },[])
 
     const openRenewalModal=(id:string)=>{
@@ -73,14 +92,14 @@ const HostingService:React.FC=()=>{
             const data:any=res.data.data;
             console.log('hosted',data);
             setLoading(undefined);
-            alert(`your website url is ${data.websiteUrl} it will take upto 1 min to active url`);
+            notifier.success(`your website url is ${data.websiteUrl} it will take upto 1 min to active url`);
           return  setHostingServiceScreen(false);
         }
         ).catch((err:any)=>{
-          alert(`error in hosting website .Insufficient amount ${err.message}`)
+          notifier.error(`error in hosting website .Insufficient amount ${err.message}`)
         })
        }else{
-       return alert('all fields are required');
+       return notifier.warning('all fields are required');
        }
         
        
@@ -93,10 +112,10 @@ const HostingService:React.FC=()=>{
     axios.post(`${import.meta.env.VITE_API_URL}/api/host/renew-validity`,{AccessCookie:accessToken,websiteId}).then((res)=>{
       console.log(res.data.data);
             setOpen(false);
-            alert('renewed successful')
+            notifier.success('renewed successful')
             
         }).catch((err:any)=>{
-          alert(`error in renewal. you have not sufficient amount to renew your website or unauthorised ${err.message}`)
+          notifier.error(`error in renewal. you have not sufficient amount to renew your website or unauthorised ${err.message}`)
         })
     }
     return (
@@ -151,6 +170,11 @@ const HostingService:React.FC=()=>{
               <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8">
                 Deploy static sites instantly with our global CDN. Built for developers who ship fast.
               </p>
+              {!loadingCost && (
+                <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 ring-1 ring-cyan-500/20 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 mb-8">
+                  <span className="font-semibold">Pricing:</span> {formatCost(hostingCost)} per 30 days
+                </div>
+              )}
               <div className="flex items-center justify-center gap-4 mb-12">
                 <button 
                   className="inline-flex items-center gap-2 rounded-md bg-cyan-500/90 hover:bg-cyan-400 text-slate-900 font-semibold px-6 py-3 text-sm"
@@ -235,7 +259,11 @@ const HostingService:React.FC=()=>{
                   </DialogTitle>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500 dark:text-slate-300">
-                      Are you sure you want to renewal your website's validity? You will be charged for renewal charge 20rs for your website
+                      Are you sure you want to renew your website's validity? 
+                      <br />
+                      <span className="font-semibold mt-2 block">
+                        Renewal cost: {formatCost(hostingCost)} for 30 days
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -286,7 +314,11 @@ const HostingService:React.FC=()=>{
                   </DialogTitle>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500 dark:text-slate-300">
-                      Are you sure you want to host your website? You will be charged for hosting charge 20rs for your website for 1 month
+                      Are you sure you want to host your website? 
+                      <br />
+                      <span className="font-semibold mt-2 block">
+                        Hosting cost: {formatCost(hostingCost)} for 30 days
+                      </span>
                     </p>
                   </div>
                 </div>

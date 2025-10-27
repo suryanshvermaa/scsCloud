@@ -131,3 +131,23 @@ spec:
             secretKeyRef:
               name: scs-cloud-app-secret
               key: HOSTING_SERVICE_CHARGE_PER_30_DAYS
+        - name: STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES
+        - name: NODE_ENV
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: NODE_ENV
+        - name: IS_UNDER_KUBERNETES
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: IS_UNDER_KUBERNETES
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: GROQ_API_KEY

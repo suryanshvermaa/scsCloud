@@ -3,17 +3,13 @@
  kind create cluster --name=suryansh-cluster --config=./cluster.yaml
  ```
  ## installing NGINX Ingress Controller
- ```bash
-kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+```bash
+kubectl apply -f ./nginx-ingress-controller.yaml
 ```
+
 ## pods status
 ```bash
 kubectl get pods -n ingress-nginx --watch
-```
-
-## port-forwarding to access services
-```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
 ```
 
 ## applying manifests
@@ -38,3 +34,8 @@ kubectl delete -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -
 ```bash
  kind delete cluster --name=suryansh-cluster
  ```
+
+ ## port-forwarding to access services
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
+```

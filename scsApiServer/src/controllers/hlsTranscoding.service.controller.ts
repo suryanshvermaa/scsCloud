@@ -14,7 +14,7 @@ import asyncHandler from "../utils/asyncHandler";
  * @param res response object to send back the upload URL
  */
 export const uploadVideoUrl=asyncHandler(async(req:Request,res:Response)=>{
-    const {fileName,AccessCookie,credentials}=req.body;
+    const {fileName,AccessCookie,credentials, videoSizeInMB}=req.body;
     if(!fileName) throw new AppError('fileName is required',400);
     // Handle upload URL generation based on authentication method
     if(AccessCookie){
@@ -23,7 +23,7 @@ export const uploadVideoUrl=asyncHandler(async(req:Request,res:Response)=>{
         const {email,userId}=JSON.parse(JSON.stringify(isVerified));
         const myUser=await User.findById(userId);
         if(!myUser) throw new AppError('User not found',404);
-        if(myUser.SCSCoins<Number(process.env.TRANSCODER_SERVICE_CHARGE)) throw new AppError('Insufficient SCSCoins',400);
+        if(myUser.SCSCoins<Number(process.env.TRANSCODER_SERVICE_CHARGE)*videoSizeInMB) throw new AppError('Insufficient SCSCoins',400);
         const uploadUrl=await putObjectSignedUrl(fileName); 
         response(res,200,'uploading video',{uploadUrl,videoKey:`outputs/${fileName}`,email});
     }
@@ -40,7 +40,7 @@ export const uploadVideoUrl=asyncHandler(async(req:Request,res:Response)=>{
         if(!user.credentialsActive) throw new AppError('Credentials are not active',403);
         const userSecretAccessKey=user.secretAccessKey;
         if(userSecretAccessKey!==secretAccessKey) throw new AppError('Credentials do not match',401);
-        if(user.SCSCoins<Number(process.env.TRANSCODER_SERVICE_CHARGE)) throw new AppError('Insufficient SCSCoins',400);
+        if(user.SCSCoins<Number(process.env.TRANSCODER_SERVICE_CHARGE)*videoSizeInMB) throw new AppError('Insufficient SCSCoins',400);
         const uploadUrl=await putObjectSignedUrl(fileName);
         response(res,200,'uploading video',{uploadUrl,videoKey:`outputs/${fileName}`,email:user.email});
     }
@@ -53,7 +53,7 @@ export const uploadVideoUrl=asyncHandler(async(req:Request,res:Response)=>{
  * @param res response object to send back the transcoding status
  */
 export const transcodeVideo=asyncHandler(async(req:Request,res:Response)=>{
-    const {videoKey,userAccessKey,userSecretAccessKey,bucketPath,userBucketName,email,AccessCookie,credentials}=req.body;
+    const {videoKey,userAccessKey,userSecretAccessKey,bucketPath,userBucketName,email,AccessCookie,credentials,videoSizeInMB}=req.body;
     if(!videoKey || !userAccessKey || !userSecretAccessKey || !bucketPath || !userBucketName || !email) {
         throw new AppError('All fields are required',400);
     }
@@ -66,7 +66,7 @@ export const transcodeVideo=asyncHandler(async(req:Request,res:Response)=>{
         if(!isVerified) throw new AppError('Invalid Access Cookie',401);
         const user=await User.findOne({email})
         if(!user) throw new AppError('User not found',404);
-        const serviceCharge=Number(process.env.TRANSCODER_SERVICE_CHARGE);
+        const serviceCharge=Number(process.env.TRANSCODER_SERVICE_CHARGE)*videoSizeInMB;
         if(user.SCSCoins<serviceCharge) throw new AppError('Insufficient SCSCoins',400);
         user.SCSCoins=user.SCSCoins-serviceCharge;
         await user.save();
@@ -87,7 +87,7 @@ export const transcodeVideo=asyncHandler(async(req:Request,res:Response)=>{
         if(!user.credentialsActive) throw new AppError('Credentials are not active',403);
         const userSecretAK=user.secretAccessKey;
         if(userSecretAK!==secretAccessKey) throw new AppError('User secret access key not found',404);
-        const serviceCharge=Number(process.env.TRANSCODER_SERVICE_CHARGE);
+        const serviceCharge=Number(process.env.TRANSCODER_SERVICE_CHARGE)*videoSizeInMB;
         if(user.SCSCoins<serviceCharge) throw new AppError('Insufficient SCSCoins',400);
         user.SCSCoins=user.SCSCoins-serviceCharge;
         await user.save();

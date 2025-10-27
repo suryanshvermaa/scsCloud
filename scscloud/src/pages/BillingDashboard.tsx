@@ -3,6 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import {load} from '@cashfreepayments/cashfree-js';
+import { notifier } from "../utils/notifier";
 import { 
   CreditCard, 
   TrendingUp, 
@@ -75,7 +76,8 @@ const BillingDashboard: React.FC = () => {
         const historyRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`
         );
-        const history = historyRes.data?.data || [];
+        const history = historyRes.data?.data.data || [];
+        console.log(history);
         setPaymentHistory(Array.isArray(history) ? history : []);
       } catch (e) {
         console.error('Failed to load payment history:', e);
@@ -90,7 +92,7 @@ const BillingDashboard: React.FC = () => {
 
   const handlePayment = async () => {
     if (!phoneNumber || !inputAmount || parseFloat(inputAmount) <= 0) {
-      alert('Please enter valid amount and phone number');
+      notifier.warning('Please enter valid amount and phone number');
       return;
     }
 
@@ -122,7 +124,7 @@ const BillingDashboard: React.FC = () => {
       // Start checkout process
       cashfree.checkout(checkoutOptions).then(async (result: any) => {      
         if (result.error) {
-          alert(`Payment cancelled or failed: ${result.error.message || 'Unknown error'}`);
+          notifier.error(`Payment cancelled or failed: ${result.error.message || 'Unknown error'}`);
           setProcessing(false);
           return;
         }
@@ -145,23 +147,23 @@ const BillingDashboard: React.FC = () => {
             setInputAmount("");
             setPhoneNumber("");
             await loadDashboardData();
-            alert('Payment successful!');
+            notifier.success('Payment successful!');
           } catch (verifyError: any) {
             console.error('Verification Failed:', verifyError);
-            alert('Payment completed but verification failed. Please contact support.');
+            notifier.error('Payment completed but verification failed. Please contact support.');
           }
         }
         
         setProcessing(false);
       }).catch((error: any) => {
         console.error('Checkout Failed:', error);
-        alert(`Checkout failed: ${error.message || 'Unknown error occurred'}`);
+        notifier.error(`Checkout failed: ${error.message || 'Unknown error occurred'}`);
         setProcessing(false);
       });
 
     } catch (error: any) {
       console.error('Payment Failed:', error);
-      alert(`Payment failed: ${error.message || 'Unknown error occurred'}`);
+      notifier.error(`Payment failed: ${error.message || 'Unknown error occurred'}`);
       setProcessing(false);
     }
   };

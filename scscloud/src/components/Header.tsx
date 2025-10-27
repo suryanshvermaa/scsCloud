@@ -59,8 +59,15 @@ const Header:React.FC=()=> {
                         <CgMenuGridR className='text-lg'/> Services
                     </button>
                             <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/hls-transcoder-docs')}>Docs</button>
+                            <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/pricing')}>Pricing</button>
                             <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/amount-dashboard')}>Dashboard</button>
                             <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/hosting-service-docs')}>Hosting</button>
+                        </nav>}
+
+                {/* Desktop nav for public pages */}
+                        {isPublicPage && <nav className='hidden md:flex items-center gap-6 text-sm'>
+                            <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/pricing')}>Pricing</button>
+                            <button className='text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white' onClick={()=>navigate('/hls-transcoder-docs')}>Docs</button>
                         </nav>}
 
                 {/* Right controls */}
@@ -114,6 +121,9 @@ const Header:React.FC=()=> {
                                 <button className='w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-600/50' onClick={()=>{setMenu(false); setServices(false); navigate('/amount-dashboard')}}>
                         <span className='inline-flex items-center gap-2 text-slate-800 dark:text-slate-100'><HiOutlineCurrencyRupee/> Dashboard</span>
                 </button>
+                                <button className='w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-600/50' onClick={()=>{setMenu(false); setServices(false); navigate('/pricing')}}>
+                        <span className='text-slate-800 dark:text-slate-100'>Pricing</span>
+                </button>
                 <button className='w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-600/50' onClick={()=>{setMenu(false); setServices(false); navigate('/hls-transcoder-docs')}}>
                         <span className='text-slate-800 dark:text-slate-100'>Docs</span>
                 </button>
@@ -128,6 +138,9 @@ const Header:React.FC=()=> {
         {/* Mobile panel for public pages */}
             {menu && isPublicPage && (
                 <div className='md:hidden fixed top-14 left-0 right-0 z-40 bg-white/95 dark:bg-slate-700/95 backdrop-blur border-b border-slate-200 dark:border-slate-600 p-4 space-y-3'>
+                                <button className='w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-600/50' onClick={()=>{setMenu(false); navigate('/pricing')}}>
+                        <span className='text-slate-800 dark:text-slate-100'>Pricing</span>
+                </button>
                                 <button className='w-full text-left px-3 py-2 rounded-md bg-cyan-500/90 text-slate-900 font-semibold' onClick={()=>{setMenu(false); navigate(location.pathname === '/login' ? '/register' : '/login')}}>
                     {location.pathname === '/login' ? 'Sign Up' : 'Login'}
                 </button>

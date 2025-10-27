@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
+import { notifier } from "../utils/notifier";
 import { 
   Mail, 
   Wallet, 
@@ -17,7 +18,6 @@ import {
   Copy,
   Edit,
   Settings,
-  Shield,
   Activity,
   DollarSign
 } from 'lucide-react';
@@ -31,7 +31,7 @@ const Profile:React.FC=()=>{
        updatedAt:Date;
        paymentCount:number;
        paymentAmount:number;
-
+       objectStorageServiceEnabled?: boolean;
     }
     interface IPaymentHistory{
         _id:number;
@@ -80,7 +80,7 @@ const Profile:React.FC=()=>{
 
           try {
             const { data: historyRes } = await axios.get(`${import.meta.env.VITE_API_URL}/api/payment/history?token=${accessToken}`);
-            const maybeArr = (historyRes as any)?.data;
+            const maybeArr = (historyRes as any)?.data.data;
             setPaymentHistory(Array.isArray(maybeArr) ? maybeArr : []);
           } catch (e) {
             // history may fail independently; keep UI usable
@@ -110,7 +110,7 @@ const Profile:React.FC=()=>{
             setCredentialsModal2(true);
 
         }).catch((err:any)=>{
-            alert(`error: ${err.message}`)
+            notifier.error(`error: ${err.message}`)
         })
     }
  return (
@@ -189,7 +189,9 @@ const Profile:React.FC=()=>{
                  <div className="space-y-3">
                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                      <span className="text-sm text-muted-foreground">Active Services</span>
-                     <span className="text-lg font-bold text-primary">2</span>
+                     <span className="text-lg font-bold text-primary">
+                       {(user?.objectStorageServiceEnabled ? 1 : 0) + 2}
+                     </span>
                    </div>
                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                      <span className="text-sm text-muted-foreground">API Keys</span>
@@ -291,6 +293,19 @@ const Profile:React.FC=()=>{
                    </button>
 
                    <button 
+                     onClick={() => navigate('/object-storage')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-purple-500/10">
+                       <Activity className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Object Storage</p>
+                       <p className="text-xs text-muted-foreground">S3-compatible storage</p>
+                     </div>
+                   </button>
+
+                   <button 
                      onClick={() => navigate('/amount-dashboard')}
                      className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
                    >
@@ -300,18 +315,6 @@ const Profile:React.FC=()=>{
                      <div>
                        <p className="font-medium text-foreground">Billing Dashboard</p>
                        <p className="text-xs text-muted-foreground">View payments</p>
-                     </div>
-                   </button>
-
-                   <button 
-                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
-                   >
-                     <div className="p-2 rounded-lg bg-violet-500/10">
-                       <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                     </div>
-                     <div>
-                       <p className="font-medium text-foreground">Security Settings</p>
-                       <p className="text-xs text-muted-foreground">Manage security</p>
                      </div>
                    </button>
                  </div>

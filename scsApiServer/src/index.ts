@@ -12,6 +12,8 @@ import errorHandler from './middleware/error.middleware';
 import asyncHandler from './utils/asyncHandler';
 import response from './utils/response';
 import botRouter from './routes/bot.routes';
+import objectStorageRouter from './routes/objectStorage.routes';
+import costRouter from './routes/cost.routes';
 
 const app=express();
 
@@ -48,6 +50,8 @@ app.use('/api/v1',transcodingRouter)
 app.use('/api/payment',paymentRouter)
 app.use('/api/host',hostingRouter)
 app.use('/api/v1/bot',botRouter)
+app.use('/api/v1/object-storage',objectStorageRouter)
+app.use('/api/v1/cost',costRouter)
 
 // health check route
 app.get('/api/v1/health-check',asyncHandler(async(req:Request,res:Response)=>{

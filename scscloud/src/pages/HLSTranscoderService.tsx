@@ -5,9 +5,13 @@ import axios from "axios";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { FaVideo, FaCloud, FaRocket } from 'react-icons/fa';
+import { notifier } from "../utils/notifier";
+import { getTranscodingCost, formatCost, calculateTotalCost } from "../utils/costApi";
 
 const HLSTranscoderService:React.FC=()=>{
   const [hlsInputScreen,setHlsInputScreen]=useState<boolean>(false);
+  const [transcodingCostPerMB, setTranscodingCostPerMB] = useState<string>('0');
+  const [loadingCost, setLoadingCost] = useState<boolean>(true);
   interface Idata{
     accessKey:string,
     secretAccessKey:string;
@@ -51,6 +55,21 @@ const HLSTranscoderService:React.FC=()=>{
         }
     }
       validator();
+      
+      // Fetch transcoding cost
+      const fetchCost = async () => {
+        try {
+          setLoadingCost(true);
+          const cost = await getTranscodingCost();
+          setTranscodingCostPerMB(cost);
+        } catch (error) {
+          console.error('Error fetching transcoding cost:', error);
+          notifier.error('Failed to load pricing information');
+        } finally {
+          setLoadingCost(false);
+        }
+      };
+      fetchCost();
     },[])
     const handleUploadAndTranscode=async()=>{
       setOpen(false)
@@ -60,6 +79,7 @@ const HLSTranscoderService:React.FC=()=>{
         const fileType=file?.type;
         const fileName=file?.name;
         const fileSize=file?.size;
+        const videoSizeInMB = fileSize ? (fileSize / (1024 * 1024)) : 0; // Convert bytes to MB
         const fileObj={fileType,fileName,fileSize}
         console.log(fileObj);
         console.log(data);
@@ -70,7 +90,11 @@ const HLSTranscoderService:React.FC=()=>{
           console.log(accessToken);
 
           try {
-            const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{fileName,AccessCookie:accessToken})
+            const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{
+              fileName,
+              AccessCookie:accessToken,
+              videoSizeInMB
+            })
             console.log(uploadRes.data.data);
             email = uploadRes.data.data.email;
             videoKey = uploadRes.data.data.videoKey;
@@ -87,29 +111,30 @@ const HLSTranscoderService:React.FC=()=>{
               userSecretAccessKey:data.secretAccessKey,
               bucketPath:data.destinationFolder,
               userBucketName:data.bucketName,
-              AccessCookie:accessToken
+              AccessCookie:accessToken,
+              videoSizeInMB
             }
             
             const transcodingRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata)
             console.log(transcodingRes.data.data);
             setLoading('')
-            alert('We are transcoding your video. When transcoding is complete, we will notify you through email.')
+            notifier.success('We are transcoding your video. When transcoding is complete, we will notify you through email.')
             navigate('/home')
           } catch (error: any) {
             setLoading('');
             console.error('Error during transcoding:', error);
             if (error.response?.status === 402 || error.response?.data?.message?.includes('sufficient')) {
-              alert('You do not have sufficient balance to transcode this video.')
+              notifier.error('You do not have sufficient balance to transcode this video.')
             } else {
-              alert('Error in transcoding video. Please try again.')
+              notifier.error('Error in transcoding video. Please try again.')
             }
           }
         }else{
           setLoading('');
-          alert('Video should be type of mp4')
+          notifier.error('Video should be type of mp4')
         }
        } else{
-        alert('All fields are required')
+        notifier.warning('All fields are required')
        } 
     }
     const setFileVideo=(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -263,9 +288,28 @@ const HLSTranscoderService:React.FC=()=>{
               {/* Pricing Info */}
               <div className="mt-12 rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Simple Pricing</h3>
-                <p className="text-slate-600 dark:text-slate-300">
-                  ₹20 per video transcoding job. Upload your video, configure your S3 destination, and we'll handle the rest.
-                </p>
+                {loadingCost ? (
+                  <p className="text-slate-600 dark:text-slate-300">Loading pricing information...</p>
+                ) : (
+                  <>
+                    <p className="text-slate-600 dark:text-slate-300 mb-3">
+                      <span className="text-2xl font-bold text-slate-900 dark:text-white">{formatCost(transcodingCostPerMB)}</span> per MB of video
+                    </p>
+                    {file && (
+                      <div className="mt-4 p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                          <span className="font-semibold">Selected File:</span> {file.name}
+                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                          <span className="font-semibold">Size:</span> {(file.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                          <span className="font-semibold">Estimated Cost:</span> {formatCost(calculateTotalCost(transcodingCostPerMB, file.size / (1024 * 1024)).toString())}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
            }
@@ -294,7 +338,18 @@ const HLSTranscoderService:React.FC=()=>{
                   </DialogTitle>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500 dark:text-slate-300">
-                      Are you sure you want to transcode your video? You will be charged for transcoding charge 20rs for your video
+                      Are you sure you want to transcode your video? 
+                      {file && (
+                        <>
+                          <br />
+                          <span className="font-semibold mt-2 block">
+                            Video size: {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                          <span className="font-semibold block">
+                            Estimated cost: {formatCost(calculateTotalCost(transcodingCostPerMB, file.size / (1024 * 1024)).toString())}
+                          </span>
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>

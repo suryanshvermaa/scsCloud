@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: scs-cloud
 spec:
   rules:
-  - host: localhost
+  - host: suryanshverma.live
     http:
       paths:
       - pathType: Prefix
@@ -18,7 +18,7 @@ spec:
             name: scs-cloud
             port:
               number: 80
-  - host: api.localhost
+  - host: api.suryanshverma.live
     http:
       paths:
       - pathType: Prefix
