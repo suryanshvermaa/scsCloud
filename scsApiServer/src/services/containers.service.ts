@@ -12,6 +12,7 @@ export interface IRunProps {
   userBucketName: string;
   bucketPath: string;
   email: string;
+  storageEndpoint: string;
 }
 
 export interface IRunPropsHost {

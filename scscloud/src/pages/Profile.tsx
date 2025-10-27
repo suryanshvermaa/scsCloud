@@ -232,7 +232,7 @@ const Profile:React.FC=()=>{
                      </div>
                    </div>
                    <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
-                   <p className="text-3xl font-bold text-foreground">₹{user?.SCSCoins || 0}</p>
+                   <p className="text-3xl font-bold text-foreground">₹{(user?.SCSCoins ?? 0).toFixed(2)}</p>
                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Available to spend</p>
                  </div>
 

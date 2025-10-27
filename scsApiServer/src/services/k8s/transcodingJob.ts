@@ -1,5 +1,5 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunProps, myBucketName } from "../containers.service";
+import { IRunProps } from "../containers.service";
 
 const transcodingJob = (runProps: IRunProps) => {
   const jobConfig: V1Job = {
@@ -15,26 +15,17 @@ const transcodingJob = (runProps: IRunProps) => {
           containers:[
             {
               name: "transcoding-container",
-              image: "suryanshvermaaa/transcoding-container:1.0.0",
+              image: "suryanshvermaaa/transcoding-container:1.0.3",
               env:[
                 {
-                  name: "MY_ACCESS_KEY_ID",
-                  value: process.env.ACCESS_KEY_ID,
+                  name: "ACCESS_KEY",
+                  value: runProps.userAccessKey,
                 },{
-                  name:"MY_SECRET_ACCESS_KEY",
-                  value: process.env.SECRET_ACCESS_KEY,
+                  name:"SECRET_ACCESS_KEY",
+                  value: runProps.userSecretAccessKey,
                 },{
-                  name:"MY_BUCKET_NAME",
-                  value: myBucketName,
-                },{
-                    name: "USER_ACCESS_KEY_ID",
-                    value: runProps.userAccessKey,
-                },{
-                    name: "USER_SECRET_ACCESS_KEY",
-                    value: runProps.userSecretAccessKey,
-                },{
-                    name: "USER_BUCKET_NAME",
-                    value: runProps.userBucketName,
+                  name:"BUCKET_NAME",
+                  value: runProps.userBucketName,
                 },
                 {
                     name: "VIDEO_KEY",
@@ -60,6 +51,10 @@ const transcodingJob = (runProps: IRunProps) => {
                 {
                     name: "QUEUE_PORT",
                     value: process.env.QUEUE_PORT,
+                },
+                {
+                  name: "STORAGE_ENDPOINT",
+                  value: runProps.storageEndpoint,
                 }
               ]
             },

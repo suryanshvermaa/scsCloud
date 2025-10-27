@@ -56,6 +56,8 @@ const ObjectStorageDashboard: React.FC = () => {
   // Objects state
   const [objects, setObjects] = useState<StorageObject[]>([]);
   const [loadingObjects, setLoadingObjects] = useState<boolean>(false);
+  // Current prefix (folder) for virtual folder navigation
+  const [currentPrefix, setCurrentPrefix] = useState<string>('');
   
   // Modals state
   const [showEnableModal, setShowEnableModal] = useState<boolean>(false);
@@ -123,6 +125,8 @@ const ObjectStorageDashboard: React.FC = () => {
   // Load objects when a bucket is selected
   useEffect(() => {
     if (selectedBucket) {
+      // reset prefix when bucket changes
+      setCurrentPrefix('');
       loadObjects(selectedBucket);
     }
   }, [selectedBucket]);
@@ -219,6 +223,20 @@ const ObjectStorageDashboard: React.FC = () => {
     }
   };
 
+  // Navigate into a virtual folder (prefix)
+  const enterPrefix = (prefix: string) => {
+    setCurrentPrefix(prefix);
+  };
+
+  const goUpOneLevel = () => {
+    if (!currentPrefix) return;
+    const trimmed = currentPrefix.replace(/\/$/, '');
+    const parts = trimmed.split('/');
+    parts.pop();
+    const newPrefix = parts.length > 0 ? parts.join('/') + '/' : '';
+    setCurrentPrefix(newPrefix);
+  };
+
   const handleEnableService = async () => {
     try {
       const response = await enableBucketService(storageSize);
@@ -285,7 +303,9 @@ const ObjectStorageDashboard: React.FC = () => {
     try {
       setUploading(true);
       const fileSizeInKB = uploadFileState.size / 1024;
-      const signedUrl = await getUploadUrl(selectedBucket, uploadFileState.name, fileSizeInKB);
+      // Respect current prefix (virtual folder) when uploading
+      const objectKey = `${currentPrefix || ''}${uploadFileState.name}`;
+      const signedUrl = await getUploadUrl(selectedBucket, objectKey, fileSizeInKB);
       await uploadFile(signedUrl, uploadFileState);
       setShowUploadModal(false);
       setUploadFileState(null);
@@ -827,6 +847,22 @@ const ObjectStorageDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={goUpOneLevel}
+                      className={`p-2 rounded ${currentPrefix ? 'bg-slate-100 dark:bg-slate-900' : 'opacity-50 cursor-not-allowed'}`}
+                      disabled={!currentPrefix}
+                      title="Up"
+                    >
+                      <ArrowLeftIcon className="h-4 w-4 text-slate-600" />
+                    </button>
+                    <div className="text-sm text-slate-600 dark:text-slate-300">
+                      Path: /{currentPrefix}
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{objects.length} objects</div>
+                </div>
                 <table className="w-full">
                   <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                     <tr>
@@ -845,45 +881,93 @@ const ObjectStorageDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                    {objects.map((obj) => (
-                      <tr key={obj.Key} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <DocumentIcon className="h-5 w-5 text-slate-400" />
-                            <span className="text-sm font-medium text-slate-900 dark:text-white">
-                              {obj.Key}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                          {formatBytes(obj.Size)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                          {formatDate(obj.LastModified)}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleDownloadObject(obj.Key)}
-                              className="p-2 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded"
-                              title="Download"
+                    {(() => {
+                      // Compute folders and files under the current prefix
+                      const prefix = currentPrefix || '';
+                      const prefixFiltered = objects.filter((o) => o.Key.startsWith(prefix));
+                      const foldersSet = new Set<string>();
+                      const files: StorageObject[] = [];
+
+                      prefixFiltered.forEach((o) => {
+                        const remainder = o.Key.slice(prefix.length);
+                        const idx = remainder.indexOf('/');
+                        if (idx === -1) {
+                          // it's a file in this prefix
+                          files.push(o);
+                        } else {
+                          // it's inside a subfolder; capture the first folder segment (include slash)
+                          foldersSet.add(remainder.slice(0, idx + 1));
+                        }
+                      });
+
+                      const folders = Array.from(foldersSet).sort();
+
+                      return (
+                        <>
+                          {/* Folders */}
+                          {folders.map((folder) => (
+                            <tr
+                              key={prefix + folder}
+                              className="hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer"
+                              onClick={() => enterPrefix(prefix + folder)}
                             >
-                              <ArrowDownTrayIcon className="h-5 w-5" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setObjectToDelete(obj.Key);
-                                setShowDeleteObjectModal(true);
-                              }}
-                              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                              title="Delete"
-                            >
-                              <TrashIcon className="h-5 w-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <FolderIcon className="h-5 w-5 text-slate-400" />
+                                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                    {folder.replace(/\/$/, '')}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">-</td>
+                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">-</td>
+                              <td className="px-6 py-4 text-right"></td>
+                            </tr>
+                          ))}
+
+                          {/* Files */}
+                          {files.map((obj) => (
+                            <tr key={obj.Key} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <DocumentIcon className="h-5 w-5 text-slate-400" />
+                                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                    {obj.Key.slice(prefix.length)}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                                {formatBytes(obj.Size)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                                {formatDate(obj.LastModified)}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => handleDownloadObject(obj.Key)}
+                                    className="p-2 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded"
+                                    title="Download"
+                                  >
+                                    <ArrowDownTrayIcon className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setObjectToDelete(obj.Key);
+                                      setShowDeleteObjectModal(true);
+                                    }}
+                                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                    title="Delete"
+                                  >
+                                    <TrashIcon className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </>
+                      );
+                    })()}
                   </tbody>
                 </table>
               </div>

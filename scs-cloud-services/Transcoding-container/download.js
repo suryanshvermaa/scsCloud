@@ -14,25 +14,19 @@ const queue = new Queue('TranscodingQueue',{
     }
 });
 
-
-const myS3Client = new S3Client({
+const s3Client = new S3Client({
+  endpoint: process.env.STORAGE_ENDPOINT,
   region: "ap-south-1",
   credentials: {
-    accessKeyId: process.env.MY_ACCESS_KEY_ID,
-    secretAccessKey:process.env.MY_SECRET_ACCESS_KEY ,
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey:process.env.SECRET_ACCESS_KEY,
   },
+  forcePathStyle: true,
 });
 
-const userS3Client=new S3Client({
-  region: "ap-south-1",
-  credentials: {
-    accessKeyId: process.env.USER_ACCESS_KEY_ID,
-    secretAccessKey:process.env.USER_SECRET_ACCESS_KEY ,
-  },
-});
 
-const myBucketName=process.env.MY_BUCKET_NAME;
-const userBucketName=process.env.USER_BUCKET_NAME;
+
+const bucketName=process.env.BUCKET_NAME;
 const videoKey=process.env.VIDEO_KEY;
 const bucketPath=process.env.BUCKET_PATH;
 const email=process.env.USER_EMAIL;
@@ -41,45 +35,30 @@ const email=process.env.USER_EMAIL;
 const deleteObject=async(videoKey)=>{
   queue.add('transcoding-email'+Date.now(),JSON.stringify({email,videoKey}))
   const command = new DeleteObjectCommand({
-    Bucket: myBucketName,
+    Bucket: bucketName,
     Key: videoKey    
 })
 
-await myS3Client.send(command);
+await s3Client.send(command);
 console.log('transcoding success');
-process.exit(1);
+process.exit(0);
 }
 
 const putObj=async(videoKey)=>{
-  
-  const temp=videoKey.split('.');
-  temp.pop();
-  const videoUrl=temp.join('.');
-
-
-
   const distFolderPath =  'outputs';
   const distFolderContents = fs.readdirSync(distFolderPath, { recursive: true })
-
 
   for (const file of distFolderContents) {
     const filePath = path.join(distFolderPath, file)
 
-
-    
     if (fs.lstatSync(filePath).isDirectory()) continue;
-
-   
-
     const command = new PutObjectCommand({
-        Bucket: userBucketName,
-        Key: `${bucketPath}/${videoUrl}/${file}`,
+        Bucket: bucketName,
+        Key: `${bucketPath}/${videoKey}/${file}`,
         Body: fs.createReadStream(filePath),
-        
     })
 
-    await userS3Client.send(command)
-   
+    await s3Client.send(command)
     console.log('uploaded', filePath)
 }
 deleteObject(videoKey);
@@ -87,13 +66,23 @@ deleteObject(videoKey);
 
 const getObject = async (videoKey) => {
   const getobjcmd = new GetObjectCommand({
-    Bucket: myBucketName,
+    Bucket: bucketName,
     Key: videoKey,
   });
-
-  const resp = await myS3Client.send(getobjcmd);
+  const resp = await s3Client.send(getobjcmd);
   const stream = await resp.Body.transformToWebStream();
-  const filepp=videoKey.split('/')[1];
+  // derive a safe filename from the S3 key and validate it
+  const filepp = path.basename(videoKey || '');
+  if (!filepp) {
+    console.error('Invalid or missing videoKey, cannot determine filename. videoKey=', videoKey);
+    process.exit(1);
+  }
+
+  // ensure output folders exist before starting transcoding/upload
+  const ensureDir = (d) => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); };
+  ensureDir('outputs');
+  ['1080p', '720p', '480p', '360p'].forEach(dir => ensureDir(path.join('outputs', dir)));
+
   const fileStream = fs.createWriteStream(filepp);
 
   stream.pipeTo(new WritableStream({
@@ -106,23 +95,25 @@ const getObject = async (videoKey) => {
         const p=exec(`ffmpeg -i ${filepp} -codec:v libx264 -vf "scale=-2:1080" -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename outputs/1080p/segment%03d.ts -start_number 0 outputs/1080p/index.m3u8 && ffmpeg -i ${filepp} -codec:v libx264 -vf "scale=-2:720" -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename outputs/720p/segment%03d.ts -start_number 0 outputs/720p/index.m3u8 && ffmpeg -i ${filepp} -codec:v libx264 -vf "scale=-2:480" -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename outputs/480p/segment%03d.ts -start_number 0 outputs/480p/index.m3u8 && ffmpeg -i ${filepp} -codec:v libx264 -vf "scale=-2:360" -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename outputs/360p/segment%03d.ts -start_number 0 outputs/360p/index.m3u8
           `);
           
-          p.stdout.on('data', function (data) {
-            console.log(data.toString())
-           
-          })
-          
-          p.stdout.on('error', function (data) {
-            console.log('Error', data.toString())
+          // capture stdout/stderr
+          if (p.stdout) p.stdout.on('data', (data) => console.log(data.toString()));
+          if (p.stderr) p.stderr.on('data', (data) => console.error(data.toString()));
+
+          p.on('error', (err) => {
+            console.error('ffmpeg spawn error', err);
             process.exit(1);
-         
-          })
-          
-          p.on('close', async function () {
-            console.log('transcoding completed');
-            putObj(videoKey);
-            console.log("completed");
-            
-          })
+          });
+
+          p.on('close', async (code, signal) => {
+            if (code === 0) {
+              console.log('transcoding completed');
+              await putObj(videoKey);
+              console.log('completed');
+            } else {
+              console.error('ffmpeg exited with code', code, 'signal', signal);
+              process.exit(1);
+            }
+          });
           
     },
     abort(err) {

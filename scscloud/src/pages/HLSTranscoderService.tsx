@@ -7,23 +7,22 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { FaVideo, FaCloud, FaRocket } from 'react-icons/fa';
 import { notifier } from "../utils/notifier";
 import { getTranscodingCost, formatCost, calculateTotalCost } from "../utils/costApi";
+import { getBuckets, Bucket } from "../utils/objectStorageApi";
 
 const HLSTranscoderService:React.FC=()=>{
   const [hlsInputScreen,setHlsInputScreen]=useState<boolean>(false);
   const [transcodingCostPerMB, setTranscodingCostPerMB] = useState<string>('0');
   const [loadingCost, setLoadingCost] = useState<boolean>(true);
+  const [buckets, setBuckets] = useState<Bucket[]>([]);
+  const [loadingBuckets, setLoadingBuckets] = useState<boolean>(false);
   interface Idata{
-    accessKey:string,
-    secretAccessKey:string;
-    destinationFolder:string;
-    bucketName:string 
+    bucketName:string;
+    bucketPath:string;
   }
   const [open,setOpen]=useState<boolean>(false);
     const [data,setData]=useState<Idata>({
-      accessKey:'',
-      secretAccessKey:'',
-      destinationFolder:'',
-      bucketName:''
+      bucketName:'',
+      bucketPath:''
     });
     const [loading,setLoading]=useState<string>('')
     const [file,setFile]=useState<File>();
@@ -70,12 +69,27 @@ const HLSTranscoderService:React.FC=()=>{
         }
       };
       fetchCost();
+
+      // Fetch buckets
+      const fetchBuckets = async () => {
+        try {
+          setLoadingBuckets(true);
+          const userBuckets = await getBuckets();
+          setBuckets(userBuckets);
+        } catch (error) {
+          console.error('Error fetching buckets:', error);
+          notifier.error('Failed to load buckets. Please ensure Object Storage is enabled.');
+        } finally {
+          setLoadingBuckets(false);
+        }
+      };
+      fetchBuckets();
     },[])
     const handleUploadAndTranscode=async()=>{
       setOpen(false)
       let email='';
       let videoKey='';
-       if(data.accessKey && data.bucketName && data.destinationFolder && data.secretAccessKey && file){
+       if(data.bucketName && data.bucketPath && file){
         const fileType=file?.type;
         const fileName=file?.name;
         const fileSize=file?.size;
@@ -93,7 +107,8 @@ const HLSTranscoderService:React.FC=()=>{
             const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/upload-video`,{
               fileName,
               AccessCookie:accessToken,
-              videoSizeInMB
+              videoSizeInMB,
+              bucketName: data.bucketName
             })
             console.log(uploadRes.data.data);
             email = uploadRes.data.data.email;
@@ -105,14 +120,12 @@ const HLSTranscoderService:React.FC=()=>{
             console.log('Video uploaded successfully');
             
             const transcodingdata={
-              email,
-              videoKey,
-              userAccessKey:data.accessKey,
-              userSecretAccessKey:data.secretAccessKey,
-              bucketPath:data.destinationFolder,
-              userBucketName:data.bucketName,
-              AccessCookie:accessToken,
-              videoSizeInMB
+              AccessCookie: accessToken,
+              videoKey: videoKey,
+              bucketPath: data.bucketPath,
+              userBucketName: data.bucketName,
+              email: email,
+              videoSizeInMB: videoSizeInMB
             }
             
             const transcodingRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/transcoding-video`,transcodingdata)
@@ -125,8 +138,10 @@ const HLSTranscoderService:React.FC=()=>{
             console.error('Error during transcoding:', error);
             if (error.response?.status === 402 || error.response?.data?.message?.includes('sufficient')) {
               notifier.error('You do not have sufficient balance to transcode this video.')
+            } else if (error.response?.data?.message?.includes('Object Storage')) {
+              notifier.error(error.response.data.message || 'Object Storage service is not enabled or configured.')
             } else {
-              notifier.error('Error in transcoding video. Please try again.')
+              notifier.error(error.response?.data?.message || 'Error in transcoding video. Please try again.')
             }
           }
         }else{
@@ -194,15 +209,38 @@ const HLSTranscoderService:React.FC=()=>{
               <input  type="file" id="dropzone-file" className="hidden fileUpload"  onChange={setFileVideo}/>
             </label>
 
-            <label className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5"> Bucket Name</label>
-            <input type="text"  className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full' placeholder="enter your s3 bucket name..." onChange={(e)=>setData({...data,bucketName:e.target.value})}/>
+            <label className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5">Object Storage Bucket Name</label>
+            {loadingBuckets ? (
+              <div className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full'>
+                Loading buckets...
+              </div>
+            ) : buckets.length > 0 ? (
+              <select 
+                className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full' 
+                onChange={(e)=>setData({...data,bucketName:e.target.value})}
+                value={data.bucketName}
+              >
+                <option value="">Select a bucket...</option>
+                {buckets.map((bucket) => (
+                  <option key={bucket.Name} value={bucket.Name}>
+                    {bucket.Name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className='text-md font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full'>
+                No buckets found. Please create a bucket in Object Storage first.
+              </div>
+            )}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Transcoded videos will be stored in your Object Storage bucket
+            </p>
 
-            <label className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5">Destination folder</label>
-            <input type="text"  className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full' placeholder="enter destination folder on your s3..." onChange={(e)=>setData({...data,destinationFolder:e.target.value})}/>
-
-            <label className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5">AWS credentials</label>
-            <input type="text"  className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full' placeholder="accessKeyId..." onChange={(e)=>setData({...data,accessKey:e.target.value})}/>
-            <input type="password"  className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded mt-2 w-full' placeholder="secretAccessKey..." onChange={(e)=>setData({...data,secretAccessKey:e.target.value})}/>
+            <label className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5">Bucket Path</label>
+            <input type="text"  className='text-md font-medium text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-600 rounded w-full' placeholder="e.g., videos/ or transcoded/ or leave empty" onChange={(e)=>setData({...data,bucketPath:e.target.value})}/>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Optional folder path within the bucket where transcoded files will be stored
+            </p>
 
             {
               !loading ? <button className='text-lg font-bold text-slate-900 bg-cyan-400 hover:bg-cyan-300 p-3 rounded mt-10 mb-6 w-full' onClick={()=>setOpen(true)}>Transcode video</button>
@@ -228,7 +266,7 @@ const HLSTranscoderService:React.FC=()=>{
                 </h1>
                 <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8">
                   Transform your videos into adaptive HLS streams with scalable, on-demand transcoding. 
-                  Deliver smooth playback across all devices and network conditions.
+                  Transcoded videos are automatically stored in your Object Storage bucket for seamless delivery.
                 </p>
                 <div className="flex items-center justify-center gap-4">
                   <button 
@@ -253,10 +291,10 @@ const HLSTranscoderService:React.FC=()=>{
                     <FaCloud className="text-xl" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                    Cloud-Native
+                    Object Storage Integration
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Fully managed infrastructure scales automatically with your workload. No servers to maintain.
+                    Transcoded videos automatically stored in your Object Storage bucket. No need for AWS credentials.
                   </p>
                 </div>
 
@@ -268,7 +306,7 @@ const HLSTranscoderService:React.FC=()=>{
                     Adaptive Streaming
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Multiple quality variants generated automatically for optimal viewing on any device or bandwidth.
+                    Multiple quality variants (360p, 480p, 720p, 1080p) generated automatically for optimal viewing.
                   </p>
                 </div>
 

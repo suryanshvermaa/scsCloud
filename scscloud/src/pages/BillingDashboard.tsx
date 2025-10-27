@@ -15,8 +15,7 @@ import {
   CheckCircle2,
   ArrowUpRight,
   Calendar,
-  DollarSign,
-  Activity
+  DollarSign
 } from "lucide-react";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 
@@ -29,11 +28,6 @@ interface IPaymentHistory {
   status?: string;
 }
 
-interface IUsageStats {
-  hosting: number;
-  transcoding: number;
-  storage: number;
-}
 
 const BillingDashboard: React.FC = () => {
   const [scsCoins, setScsCoins] = useState<number>(0);
@@ -44,12 +38,7 @@ const BillingDashboard: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [processing, setProcessing] = useState<boolean>(false);
   const navigate = useNavigate();
-  // Mock usage stats - replace with actual API calls
-  const [usageStats] = useState<IUsageStats>({
-    hosting: 20,
-    transcoding: 0,
-    storage: 0
-  });
+  // Note: usage statistics are not implemented server-side. No fake usage will be shown.
 
   useEffect(() => {
     loadDashboardData();
@@ -255,57 +244,9 @@ const BillingDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Usage Breakdown */}
+      {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Current Usage */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-foreground">Current Usage</h2>
-            <Activity className="h-5 w-5 text-muted-foreground" />
-          </div>
-          
-          <div className="space-y-4">
-            {/* Hosting */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">Static Web Hosting</span>
-                <span className="text-sm font-semibold text-primary">₹{usageStats.hosting}</span>
-              </div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${scsCoins > 0 ? Math.min((usageStats.hosting / scsCoins) * 100, 100) : 0}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Transcoding */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">HLS Transcoding</span>
-                <span className="text-sm font-semibold text-accent">₹{usageStats.transcoding}</span>
-              </div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-accent rounded-full transition-all"
-                  style={{ width: `${scsCoins > 0 ? Math.min((usageStats.transcoding / scsCoins) * 100, 100) : 0}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Estimated total</span>
-              <span className="text-lg font-bold text-foreground">
-                ₹{(usageStats.hosting + usageStats.transcoding + usageStats.storage).toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="lg:col-span-3 rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <button
