@@ -14,6 +14,7 @@ import response from './utils/response';
 import botRouter from './routes/bot.routes';
 import objectStorageRouter from './routes/objectStorage.routes';
 import costRouter from './routes/cost.routes';
+import { AppError } from './utils/error';
 
 const app=express();
 

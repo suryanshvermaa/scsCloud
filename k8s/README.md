@@ -37,5 +37,5 @@ kubectl delete -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -
 
  ## port-forwarding to access services
 ```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 80:80
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
 ```

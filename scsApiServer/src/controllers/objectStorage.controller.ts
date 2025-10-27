@@ -83,6 +83,7 @@ export const getBuckets = asyncHandler(async (req: Request, res: Response) => {
     const objectStorage = await ObjectStorage.findOne({ userId: userId });
     if (!objectStorage) throw new AppError("Object Storage not found", 404);
     if(objectStorage.expiryDate<new Date()) throw new AppError("Object Storage service has expired. Please renew to continue using the service.",403);
+    console.log("Using endpoint:",getEndpointUrl(objectStorage.service));
     const s3Client=getS3Client({
         region:"ap-south-1",
         endpoint:getEndpointUrl(objectStorage.service),

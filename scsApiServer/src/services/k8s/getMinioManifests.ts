@@ -5,23 +5,23 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         apiVersion: "apps/v1",
         kind: "Deployment",
         metadata: {
-            name: "minio-deployment"+user,
+            name: "minio-deployment-"+user,
             namespace: "minio",
             labels: {
-                app: "minio"+user,
+                app: "minio-"+user,
             },
         },
         spec: {
             replicas: 1,
             selector: {
                 matchLabels: {
-                    app: "minio"+user
+                    app: "minio-"+user
                 },
             },
             template: {
                 metadata: {
                     labels: {
-                        app: "minio"+user
+                        app: "minio-"+user
                     },
                 },
                 spec: {
@@ -40,7 +40,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
                                     name: "MINIO_ROOT_USER",
                                     valueFrom:{
                                         secretKeyRef:{
-                                            name: "minio-secret"+user,
+                                            name: "minio-secret-"+user,
                                             key: "accesskey"
                                         }
                                     },
@@ -49,7 +49,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
                                     name: "MINIO_ROOT_PASSWORD",
                                     valueFrom:{
                                         secretKeyRef:{
-                                            name: "minio-secret"+user,
+                                            name: "minio-secret-"+user,
                                             key: "secretkey"
                                         }
                                     },
@@ -68,7 +68,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
                         {
                             name: "minio-storage",
                             persistentVolumeClaim:{
-                                claimName: "minio-pvc"+user
+                                claimName: "minio-pvc-"+user
                             }
                         }
                     ]
@@ -81,7 +81,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         apiVersion: "v1",
         kind: "PersistentVolume",
         metadata: {
-            name: "minio-pv"+user,
+            name: "minio-pv-"+user,
             namespace: "minio",
         },
         spec: {
@@ -101,7 +101,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         apiVersion: "v1",
         kind: "PersistentVolumeClaim",
         metadata: {
-            name: "minio-pvc"+user,
+            name: "minio-pvc-"+user,
             namespace: "minio",
         },
         spec: {
@@ -118,7 +118,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         apiVersion: "v1",
         kind: "Secret",
         metadata: {
-            name: "minio-secret"+user,
+            name: "minio-secret-"+user,
             namespace: "minio",
         },
         type: "Opaque",
@@ -132,12 +132,12 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         apiVersion: "v1",
         kind: "Service",
         metadata: {
-            name: "minio-service"+user,
+            name: "minio-service-"+user,
             namespace: "minio",
         },
         spec: {
             selector: {
-                app: "minio"+user
+                app: "minio-"+user
             },
             ports: [
                 {
@@ -163,7 +163,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
         spec: {
             rules: [
                 {
-                    host: `minio-${user}.${process.env.HOSTING_DOMAIN!}`,
+                    host: `minio-${user}.${(process.env.HOSTING_DOMAIN!).split(":")[0]}`, // Remove port if present
                     http: {
                         paths: [
                             {
@@ -171,7 +171,7 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
                                 path: "/",
                                 backend: {
                                     service: {
-                                        name: "minio-service"+user,
+                                        name: "minio-service-"+user,
                                         port: {
                                             number: 9000
                                         }
