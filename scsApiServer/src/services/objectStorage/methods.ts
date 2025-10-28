@@ -1,7 +1,8 @@
-import { S3Client, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsCommand  } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListBucketsCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsCommand, PutBucketCorsCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import getMinioManifests from "../k8s/getMinioManifests";
 import { k8sObjectApi } from "../k8s/k8s";
+import mime from 'mime-types'
 
 interface IS3ClientConfig{
     region: string;
@@ -79,9 +80,11 @@ const listBuckets=async(s3Client:S3Client)=>{
  * @param contentType 
  */
 const putObjectSignedUrl=async(s3Client:S3Client,bucketName:string,objectKey:string,expiresIn?:number)=>{
+    const contentType = mime.lookup(objectKey)
     const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: objectKey,
+        ContentType: contentType||"",
     });
     return await getSignedUrl(s3Client,command,{expiresIn:3600});
 }

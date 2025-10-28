@@ -54,6 +54,10 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
                                         }
                                     },
                                 },
+                                {
+                                    name: "MINIO_SERVER_URL",
+                                    value: `http://minio-${user}.${(process.env.HOSTING_DOMAIN!).split(":")[0]}`
+                                }
                             ],
                             volumeMounts:[
                                 {
@@ -157,8 +161,17 @@ const getMinioManifests = (user:string,storageInGB:number,accesskey:string,secre
             namespace: "minio",
             labels: {
                 "app.kubernetes.io/name": "minio-ingress"+user,
-                "app.kubernetes.io/part-of": "minio"
-            }
+                "app.kubernetes.io/part-of": "minio",
+            },
+            annotations: {
+                "nginx.ingress.kubernetes.io/enable-cors": "true",
+                "nginx.ingress.kubernetes.io/cors-allow-origin": "*",
+                "nginx.ingress.kubernetes.io/cors-allow-methods": "GET, PUT, POST, DELETE, OPTIONS",
+                "nginx.ingress.kubernetes.io/cors-allow-headers": "Authorization, Content-Type, x-amz-acl, x-amz-meta-*",
+                "nginx.ingress.kubernetes.io/cors-allow-credentials": "true",
+                "nginx.ingress.kubernetes.io/proxy-body-size": "1000m",
+
+            },
         },
         spec: {
             rules: [
