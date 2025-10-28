@@ -1,3 +1,4 @@
+# Kubernetes Cluster Setup and Application Deployment
 ## Creating a Kubernetes Cluster
 ```bash
  kind create cluster --name=suryansh-cluster --config=./cluster.yaml
@@ -25,6 +26,11 @@ kubectl apply -f ./email-server -f ./api-server -f ./frontend -f ./ingress.yaml
 kubectl get pods -n scs-cloud --watch
 ```
 
+ ## port-forwarding to access services
+```bash
+kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
+```
+
 ## cleaning up resources
 ```bash
 kubectl delete -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -f ./api-server -f ./frontend -f ./ingress.yaml
@@ -34,8 +40,3 @@ kubectl delete -f ./namespace.yaml -f ./db -f ./redis-server -f ./email-server -
 ```bash
  kind delete cluster --name=suryansh-cluster
  ```
-
- ## port-forwarding to access services
-```bash
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
-```

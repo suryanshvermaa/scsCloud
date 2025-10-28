@@ -31,7 +31,7 @@ export const hostWebsite=asyncHandler(async(req:Request,res:Response)=>{
         webUrl
     }
     spinHoster(runObj)
-    const websiteUrl=`https://${webUrl}.${process.env.HOSTING_DOMAIN!}`;
+    const websiteUrl=`http://${webUrl}.${process.env.HOSTING_DOMAIN!}`;
     const s3bucketUrl=`${process.env.BUCKET_HOST_FOR_HOSTING!}/${webUrl}`;
     const user=userId;
     hostingQueue.add('Hosting'+Date.now(),JSON.stringify({email:myUser.email,websiteUrl}))
