@@ -6,7 +6,7 @@ package pb;
 
 message GetDeploymentRequest {
     string namespace = 1;
-    string docker_image = 2;
+    string user_id = 2;
 }
 
 message GetDeploymentsResponse {
@@ -14,34 +14,38 @@ message GetDeploymentsResponse {
 }
 
 message Deployment {
-    string id = 1;
     string namespace = 2;
-    string docker_image = 3;
-    string status = 4;
-    string created_at = 5;
+    string name = 3;
+    string docker_image = 4;
+    string cpu = 5;
+    string memory = 6;
+    int32 replicas = 7;
+    int32 port = 8;
+    map<string, string> environments = 9;
+    string created_at = 10;
 }
 
 message PostDeploymentRequest {
-    string namespace = 1;
-    string docker_image = 2;
+    string user_id = 1;
+    Deployment deployment = 2;
 }
 
 message PostDeploymentResponse {
     string id = 1;
-    string message = 2;
+    Deployment deployment = 2;
 }
 
-message RenewDeploymentRequest {
-    string deployment_id = 1;
+message DeleteDeploymentRequest {
+    string user_id = 1;
+    string name = 2;
 }
 
-message RenewDeploymentResponse {
-    string id = 1;
-    string message = 2;
+message DeleteDeploymentResponse {
+    string message = 1;
 }
 
-service AccountService{
+service ContainerService {
     rpc GetDeployments(GetDeploymentRequest) returns (GetDeploymentsResponse);
-    rpc Createdeployment(PostDeploymentRequest) returns (PostDeploymentResponse);
-    rpc RenewDeployment(RenewDeploymentRequest) returns (RenewDeploymentResponse);
+    rpc CreateDeployment(PostDeploymentRequest) returns (PostDeploymentResponse);
+    rpc DeleteDeployment(DeleteDeploymentRequest) returns (DeleteDeploymentResponse);
 }
