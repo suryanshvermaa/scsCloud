@@ -2,3 +2,4 @@ docker-compose.yml
 mongo-data
 redis_data
 **/secrets.yaml
+containerService/go.mod
