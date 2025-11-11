@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package containerService;
+package pb;
 
 message GetDeploymentRequest {
     string user_id = 1;

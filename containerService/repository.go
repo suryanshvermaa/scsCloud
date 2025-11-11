@@ -12,6 +12,7 @@ type Repository interface {
 	GetDeploymentsByUserID(ID string) ([]Deployment, error)
 	CreateDeployment(deployment Deployment) (Deployment, error)
 	DeleteDeployment(id string) error
+	GetDeploymentByID(id string) (Deployment, error)
 }
 
 type postgresRepository struct {
@@ -94,4 +95,23 @@ func (r *postgresRepository) CreateDeployment(deployment Deployment) (Deployment
 func (r *postgresRepository) DeleteDeployment(id string) error {
 	_, err := r.db.Exec("DELETE FROM deployments WHERE id = $1", id)
 	return err
+}
+
+func (r *postgresRepository) GetDeploymentByID(id string) (Deployment, error) {
+	var d Deployment
+	var envData []byte
+	err := r.db.QueryRow("SELECT service_subdomain, id, user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, created_at FROM deployments WHERE id = $1", id).
+		Scan(&d.ServiceSubdomain, &d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Replicas, &d.Port, &envData, &d.CreatedAt)
+	if err != nil {
+		return Deployment{}, err
+	}
+	// Unmarshal JSONB environments into the map
+	envs := make(map[string]string)
+	if len(envData) > 0 {
+		if err := json.Unmarshal(envData, &envs); err != nil {
+			return Deployment{}, err
+		}
+	}
+	d.Environments = envs
+	return d, nil
 }
