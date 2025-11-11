@@ -9,9 +9,9 @@ import (
 
 type Repository interface {
 	Close()
-	GetDeploymentsByUserID(userID string) ([]Deployment, error)
+	GetDeploymentsByUserID(ID string) ([]Deployment, error)
 	CreateDeployment(deployment Deployment) (Deployment, error)
-	DeleteDeployment(name string) error
+	DeleteDeployment(id string) error
 }
 
 type postgresRepository struct {
@@ -41,8 +41,8 @@ func (r *postgresRepository) Ping() error {
 }
 
 // GetDeploymentsByUserID retrieves deployments for a specific user.
-func (r *postgresRepository) GetDeploymentsByUserID(userID string) ([]Deployment, error) {
-	rows, err := r.db.Query("SELECT id, user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, created_at FROM deployments WHERE user_id = $1", userID)
+func (r *postgresRepository) GetDeploymentsByUserID(ID string) ([]Deployment, error) {
+	rows, err := r.db.Query("SELECT id, user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, created_at FROM deployments WHERE user_id = $1", ID)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (r *postgresRepository) CreateDeployment(deployment Deployment) (Deployment
 // parseEnvironments parses a serialized environment string into a map.
 // (old semicolon-serialization removed) environments are stored as JSONB in DB
 
-func (r *postgresRepository) DeleteDeployment(name string) error {
-	_, err := r.db.Exec("DELETE FROM deployments WHERE name = $1", name)
+func (r *postgresRepository) DeleteDeployment(id string) error {
+	_, err := r.db.Exec("DELETE FROM deployments WHERE id = $1", id)
 	return err
 }

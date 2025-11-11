@@ -3,7 +3,7 @@ package containerservice
 type Service interface {
 	GetDeployments(userID string) ([]Deployment, error)
 	CreateDeployment(userID, namespace, name, dockerImage, cpu, memory string, replicas, port int, environments map[string]string) (Deployment, error)
-	DeleteDeployment(name string) error
+	DeleteDeployment(id string) error
 }
 
 type Deployment struct {
@@ -49,8 +49,8 @@ func (s *accountService) CreateDeployment(userID, namespace, name, dockerImage, 
 	return s.repository.CreateDeployment(deployment)
 }
 
-func (s *accountService) DeleteDeployment(name string) error {
-	err := s.repository.DeleteDeployment(name)
+func (s *accountService) DeleteDeployment(id string) error {
+	err := s.repository.DeleteDeployment(id)
 	if err != nil {
 		return err
 	}

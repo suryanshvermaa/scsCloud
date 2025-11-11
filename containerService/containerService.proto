@@ -5,8 +5,7 @@ option go_package = "./pb";
 package pb;
 
 message GetDeploymentRequest {
-    string namespace = 1;
-    string user_id = 2;
+    string user_id = 1;
 }
 
 message GetDeploymentsResponse {
@@ -14,6 +13,7 @@ message GetDeploymentsResponse {
 }
 
 message Deployment {
+    optional string id = 1;
     string namespace = 2;
     string name = 3;
     string docker_image = 4;
@@ -36,8 +36,7 @@ message PostDeploymentResponse {
 }
 
 message DeleteDeploymentRequest {
-    string user_id = 1;
-    string name = 2;
+    string id = 1;
 }
 
 message DeleteDeploymentResponse {

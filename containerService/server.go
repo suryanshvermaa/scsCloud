@@ -35,6 +35,7 @@ func (s *grpcServer) GetDeployments(ctx context.Context, req *pb.GetDeploymentRe
 	var pbDeployments []*pb.Deployment
 	for _, d := range deployments {
 		pbDeployment := &pb.Deployment{
+			Id:           &d.ID,
 			Name:         d.Name,
 			Namespace:    d.Namespace,
 			DockerImage:  d.DockerImage,
@@ -57,6 +58,7 @@ func (s *grpcServer) CreateDeployment(ctx context.Context, req *pb.PostDeploymen
 		return nil, err
 	}
 	return &pb.PostDeploymentResponse{Id: res.ID, Deployment: &pb.Deployment{
+		Id:           &res.ID,
 		Namespace:    res.Namespace,
 		Name:         res.Name,
 		DockerImage:  res.DockerImage,
@@ -71,7 +73,7 @@ func (s *grpcServer) CreateDeployment(ctx context.Context, req *pb.PostDeploymen
 
 // DeleteDeployment deletes a deployment.
 func (s *grpcServer) DeleteDeployment(ctx context.Context, req *pb.DeleteDeploymentRequest) (*pb.DeleteDeploymentResponse, error) {
-	err := s.service.DeleteDeployment(req.Name)
+	err := s.service.DeleteDeployment(req.Id)
 	if err != nil {
 		return nil, err
 	}

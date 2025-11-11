@@ -23,8 +23,7 @@ const (
 
 type GetDeploymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Namespace     string                 `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,13 +56,6 @@ func (x *GetDeploymentRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetDeploymentRequest.ProtoReflect.Descriptor instead.
 func (*GetDeploymentRequest) Descriptor() ([]byte, []int) {
 	return file_containerService_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GetDeploymentRequest) GetNamespace() string {
-	if x != nil {
-		return x.Namespace
-	}
-	return ""
 }
 
 func (x *GetDeploymentRequest) GetUserId() string {
@@ -119,6 +111,7 @@ func (x *GetDeploymentsResponse) GetDeployments() []*Deployment {
 
 type Deployment struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
 	Namespace     string                 `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	DockerImage   string                 `protobuf:"bytes,4,opt,name=docker_image,json=dockerImage,proto3" json:"docker_image,omitempty"`
@@ -160,6 +153,13 @@ func (x *Deployment) ProtoReflect() protoreflect.Message {
 // Deprecated: Use Deployment.ProtoReflect.Descriptor instead.
 func (*Deployment) Descriptor() ([]byte, []int) {
 	return file_containerService_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Deployment) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
 }
 
 func (x *Deployment) GetNamespace() string {
@@ -331,8 +331,7 @@ func (x *PostDeploymentResponse) GetDeployment() *Deployment {
 
 type DeleteDeploymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -367,16 +366,9 @@ func (*DeleteDeploymentRequest) Descriptor() ([]byte, []int) {
 	return file_containerService_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DeleteDeploymentRequest) GetUserId() string {
+func (x *DeleteDeploymentRequest) GetId() string {
 	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *DeleteDeploymentRequest) GetName() string {
-	if x != nil {
-		return x.Name
+		return x.Id
 	}
 	return ""
 }
@@ -429,14 +421,14 @@ var File_containerService_proto protoreflect.FileDescriptor
 
 const file_containerService_proto_rawDesc = "" +
 	"\n" +
-	"\x16containerService.proto\x12\x02pb\"M\n" +
-	"\x14GetDeploymentRequest\x12\x1c\n" +
-	"\tnamespace\x18\x01 \x01(\tR\tnamespace\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"J\n" +
+	"\x16containerService.proto\x12\x02pb\"/\n" +
+	"\x14GetDeploymentRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"J\n" +
 	"\x16GetDeploymentsResponse\x120\n" +
-	"\vdeployments\x18\x01 \x03(\v2\x0e.pb.DeploymentR\vdeployments\"\xe1\x02\n" +
+	"\vdeployments\x18\x01 \x03(\v2\x0e.pb.DeploymentR\vdeployments\"\xfd\x02\n" +
 	"\n" +
-	"Deployment\x12\x1c\n" +
+	"Deployment\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x1c\n" +
 	"\tnamespace\x18\x02 \x01(\tR\tnamespace\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12!\n" +
 	"\fdocker_image\x18\x04 \x01(\tR\vdockerImage\x12\x10\n" +
@@ -450,7 +442,8 @@ const file_containerService_proto_rawDesc = "" +
 	" \x01(\tR\tcreatedAt\x1a?\n" +
 	"\x11EnvironmentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"`\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x05\n" +
+	"\x03_id\"`\n" +
 	"\x15PostDeploymentRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12.\n" +
 	"\n" +
@@ -460,10 +453,9 @@ const file_containerService_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12.\n" +
 	"\n" +
 	"deployment\x18\x02 \x01(\v2\x0e.pb.DeploymentR\n" +
-	"deployment\"F\n" +
-	"\x17DeleteDeploymentRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"4\n" +
+	"deployment\")\n" +
+	"\x17DeleteDeploymentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
 	"\x18DeleteDeploymentResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage2\xf4\x01\n" +
 	"\x10ContainerService\x12F\n" +
@@ -517,6 +509,7 @@ func file_containerService_proto_init() {
 	if File_containerService_proto != nil {
 		return
 	}
+	file_containerService_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
