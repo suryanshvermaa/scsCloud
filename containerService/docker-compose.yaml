@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  database:
+    build:
+      context: .
+      dockerfile: db.dockerfile
+    environment:
+      POSTGRES_USER: scsuser
+      POSTGRES_PASSWORD: scspassword
+      POSTGRES_DB: scsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_v0:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_v0:
