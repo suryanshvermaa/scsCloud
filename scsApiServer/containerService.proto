@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package containerService;
+
+message GetDeploymentRequest {
+    string user_id = 1;
+}
+
+message GetDeploymentsResponse {
+    repeated Deployment deployments = 1;
+}
+
+message Deployment {
+    optional string id = 1;
+    string namespace = 2;
+    string name = 3;
+    string docker_image = 4;
+    string cpu = 5;
+    string memory = 6;
+    int32 replicas = 7;
+    int32 port = 8;
+    map<string, string> environments = 9;
+    string created_at = 10;
+    optional string serviceSubdomain = 11;
+}
+
+message PostDeploymentRequest {
+    string user_id = 1;
+    Deployment deployment = 2;
+}
+
+message PostDeploymentResponse {
+    string id = 1;
+    Deployment deployment = 2;
+}
+
+message DeleteDeploymentRequest {
+    string id = 1;
+}
+
+message DeleteDeploymentResponse {
+    string message = 1;
+}
+
+service ContainerService {
+    rpc GetDeployments(GetDeploymentRequest) returns (GetDeploymentsResponse);
+    rpc CreateDeployment(PostDeploymentRequest) returns (PostDeploymentResponse);
+    rpc DeleteDeployment(DeleteDeploymentRequest) returns (DeleteDeploymentResponse);
+}
