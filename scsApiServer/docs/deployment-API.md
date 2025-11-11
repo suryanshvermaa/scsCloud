@@ -19,9 +19,9 @@ Key files:
 
 ## Endpoints
 
-Base path: The router is mounted under `/api/v1` in `src/index.ts` (except the `create` and `delete` handlers use same router). Full paths below assume that base mounting.
+Base path: The router is mounted under `/api/v1/deployment` in `src/index.ts`. Full paths below assume that base mounting.
 
-1) GET /api/v1/getDeployments/:AuthCookie
+1) GET /api/v1/deployment/getDeployments/:AuthCookie
 
 - Description: Return a list of deployments for the authenticated user.
 - Authentication: The `AuthCookie` path param is a JWT (signed with `ACCESS_TOKEN_SECRET`). The controller verifies it and extracts `userId`.
@@ -36,7 +36,7 @@ Base path: The router is mounted under `/api/v1` in `src/index.ts` (except the `
 
 Example request:
 
-GET /api/v1/getDeployments/eyJhbGciOi... (AuthCookie in URL)
+GET /api/v1/deployment/getDeployments/eyJhbGciOi... (AuthCookie in URL)
 
 Example response (200):
 
@@ -61,7 +61,7 @@ Example response (200):
   }
 }
 
-2) POST /api/v1/createDeployment
+2) POST /api/v1/deployment/createDeployment
 
 - Description: Deploy a new container for the authenticated user.
 - Authentication: `AuthCookie` should be passed in request body (see controller implementation). The controller verifies the JWT and reads `userId`.
@@ -70,11 +70,9 @@ Example response (200):
   - `config` (object) — required. Fields supported (defaults applied if missing):
     - `dockerImage` (string) — required
     - `cpu` (number) — default 0.5
-    - `memory` (number, MB) — default 512
+    - `memory` (string, Gi) — default "10Gi" # like -> "20Gi"
     - `port` (number) — default 80
     - `replicas` (number) — default 1
-    - `name` (string) — optional. If not provided, server generates a random name `service-xxxxx`.
-    - `serviceSubdomain` (string) — optional. If not provided, server generates `service-xxxxx`.
     - `environments` (array of {key,string value,string}) — optional environment variables for the container
 - Response (200):
   - JSON with `deploymentResult` (the created Deployment) and `url` for the service at `http://{serviceSubdomain}.{HOSTING_DOMAIN}`.
@@ -85,7 +83,7 @@ Example response (200):
 
 Example request body:
 
-POST /api/v1/createDeployment
+POST /api/v1/deployment/createDeployment
 Content-Type: application/json
 
 {
@@ -93,7 +91,7 @@ Content-Type: application/json
   "config": {
     "dockerImage": "nginx:latest",
     "cpu": 0.5,
-    "memory": 256,
+    "memory": "10Gi",
     "port": 80,
     "replicas": 1,
     "serviceSubdomain": "my-service-123",
@@ -114,7 +112,7 @@ Successful response (200):
   }
 }
 
-3) DELETE /api/v1/deleteDeployment
+3) DELETE /api/v1/deployment/deleteDeployment
 
 - Description: Delete a deployment by its ID.
 - Body (JSON):
@@ -127,7 +125,7 @@ Successful response (200):
 
 Example request body:
 
-DELETE /api/v1/deleteDeployment
+DELETE /api/v1/deployment/deleteDeployment
 Content-Type: application/json
 
 {
