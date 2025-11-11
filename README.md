@@ -20,6 +20,7 @@ Cloud-native platform for video transcoding (HLS), static-site hosting, object s
 
 - `scsApiServer/` — TypeScript Express API (auth, transcoding/hosting orchestration, object storage, payments, queues)
    - `src/bot/` — scs-bot conversational assistant (Groq SDK with LangChain-style tool-calling), exposed at `/api/v1/bot`
+- `containerService/` — Go gRPC microservice to manage per-user container deployments (PostgreSQL) and provision Kubernetes Deployment/Service/Ingress
 - `scscloud/` — React + Vite frontend (TailwindCSS)
 - `emailServer/` — BullMQ workers + Nodemailer (OTP, payment, hosting, transcoding, API keys)
 - `scs-cloud-services/`
@@ -27,7 +28,7 @@ Cloud-native platform for video transcoding (HLS), static-site hosting, object s
    - `Transcoding-container/` — Downloads from S3, transcodes to 1080p/720p/480p/360p HLS, re-uploads
 - `scs-hls-client/` — JS helpers for upload + transcode flows
 - `k8s/` — Kind + NGINX Ingress setup and per-service manifests (secrets excluded by design)
-- `docker-compose.yml` and `dockercompose.dev.yaml` — Local services and dev stack
+- `dockercompose.dev.yaml` — Local services dev stack (MongoDB, Redis, email worker). See `containerService/docker-compose.yaml` for Postgres (containerService dev).
 
 ---
 
@@ -82,6 +83,8 @@ Cloud-native platform for video transcoding (HLS), static-site hosting, object s
 - Docker Desktop (with WSL2 backend recommended on Windows)
 - Node.js 18+ (to run services locally without Docker)
 - kubectl, kind (for local Kubernetes), and an ingress controller if you plan to use k8s
+- Go 1.21+ (for `containerService/` development)
+- PostgreSQL 14+ or Docker (for `containerService` Postgres via its docker-compose)
 
 ---
 
@@ -91,7 +94,7 @@ This starts MongoDB, Redis, and the email worker. Run the API server and fronten
 
 1) Create a root `.env.dev` file (used by `dockercompose.dev.yaml`). Replace placeholders with your values:
 
-```powershell
+```bash
 # Database and Redis
 MONGO_INITDB_ROOT_USERNAME=root
 MONGO_INITDB_ROOT_PASSWORD=<your-mongo-root-password>
@@ -105,7 +108,7 @@ QUEUE_PASSWORD=<same-as-redis-password>
 
 2) Start the dev stack:
 
-```powershell
+```bash
 docker compose -f dockercompose.dev.yaml up -d
 ```
 
@@ -113,7 +116,7 @@ This launches MongoDB, Redis, and the email worker. MongoDB and Redis are intern
 
 3) Run the API server (separate terminal):
 
-```powershell
+```bash
 cd scsApiServer
 npm install
 npm run dev
@@ -121,7 +124,7 @@ npm run dev
 
 4) Run the frontend (separate terminal):
 
-```powershell
+```bash
 cd scscloud
 npm install
 npm run dev
@@ -129,7 +132,7 @@ npm run dev
 
 5) Stop everything:
 
-```powershell
+```bash
 docker compose -f dockercompose.dev.yaml down
 ```
 
@@ -139,20 +142,23 @@ Tip: The root `docker-compose.yml` contains a similar minimal stack (MongoDB, Re
 
 ## Kubernetes deployment ☸️
 
-Manifests are under `k8s/`. Example workflow (Kind + NGINX Ingress). Adjust hosts in `k8s/ingress.yaml` to your domain or use port-forwarding.
+Manifests are under `k8s/` and now include namespaces for `scs-cloud`, `minio`, and `container-service`, plus a separate `postgres_db` directory for the container service database. Example workflow (Kind + NGINX Ingress). Adjust hosts in `k8s/ingress.yaml` to your domain or use port-forwarding.
 
-```powershell
+```bash
 # Create local Kind cluster
-kind create cluster --name suryansh-cluster --config .\k8s\cluster.yaml
+kind create cluster --name suryansh-cluster --config ./k8s/cluster.yaml
 
 # Install NGINX Ingress Controller
-kubectl apply -f .\k8s\nginx-ingress-controller.yaml
+kubectl apply -f ./k8s/nginx-ingress-controller.yaml
 
-# Namespace, DB, Redis
-kubectl apply -f .\k8s\namespace.yaml -f .\k8s\db -f .\k8s\redis-server
+# Namespaces, MongoDB, Redis
+kubectl apply -f ./k8s/namespace.yaml -f ./k8s/db -f ./k8s/redis-server
 
-# App services (ensure secrets exist first)
-kubectl apply -f .\k8s\email-server -f .\k8s\api-server -f .\k8s\frontend -f .\k8s\ingress.yaml
+# Optional: Postgres DB for containerService (if deploying it)
+kubectl apply -f ./k8s/postgres_db
+
+# App services (ensure Secrets exist first): email, API, container-service, frontend, ingress
+kubectl apply -f ./k8s/email-server -f ./k8s/api-server -f ./k8s/container-service -f ./k8s/frontend -f ./k8s/ingress.yaml
 
 # Watch status
 kubectl get pods -n scs-cloud --watch
@@ -175,8 +181,9 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
     - Public DNS A records:
        - `suryanshverma.live` → `127.0.0.1`
        - `api.suryanshverma.live` → `127.0.0.1`
-    - Alternatively, use Windows hosts file (requires Administrator):
-       - File: `C:\Windows\System32\drivers\etc\hosts`
+    - Alternatively, add OS hosts file entries:
+       - Linux/macOS: `/etc/hosts`
+       - Windows: `C:\\Windows\\System32\\drivers\\etc\\hosts`
        - Add:
           - `127.0.0.1  suryanshverma.live`
           - `127.0.0.1  api.suryanshverma.live`
@@ -187,7 +194,7 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
        - Browse with explicit port:
           - Frontend → `http://suryanshverma.live:3000`
           - API → `http://api.suryanshverma.live:3000`
-    - Optional (admin required, may conflict with other services):
+    - Optional (may require elevated privileges):
        - Forward to port 80 directly so you can omit the port in the URL:
           - `kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 80:80`
           - Then browse:
@@ -232,6 +239,14 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
    - Dev: http://localhost:5173
    - Docker build arg: `VITE_API_URL` for production image
 
+- Container Service (`containerService/`)
+   - Go gRPC microservice exposing `GetDeployments`, `CreateDeployment`, `DeleteDeployment`
+   - Persists deployments in PostgreSQL (JSONB env map) and provisions K8s Deployment/Service/Ingress per create
+   - Dev quickstart:
+      - `cd containerService && docker compose up -d` (start Postgres)
+      - `go run ./cmd/containerService`
+      - List services: `grpcurl -plaintext localhost:8080 list`
+
 - Email Worker (`emailServer/`)
    - BullMQ workers for OTP, transcoding complete, API keys, hosting lifecycle, payments
    - Configure via `MY_EMAIL`, `MY_PASSWORD` (use an SMTP provider/app password)
@@ -253,12 +268,40 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
 - Client helpers (`scs-hls-client/`)
    - `VideoUploadUrl()` and `TranscodeVideo()` wrappers around API flows
 
+### Container Service (Go gRPC) — details
+
+- Location: `containerService/`
+- Proto: `containerService/containerService.proto` (generated stubs under `containerService/pb/`)
+- RPCs: `GetDeployments`, `CreateDeployment`, `DeleteDeployment`
+- Ports:
+   - Local dev default: 8080 (see `containerService/README.md`)
+   - K8s example manifest uses `PORT=4000` via Secret; ensure `containerPort` and Service `targetPort` match this value
+- Environment:
+   - `DATABASE_URL` (PostgreSQL), `PORT` (service port)
+- Quick dev:
+   - Start Postgres: `cd containerService && docker compose up -d`
+   - Run service: `go run ./cmd/containerService`
+   - Explore via grpcurl:
+
+```bash
+grpcurl -plaintext localhost:8080 list
+grpcurl -plaintext localhost:8080 list pb.ContainerService
+grpcurl -plaintext -d '{"user_id":"USER123"}' localhost:8080 pb.ContainerService/GetDeployments
+```
+
+- Kubernetes notes:
+   - Namespace: manifests currently deploy to `scs-cloud` (a separate `container-service` namespace exists in `k8s/namespace.yaml` but is not used by default)
+   - Database: optional Postgres under `k8s/postgres_db` (PV/PVC, Secret, Deployment, Service)
+   - RBAC: `k8s/container-service/serviceAccount.yaml` binds `api-access` to `cluster-admin` via ClusterRoleBinding (broad privileges; restrict for production)
+   - Service/selector: verify Service `selector.app: scs-container-service` matches Deployment label and that `port/targetPort` align with the `PORT` env and container `containerPort`
+
 ---
 
 ## Docs and references 📚
 
 - API docs: `scsApiServer/docs/API.md`
 - Cost API docs: `scsApiServer/docs/Cost-API.md`
+- Container Service: `containerService/README.md`
 - Frontend config: see `scscloud/vite.config.ts` and `scscloud/nginx.conf`
 - Kubernetes quickstart: `k8s/README.md`
 
@@ -295,6 +338,10 @@ Keep secrets out of source control. Key variables by area:
 - Email worker (`emailServer`)
    - `MY_EMAIL`, `MY_PASSWORD`, `QUEUE_HOST`, `QUEUE_PORT`, `QUEUE_USER`, `QUEUE_PASSWORD`
 
+- Container Service (`containerService`)
+   - `DATABASE_URL` (e.g., `postgres://scsuser:scspassword@localhost:5432/scsdb?sslmode=disable`)
+   - `PORT` (default 8080)
+
 - Transcoding container
    - `STORAGE_ENDPOINT`, `ACCESS_KEY`, `SECRET_ACCESS_KEY`, `BUCKET_NAME`, `VIDEO_KEY`, `BUCKET_PATH`, `USER_EMAIL`, plus `QUEUE_*`
 
@@ -319,6 +366,7 @@ Keep secrets out of source control. Key variables by area:
 - Compose volumes
    - `./mongo-data` → MongoDB database files
    - `./redis_data` → Redis data (AOF enabled in dev)
+   - `containerService` Postgres data is managed by `containerService/docker-compose.yaml` (local dev)
 - Kubernetes
    - Mongo: `k8s/db/pv.yaml`, `pvc.yaml`, `deployment.yaml`, `svc.yaml`
    - Redis: `k8s/redis-server/*`
@@ -337,6 +385,12 @@ Keep secrets out of source control. Key variables by area:
    - Install the ingress controller; make sure hosts match your setup or port-forward the controller
 - Object storage errors
    - Ensure `STORAGE_PRICE_PER_GB_PER_MONTH_IN_RUPEES` is set and that the user has enough SCS Coins for enable/extend endpoints
+
+- Container Service not reachable in cluster
+   - Verify the Service selector matches the Deployment label (`app: scs-container-service`) and that the Service name/port align with your Ingress/backend expectations
+
+- Postgres init errors (containerService)
+   - If you see `function gen_random_uuid() does not exist`, add `CREATE EXTENSION IF NOT EXISTS pgcrypto;` to the top of `containerService/up.sql` before table creation
 
 ---
 

@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  scs-cloud-db
+  namespace: scs-cloud
+spec:
+  selector:
+    name:  scs-container-db
+  type:  ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
