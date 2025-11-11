@@ -1,5 +1,7 @@
 package containerservice
 
+import "github.com/suryanshvermaa/scsCloud/containerService/k8s"
+
 type Service interface {
 	GetDeployments(userID string) ([]Deployment, error)
 	CreateDeployment(userID, namespace, name, dockerImage, cpu, memory string, replicas, port int, environments map[string]string, serviceSubdomain string) (Deployment, error)
@@ -47,6 +49,19 @@ func (s *accountService) CreateDeployment(userID, namespace, name, dockerImage, 
 		Port:             port,
 		Environments:     environments,
 		ServiceSubdomain: serviceSubdomain,
+	}
+	// Orchestrate K8s resources with an adapter to avoid import cycles.
+	err := k8s.CreateContainer(k8s.K8sDeploymentSpec{
+		Name:             deployment.Name,
+		Namespace:        deployment.Namespace,
+		DockerImage:      deployment.DockerImage,
+		Replicas:         deployment.Replicas,
+		Port:             deployment.Port,
+		Environments:     deployment.Environments,
+		ServiceSubdomain: deployment.ServiceSubdomain,
+	})
+	if err != nil {
+		return Deployment{}, err
 	}
 	return s.repository.CreateDeployment(deployment)
 }

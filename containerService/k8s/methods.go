@@ -3,7 +3,6 @@ package k8s
 import (
 	"context"
 
-	containerservice "github.com/suryanshvermaa/scsCloud/containerService"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -11,7 +10,18 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func createK8sDeployment(ctx context.Context, d containerservice.Deployment) error {
+// K8sDeploymentSpec is a lightweight adapter to avoid an import cycle with the containerservice package.
+type K8sDeploymentSpec struct {
+	Name             string
+	Namespace        string
+	DockerImage      string
+	Replicas         int
+	Port             int
+	Environments     map[string]string
+	ServiceSubdomain string
+}
+
+func createK8sDeployment(ctx context.Context, d K8sDeploymentSpec) error {
 	replicas := int32(d.Replicas)
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -59,7 +69,7 @@ func convertMapToEnvVars(envs map[string]string) []corev1.EnvVar {
 	return vars
 }
 
-func createK8sService(ctx context.Context, d containerservice.Deployment) error {
+func createK8sService(ctx context.Context, d K8sDeploymentSpec) error {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.Name,
@@ -83,7 +93,7 @@ func createK8sService(ctx context.Context, d containerservice.Deployment) error 
 	return err
 }
 
-func createK8sIngress(ctx context.Context, d containerservice.Deployment) error {
+func createK8sIngress(ctx context.Context, d K8sDeploymentSpec) error {
 	ing := &networkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.Name,
