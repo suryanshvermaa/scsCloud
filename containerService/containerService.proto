@@ -23,6 +23,7 @@ message Deployment {
     int32 port = 8;
     map<string, string> environments = 9;
     string created_at = 10;
+    optional string serviceSubdomain = 11;
 }
 
 message PostDeploymentRequest {

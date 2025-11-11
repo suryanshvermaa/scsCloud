@@ -10,8 +10,6 @@ import (
 )
 
 var clientset = loadKubeConfig()
-var CoreV1Api = clientset.CoreV1()
-var AppsV1Api = clientset.AppsV1()
 
 func loadKubeConfig() *kubernetes.Clientset {
 	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
@@ -20,7 +18,6 @@ func loadKubeConfig() *kubernetes.Clientset {
 		panic(err.Error())
 	}
 
-	// 3️⃣ Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())

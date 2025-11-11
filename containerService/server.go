@@ -35,16 +35,17 @@ func (s *grpcServer) GetDeployments(ctx context.Context, req *pb.GetDeploymentRe
 	var pbDeployments []*pb.Deployment
 	for _, d := range deployments {
 		pbDeployment := &pb.Deployment{
-			Id:           &d.ID,
-			Name:         d.Name,
-			Namespace:    d.Namespace,
-			DockerImage:  d.DockerImage,
-			Cpu:          d.CPU,
-			Memory:       d.Memory,
-			Replicas:     int32(d.Replicas),
-			Port:         int32(d.Port),
-			Environments: d.Environments,
-			CreatedAt:    d.CreatedAt,
+			Id:               &d.ID,
+			Name:             d.Name,
+			Namespace:        d.Namespace,
+			DockerImage:      d.DockerImage,
+			Cpu:              d.CPU,
+			Memory:           d.Memory,
+			Replicas:         int32(d.Replicas),
+			Port:             int32(d.Port),
+			Environments:     d.Environments,
+			CreatedAt:        d.CreatedAt,
+			ServiceSubdomain: &d.ServiceSubdomain,
 		}
 		pbDeployments = append(pbDeployments, pbDeployment)
 	}
@@ -53,21 +54,22 @@ func (s *grpcServer) GetDeployments(ctx context.Context, req *pb.GetDeploymentRe
 
 // CreateDeployment creates a new deployment.
 func (s *grpcServer) CreateDeployment(ctx context.Context, req *pb.PostDeploymentRequest) (*pb.PostDeploymentResponse, error) {
-	res, err := s.service.CreateDeployment(req.UserId, req.Deployment.Name, req.Deployment.Namespace, req.Deployment.DockerImage, req.Deployment.Cpu, req.Deployment.Memory, int(req.Deployment.Replicas), int(req.Deployment.Port), req.Deployment.Environments)
+	res, err := s.service.CreateDeployment(req.UserId, req.Deployment.Name, req.Deployment.Namespace, req.Deployment.DockerImage, req.Deployment.Cpu, req.Deployment.Memory, int(req.Deployment.Replicas), int(req.Deployment.Port), req.Deployment.Environments, *req.Deployment.ServiceSubdomain)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.PostDeploymentResponse{Id: res.ID, Deployment: &pb.Deployment{
-		Id:           &res.ID,
-		Namespace:    res.Namespace,
-		Name:         res.Name,
-		DockerImage:  res.DockerImage,
-		Cpu:          res.CPU,
-		Memory:       res.Memory,
-		Replicas:     int32(res.Replicas),
-		Port:         int32(res.Port),
-		Environments: res.Environments,
-		CreatedAt:    res.CreatedAt,
+		Id:               &res.ID,
+		Namespace:        res.Namespace,
+		Name:             res.Name,
+		DockerImage:      res.DockerImage,
+		Cpu:              res.CPU,
+		Memory:           res.Memory,
+		Replicas:         int32(res.Replicas),
+		Port:             int32(res.Port),
+		Environments:     res.Environments,
+		CreatedAt:        res.CreatedAt,
+		ServiceSubdomain: &res.ServiceSubdomain,
 	}}, nil
 }
 

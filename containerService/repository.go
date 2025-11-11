@@ -42,7 +42,7 @@ func (r *postgresRepository) Ping() error {
 
 // GetDeploymentsByUserID retrieves deployments for a specific user.
 func (r *postgresRepository) GetDeploymentsByUserID(ID string) ([]Deployment, error) {
-	rows, err := r.db.Query("SELECT id, user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, created_at FROM deployments WHERE user_id = $1", ID)
+	rows, err := r.db.Query("SELECT service_subdomain, id, user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, created_at FROM deployments WHERE user_id = $1", ID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (r *postgresRepository) GetDeploymentsByUserID(ID string) ([]Deployment, er
 	for rows.Next() {
 		var d Deployment
 		var envData []byte
-		if err := rows.Scan(&d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Replicas, &d.Port, &envData, &d.CreatedAt); err != nil {
+		if err := rows.Scan(&d.ServiceSubdomain, &d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Replicas, &d.Port, &envData, &d.CreatedAt); err != nil {
 			return nil, err
 		}
 		// Unmarshal JSONB environments into the map
@@ -79,8 +79,8 @@ func (r *postgresRepository) CreateDeployment(deployment Deployment) (Deployment
 		return Deployment{}, err
 	}
 	err = r.db.QueryRow(
-		"INSERT INTO deployments (user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, created_at",
-		deployment.UserID, deployment.Namespace, deployment.Name, deployment.DockerImage, deployment.CPU, deployment.Memory, deployment.Replicas, deployment.Port, envJSON,
+		"INSERT INTO deployments (user_id, namespace, name, docker_image, cpu, memory, replicas, port, environments, service_subdomain) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, created_at",
+		deployment.UserID, deployment.Namespace, deployment.Name, deployment.DockerImage, deployment.CPU, deployment.Memory, deployment.Replicas, deployment.Port, envJSON, deployment.ServiceSubdomain,
 	).Scan(&deployment.ID, &deployment.CreatedAt)
 	if err != nil {
 		return Deployment{}, err

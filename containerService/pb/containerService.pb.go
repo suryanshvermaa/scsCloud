@@ -110,19 +110,20 @@ func (x *GetDeploymentsResponse) GetDeployments() []*Deployment {
 }
 
 type Deployment struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
-	Namespace     string                 `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	DockerImage   string                 `protobuf:"bytes,4,opt,name=docker_image,json=dockerImage,proto3" json:"docker_image,omitempty"`
-	Cpu           string                 `protobuf:"bytes,5,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	Memory        string                 `protobuf:"bytes,6,opt,name=memory,proto3" json:"memory,omitempty"`
-	Replicas      int32                  `protobuf:"varint,7,opt,name=replicas,proto3" json:"replicas,omitempty"`
-	Port          int32                  `protobuf:"varint,8,opt,name=port,proto3" json:"port,omitempty"`
-	Environments  map[string]string      `protobuf:"bytes,9,rep,name=environments,proto3" json:"environments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
+	Namespace        string                 `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Name             string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	DockerImage      string                 `protobuf:"bytes,4,opt,name=docker_image,json=dockerImage,proto3" json:"docker_image,omitempty"`
+	Cpu              string                 `protobuf:"bytes,5,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	Memory           string                 `protobuf:"bytes,6,opt,name=memory,proto3" json:"memory,omitempty"`
+	Replicas         int32                  `protobuf:"varint,7,opt,name=replicas,proto3" json:"replicas,omitempty"`
+	Port             int32                  `protobuf:"varint,8,opt,name=port,proto3" json:"port,omitempty"`
+	Environments     map[string]string      `protobuf:"bytes,9,rep,name=environments,proto3" json:"environments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CreatedAt        string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ServiceSubdomain *string                `protobuf:"bytes,11,opt,name=serviceSubdomain,proto3,oneof" json:"serviceSubdomain,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Deployment) Reset() {
@@ -221,6 +222,13 @@ func (x *Deployment) GetEnvironments() map[string]string {
 func (x *Deployment) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Deployment) GetServiceSubdomain() string {
+	if x != nil && x.ServiceSubdomain != nil {
+		return *x.ServiceSubdomain
 	}
 	return ""
 }
@@ -425,7 +433,7 @@ const file_containerService_proto_rawDesc = "" +
 	"\x14GetDeploymentRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"J\n" +
 	"\x16GetDeploymentsResponse\x120\n" +
-	"\vdeployments\x18\x01 \x03(\v2\x0e.pb.DeploymentR\vdeployments\"\xfd\x02\n" +
+	"\vdeployments\x18\x01 \x03(\v2\x0e.pb.DeploymentR\vdeployments\"\xc3\x03\n" +
 	"\n" +
 	"Deployment\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x1c\n" +
@@ -439,11 +447,13 @@ const file_containerService_proto_rawDesc = "" +
 	"\fenvironments\x18\t \x03(\v2 .pb.Deployment.EnvironmentsEntryR\fenvironments\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\x1a?\n" +
+	" \x01(\tR\tcreatedAt\x12/\n" +
+	"\x10serviceSubdomain\x18\v \x01(\tH\x01R\x10serviceSubdomain\x88\x01\x01\x1a?\n" +
 	"\x11EnvironmentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x05\n" +
-	"\x03_id\"`\n" +
+	"\x03_idB\x13\n" +
+	"\x11_serviceSubdomain\"`\n" +
 	"\x15PostDeploymentRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12.\n" +
 	"\n" +
