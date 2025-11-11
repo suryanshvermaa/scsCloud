@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-// K8sDeploymentSpec is a lightweight adapter to avoid an import cycle with the containerservice package.
 type K8sDeploymentSpec struct {
 	Name             string
 	Namespace        string

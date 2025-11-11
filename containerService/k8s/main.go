@@ -28,7 +28,7 @@ func CreateContainer(deployment K8sDeploymentSpec) error {
 
 func DeleteContainer(namespace, name string) {
 	ctx := context.Background()
-	deleteIngress(ctx, namespace, name)
-	deleteService(ctx, namespace, name)
-	deleteDeployment(ctx, namespace, name)
+	deleteIngress(ctx, name, namespace)
+	deleteService(ctx, name, namespace)
+	deleteDeployment(ctx, name, namespace)
 }

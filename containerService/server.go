@@ -54,7 +54,7 @@ func (s *grpcServer) GetDeployments(ctx context.Context, req *pb.GetDeploymentRe
 
 // CreateDeployment creates a new deployment.
 func (s *grpcServer) CreateDeployment(ctx context.Context, req *pb.PostDeploymentRequest) (*pb.PostDeploymentResponse, error) {
-	res, err := s.service.CreateDeployment(req.UserId, req.Deployment.Name, req.Deployment.Namespace, req.Deployment.DockerImage, req.Deployment.Cpu, req.Deployment.Memory, int(req.Deployment.Replicas), int(req.Deployment.Port), req.Deployment.Environments, *req.Deployment.ServiceSubdomain)
+	res, err := s.service.CreateDeployment(req.UserId, req.Deployment.Namespace, req.Deployment.Name, req.Deployment.DockerImage, req.Deployment.Cpu, req.Deployment.Memory, int(req.Deployment.Replicas), int(req.Deployment.Port), req.Deployment.Environments, *req.Deployment.ServiceSubdomain)
 	if err != nil {
 		return nil, err
 	}
