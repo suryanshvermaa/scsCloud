@@ -28,14 +28,19 @@ func main() {
 		panic(err)
 	}
 	var r containerservice.Repository
+	// Keep trying to connect until the DB is reachable. If NewPostgresRepository
+	// returns an error, propagate it so the retry loop continues.
 	retry.ForeverSleep(2*time.Second, func(_ int) (err error) {
 		r, err = containerservice.NewPostgresRepository(cfg.DatabaseURL)
 		if err != nil {
-			log.Println(err)
+			log.Println("db connect failed:", err)
+			return err
 		}
 		return nil
 	})
-	defer r.Close()
+	if r != nil {
+		defer r.Close()
+	}
 	log.Println("Listening on port", cfg.Port)
 	s := containerservice.NewService(r)
 	log.Fatal(containerservice.ListenGRPC(s, cfg.Port))
