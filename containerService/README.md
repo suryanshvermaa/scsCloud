@@ -1,6 +1,6 @@
 # scsCloud Container Service 🚀
 
-A lightweight gRPC microservice for managing user container deployments: create, list, and delete deployment records backed by PostgreSQL. Built with Go, ships with Docker assets, and includes a Kubernetes client for future orchestration work.
+A lightweight gRPC microservice for managing user container deployments: create, list, and delete deployment records backed by PostgreSQL. Built with Go, ships with Docker assets, and now provisions Kubernetes resources (Deployment, Service, Ingress) on create.
 
 ## ✨ Features
 
@@ -8,7 +8,7 @@ A lightweight gRPC microservice for managing user container deployments: create,
 - 🗄️ PostgreSQL persistence with JSONB environments
 - 🧱 Clean layering: repository (DB) ➜ service (logic) ➜ gRPC server (transport)
 - 🐳 Dockerfiles for app and database; Compose for local Postgres
-- ☸️ Kubernetes client initialization (ready for future cluster ops)
+- ☸️ Kubernetes orchestration: creates Deployment, Service, and Ingress per request
 
 ## 🧭 Overview
 
@@ -17,7 +17,7 @@ This service exposes three RPCs:
 - CreateDeployment: Insert a new deployment
 - DeleteDeployment: Remove a deployment by ID
 
-Each deployment record includes image, CPU/memory, replicas, port, and arbitrary env key/values.
+Each deployment record includes image, CPU/memory, replicas, port, env key/values, and a service subdomain used to build an Ingress host.
 
 ## 🧱 Architecture
 
@@ -27,10 +27,11 @@ Each deployment record includes image, CPU/memory, replicas, port, and arbitrary
 - `containerService.proto` → generated stubs in `pb/`
 - `cmd/containerService/main.go`: Wiring: load env, connect DB with retry, run gRPC server
 - `k8s/config.go`: Initializes a Kubernetes clientset from `~/.kube/config`
+- `k8s/methods.go`: Low-level builders for K8s resources (Deployment/Service/Ingress)
+- `k8s/main.go`: Orchestrates CreateContainer/DeleteContainer using a spec adapter
 
 ```
 [gRPC client] ⇄ [server.go] ⇄ [service.go] ⇄ [repository.go] ⇄ [PostgreSQL]
-                                      ↘︎ (future) [k8s/config.go]
 ```
 
 ## 📁 Directory
@@ -157,14 +158,15 @@ grpcurl -plaintext -d '{"user_id":"USER123"}' localhost:8080 pb.ContainerService
 grpcurl -plaintext -d '{
   "user_id": "USER123",
   "deployment": {
-    "namespace": "demo",
-    "name": "hello",
+    "namespace": "testing",
+    "name": "nginx",
     "docker_image": "nginx:1.27",
     "cpu": "250m",
     "memory": "256Mi",
     "replicas": 1,
-    "port": 8080,
-    "environments": {"ENV":"prod"}
+    "port": 80,
+    "environments": {"user":"suryansh"},
+    "serviceSubdomain": "nginx-service"
   }
 }' localhost:8080 pb.ContainerService/CreateDeployment
 ```
@@ -177,7 +179,21 @@ grpcurl -plaintext -d '{"id":"<DEPLOYMENT_ID>"}' localhost:8080 pb.ContainerServ
 
 ## ☸️ Kubernetes
 
-`k8s/config.go` initializes a `clientset` from `~/.kube/config` and exposes `CoreV1Api` and `AppsV1Api`. The service doesn’t create resources yet, but this wiring is ready for future deployments.
+When you call CreateDeployment, the service now also provisions Kubernetes resources:
+
+- Deployment: labels pods with `app: <serviceSubdomain>`, sets replicas, image, ports, envs.
+- Service: ClusterIP targeting the same port with selector `app: <serviceSubdomain>`.
+- Ingress: host `<serviceSubdomain>.suryanshverma.live` with a path prefix `/` to the Service.
+
+Implementation details:
+
+- Adapter struct `k8s.K8sDeploymentSpec` avoids an import cycle between the service and k8s packages.
+- Orchestrator `k8s.CreateContainer(spec)` creates resources and cleans up if later steps fail.
+- Delete path calls `k8s.DeleteContainer(namespace, name)` which deletes Ingress → Service → Deployment.
+
+Notes:
+- Namespaces are taken verbatim from the request (`deployment.namespace`). Ensure the namespace exists in your cluster or create it first.
+- Label and selectors use `serviceSubdomain` to avoid collision and define a stable routing key.
 
 ## 🧪 Regenerating protobufs
 
@@ -200,6 +216,7 @@ protoc \
 - go.mod go directive: The `go` version is set to `1.25.3`, but the `go` directive should be major.minor (e.g., `1.25`). If you hit tooling errors, change it to `go 1.25`.
 - UUID default: `up.sql` uses `gen_random_uuid()` which requires `pgcrypto`. If the DB init fails, add `CREATE EXTENSION IF NOT EXISTS pgcrypto;` to `up.sql` before the table creation.
 - Networking: If the app container can’t reach Postgres, ensure both are on the same Docker network or use `--network host` on Linux.
+- Ingress testing: If you use ingress-nginx locally, you can port-forward to inspect it: `kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 3000:80` and then browse `http://<serviceSubdomain>.suryanshverma.live` via hosts mapping.
 
 ## 🤝 Contributing
 
