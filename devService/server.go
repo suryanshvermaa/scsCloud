@@ -36,16 +36,16 @@ func (s *grpcServer) GetAvailableImages(ctx context.Context, req *pb.GetAvailabl
 }
 
 func (s *grpcServer) GetDevServices(ctx context.Context, req *pb.GetDevServicesRequest) (*pb.GetDevServicesResponse, error) {
-	services, err := s.service.GetDevServices()
+	services, err := s.service.GetDevServices(req.UserId)
 	if err != nil {
 		return nil, err
 	}
-	deps := make([]*pb.Deployment, len(services))
+	deps := make([]*pb.Deployment, 0, len(services))
 	for _, service := range services {
 		deps = append(deps, &pb.Deployment{
 			Name:             service.Name,
 			Port:             int32(service.Port),
-			Id:               service.ID,
+			Id:               &service.ID,
 			UserId:           service.UserID,
 			Namespace:        service.Namespace,
 			DevServiceName:   service.Name,
