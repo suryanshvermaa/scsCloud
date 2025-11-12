@@ -8,7 +8,6 @@ import (
 
 type Repository interface {
 	Close()
-	GetAvailableImages() ([]string, error)
 	GetDevServices(userID string) ([]Deployment, error)
 	GetDevService(deploymentID string) (*Deployment, error)
 	CreateDevService(deploy Deployment) (*Deployment, error)
@@ -43,15 +42,61 @@ func (r *postgresRepository) Ping() error {
 	return r.db.Ping()
 }
 
-// id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-//   user_id VARCHAR(24) NOT NULL,
-//   namespace VARCHAR(50) NOT NULL,
-//   name VARCHAR(100) NOT NULL,
-//   docker_image VARCHAR(200) NOT NULL,
-//   cpu VARCHAR(20) NOT NULL,
-//   memory VARCHAR(20) NOT NULL,
-//   port INT NOT NULL,
-//   unlock_password VARCHAR(30) NOT NULL,
-//   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   is_running BOOLEAN NOT NULL DEFAULT TRUE,
-//   service_subdomain VARCHAR(150) NOT NULL UNIQUE
+func (r *postgresRepository) GetDevServices(userID string) ([]Deployment, error) {
+	sqlQuery := `SELECT id, user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, created_at, is_running, service_subdomain FROM deployments WHERE user_id=$1`
+	rows, err := r.db.Query(sqlQuery, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var deployments []Deployment
+	for rows.Next() {
+		var d Deployment
+		err := rows.Scan(&d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Port, &d.UnlockPass, &d.CreatedAt, &d.IsRunning, &d.ServiceSubdomain)
+		if err != nil {
+			return nil, err
+		}
+		deployments = append(deployments, d)
+	}
+	return deployments, nil
+}
+
+func (r *postgresRepository) GetDevService(deploymentID string) (*Deployment, error) {
+	sqlQuery := `SELECT id, user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, created_at, is_running, service_subdomain FROM deployments WHERE id=$1`
+	row := r.db.QueryRow(sqlQuery, deploymentID)
+
+	var d Deployment
+	err := row.Scan(&d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Port, &d.UnlockPass, &d.CreatedAt, &d.IsRunning, &d.ServiceSubdomain)
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *postgresRepository) CreateDevService(deploy Deployment) (*Deployment, error) {
+	sqlQuery := `INSERT INTO deployments (user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, is_running, service_subdomain) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, created_at`
+	err := r.db.QueryRow(sqlQuery, deploy.UserID, deploy.Namespace, deploy.Name, deploy.DockerImage, deploy.CPU, deploy.Memory, deploy.Port, deploy.UnlockPass, deploy.IsRunning, deploy.ServiceSubdomain).Scan(&deploy.ID, &deploy.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &deploy, nil
+}
+
+func (r *postgresRepository) DeleteDevService(deploymentID string) error {
+	sqlQuery := `DELETE FROM deployments WHERE id=$1`
+	_, err := r.db.Exec(sqlQuery, deploymentID)
+	return err
+}
+
+func (r *postgresRepository) StopDevService(deploymentID string) error {
+	sqlQuery := `UPDATE deployments SET is_running=FALSE WHERE id=$1`
+	_, err := r.db.Exec(sqlQuery, deploymentID)
+	return err
+}
+
+func (r *postgresRepository) StartDevService(deploymentID string) error {
+	sqlQuery := `UPDATE deployments SET is_running=TRUE WHERE id=$1`
+	_, err := r.db.Exec(sqlQuery, deploymentID)
+	return err
+}
