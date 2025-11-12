@@ -238,6 +238,65 @@ const Pricing: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Container Service Card */}
+          <div className="relative rounded-2xl border border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-700 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
+            
+            <div className="p-8">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg mb-6">
+                <FaServer className="text-2xl" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+                Container Service
+              </h3>
+              
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-4xl font-bold text-slate-900 dark:text-slate-50">
+                  Pay As You Go
+                </span>
+              </div>
+              
+              <p className="text-slate-600 dark:text-slate-300 mb-6">
+                Deploy Docker containers with managed orchestration and automatic scaling.
+              </p>
+              
+              <div className="space-y-3 mb-8">
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="text-sky-500 mt-1 flex-shrink-0" />
+                  <span className="text-sm text-slate-600 dark:text-slate-300">
+                    Flexible CPU & memory allocation
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="text-sky-500 mt-1 flex-shrink-0" />
+                  <span className="text-sm text-slate-600 dark:text-slate-300">
+                    Auto-scaling & load balancing
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="text-sky-500 mt-1 flex-shrink-0" />
+                  <span className="text-sm text-slate-600 dark:text-slate-300">
+                    Custom domain support
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="text-sky-500 mt-1 flex-shrink-0" />
+                  <span className="text-sm text-slate-600 dark:text-slate-300">
+                    Environment variables & secrets
+                  </span>
+                </div>
+              </div>
+              
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-4 border border-slate-200 dark:border-slate-600">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Pricing model:</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200">
+                  Based on resource usage (CPU, memory, runtime)
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Additional Info Section */}

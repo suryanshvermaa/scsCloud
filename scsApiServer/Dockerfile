@@ -4,7 +4,9 @@ WORKDIR /build
 
 COPY package*.json ./
 RUN npm install
+COPY containerService.proto containerService.proto
 COPY src/ src/
+COPY pb/ pb/
 COPY tsconfig.json tsconfig.json
 RUN npm run build
 

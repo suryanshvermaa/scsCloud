@@ -15,6 +15,8 @@ import LandingPage from '../pages/LandingPage.tsx';
 import ObjectStorageDashboard from '../pages/ObjectStorageDashboard.tsx';
 import ObjectStorageDocs from '../pages/ObjectStorage.docs.tsx';
 import Pricing from '../pages/Pricing.tsx';
+import ContainerServiceDashboard from '../pages/ContainerServiceDashboard.tsx';
+import ContainerServiceDocs from '../pages/ContainerService.docs.tsx';
 
 export const router=createBrowserRouter([
     {
@@ -71,6 +73,12 @@ export const router=createBrowserRouter([
               },{
                 path:'/object-storage-docs',
                 element:<ObjectStorageDocs/>
+              },{
+                path:'/container-service',
+                element:<ContainerServiceDashboard/>
+              },{
+                path:'/container-service-docs',
+                element:<ContainerServiceDocs/>
               },{
                 path:'/redirect',
                 element:<Redirect/>

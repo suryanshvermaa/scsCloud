@@ -66,8 +66,13 @@ func (s *containerService) CreateDeployment(userID, namespace, name, dockerImage
 	return s.repository.CreateDeployment(deployment)
 }
 
-func (s *containerService) DeleteDeployment(id string) error {
-	err := s.repository.DeleteDeployment(id)
+func (s *accountService) DeleteDeployment(id string) error {
+	dep, err := s.repository.GetDeploymentByID(id)
+	if err != nil {
+		return err
+	}
+	k8s.DeleteContainer(dep.Namespace, dep.Name)
+	err = s.repository.DeleteDeployment(id)
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,7 @@ import response from './utils/response';
 import botRouter from './routes/bot.routes';
 import objectStorageRouter from './routes/objectStorage.routes';
 import costRouter from './routes/cost.routes';
-import { AppError } from './utils/error';
+import deploymentRouter from './routes/deployment.routes';
 
 const app=express();
 
@@ -53,6 +53,7 @@ app.use('/api/host',hostingRouter)
 app.use('/api/v1/bot',botRouter)
 app.use('/api/v1/object-storage',objectStorageRouter)
 app.use('/api/v1/cost',costRouter)
+app.use('/api/v1/deployment',deploymentRouter)
 
 // health check route
 app.get('/api/v1/health-check',asyncHandler(async(req:Request,res:Response)=>{

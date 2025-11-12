@@ -306,6 +306,19 @@ const Profile:React.FC=()=>{
                    </button>
 
                    <button 
+                     onClick={() => navigate('/container-service')}
+                     className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
+                   >
+                     <div className="p-2 rounded-lg bg-sky-500/10">
+                       <Activity className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                     </div>
+                     <div>
+                       <p className="font-medium text-foreground">Container Service</p>
+                       <p className="text-xs text-muted-foreground">Deploy containers</p>
+                     </div>
+                   </button>
+
+                   <button 
                      onClick={() => navigate('/amount-dashboard')}
                      className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-secondary transition-colors text-left"
                    >
