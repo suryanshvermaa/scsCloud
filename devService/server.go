@@ -48,7 +48,7 @@ func (s *grpcServer) GetDevServices(ctx context.Context, req *pb.GetDevServicesR
 			Id:               &service.ID,
 			UserId:           service.UserID,
 			Namespace:        service.Namespace,
-			DevServiceName:   service.Name,
+			DevServiceName:   ImageToAlias[service.DockerImage],
 			Cpu:              service.CPU,
 			Memory:           service.Memory,
 			UnlockPass:       service.UnlockPass,
@@ -70,7 +70,7 @@ func (s *grpcServer) GetDevService(ctx context.Context, req *pb.GetDevServiceReq
 		Id:               &service.ID,
 		UserId:           service.UserID,
 		Namespace:        service.Namespace,
-		DevServiceName:   service.Name,
+		DevServiceName:   ImageToAlias[service.DockerImage],
 		Cpu:              service.CPU,
 		Memory:           service.Memory,
 		UnlockPass:       service.UnlockPass,
@@ -81,11 +81,20 @@ func (s *grpcServer) GetDevService(ctx context.Context, req *pb.GetDevServiceReq
 }
 
 func (s *grpcServer) CreateDevService(ctx context.Context, req *pb.CreateDevServiceRequest) (*pb.CreateDevServiceResponse, error) {
+	// Validate request to avoid nil pointer dereference and bad inputs
+	if req == nil || req.Deployment == nil {
+		return nil, fmt.Errorf("invalid request: deployment is required")
+	}
+	// Resolve image from alias; default to provided alias if no mapping exists
+	img := AliasToImage[req.Deployment.DevServiceName]
+	if img == "" {
+		return nil, fmt.Errorf("invalid devServiceName: %s", req.Deployment.DevServiceName)
+	}
 	dep := k8s.Deployment{
 		Name:             req.Deployment.Name,
 		UserID:           req.Deployment.UserId,
 		Namespace:        req.Deployment.Namespace,
-		DockerImage:      AliasToImage[req.Deployment.DevServiceName],
+		DockerImage:      img,
 		CPU:              req.Deployment.Cpu,
 		Memory:           req.Deployment.Memory,
 		Port:             int(req.Deployment.Port),
@@ -104,7 +113,7 @@ func (s *grpcServer) CreateDevService(ctx context.Context, req *pb.CreateDevServ
 		Id:               &service.ID,
 		UserId:           service.UserID,
 		Namespace:        service.Namespace,
-		DevServiceName:   service.Name,
+		DevServiceName:   ImageToAlias[service.DockerImage],
 		Cpu:              service.CPU,
 		Memory:           service.Memory,
 		UnlockPass:       service.UnlockPass,

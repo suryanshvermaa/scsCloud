@@ -13,7 +13,7 @@ func PersistentVolume(d Deployment) *corev1.PersistentVolume {
 		},
 		Spec: corev1.PersistentVolumeSpec{
 			Capacity: corev1.ResourceList{
-				corev1.ResourceStorage: resource.MustParse("20Gi"),
+				corev1.ResourceStorage: resource.MustParse("10Gi"),
 			},
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				corev1.ReadWriteOnce,
@@ -30,18 +30,20 @@ func PersistentVolume(d Deployment) *corev1.PersistentVolume {
 }
 
 func PersistentVolumeClaim(d Deployment) *corev1.PersistentVolumeClaim {
+	sc := ""
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      d.Name + "-pvc",
 			Namespace: d.Namespace,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &sc,
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				corev1.ReadWriteOnce,
 			},
 			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceStorage: resource.MustParse("20Gi"),
+					corev1.ResourceStorage: resource.MustParse("10Gi"),
 				},
 			},
 			VolumeName: d.Name + "-pv",

@@ -15,6 +15,13 @@ var AliasToImage map[string]string = map[string]string{
 	"centos":  "suryanshvermaa/centos:1.0.0",
 }
 
+var ImageToAlias map[string]string = map[string]string{
+	"suryanshvermaaa/vs-code:1.0.0": "vs-code",
+	"suryanshvermaa/ubuntu:1.0.0":   "ubuntu",
+	"suryanshvermaa/chrome:1.0.0":   "chrome",
+	"suryanshvermaa/centos:1.0.0":   "centos",
+}
+
 var Images []Image = []Image{
 	{ImageName: "suryanshvermaaa/vs-code", Tag: "1.0.0", Alias: "vs-code"},
 	{ImageName: "suryanshvermaa/ubuntu", Tag: "1.0.0", Alias: "ubuntu"},

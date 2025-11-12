@@ -2,11 +2,13 @@ package k8s
 
 import (
 	"context"
+	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func createK8sDeployment(ctx context.Context, d Deployment) error {
+	fmt.Println("Creating Kubernetes Deployment:", d.DockerImage)
 	dep := DeploymentManifest(d)
 	_, err := clientset.AppsV1().Deployments(d.Namespace).Create(ctx, dep, metav1.CreateOptions{})
 	return err
