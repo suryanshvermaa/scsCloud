@@ -5,7 +5,7 @@ option go_package = "./pb";
 package pb;
 
 message Deployment {
-    string id = 1;
+    optional string id = 1;
     string userId = 2;
     string namespace = 3;
     string name = 4;
@@ -19,6 +19,9 @@ message Deployment {
 }
 
 // Requests
+message GetAvailableImagesRequest {
+}
+
 message GetDevServicesRequest {
     string userId = 1;
 }
@@ -74,12 +77,12 @@ message StopDevServiceResponse {
 }
 
 // functionality to be added later
-service ContainerService{
-    rpc GetAvailableImages() returns (GetAvailableImagesResponse) {}
-    rpc GetDevServices(GetDevServicesRequest) returns (GetDevServicesResponse) {}
-    rpc GetDevService(GetDevServiceRequest) returns (GetDevServiceResponse) {}
-    rpc CreateDevService(CreateDevServiceRequest) returns (CreateDevServiceResponse) {}
-    rpc DeleteDevService(DeleteDevServiceRequest) returns (DeleteDevServiceResponse) {}
-    rpc StopDevService(StopDevServiceRequest) returns (StopDevServiceResponse) {}
-    rpc StartDevService(StartDevServiceRequest) returns (StartDevServiceResponse) {};
+service DevService{
+    rpc GetAvailableImages(GetAvailableImagesRequest) returns (GetAvailableImagesResponse);
+    rpc GetDevServices(GetDevServicesRequest) returns (GetDevServicesResponse);
+    rpc GetDevService(GetDevServiceRequest) returns (GetDevServiceResponse);
+    rpc CreateDevService(CreateDevServiceRequest) returns (CreateDevServiceResponse);
+    rpc DeleteDevService(DeleteDevServiceRequest) returns (DeleteDevServiceResponse);
+    rpc StopDevService(StopDevServiceRequest) returns (StopDevServiceResponse);
+    rpc StartDevService(StartDevServiceRequest) returns (StartDevServiceResponse);      
 }
