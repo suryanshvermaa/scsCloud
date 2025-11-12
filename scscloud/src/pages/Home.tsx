@@ -168,6 +168,30 @@ const Home:React.FC=()=>{
 
           <div 
             className="group relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+            onClick={() => navigate('/container-service')}
+          >
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-sky-500/10 to-blue-600/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg group-hover:shadow-sky-500/50 group-hover:scale-110 transition-all duration-300">
+                <FaServer className="text-2xl" />
+              </div>
+              <h3 className="mt-5 text-xl font-bold text-slate-900 dark:text-slate-50">
+                Container Service
+              </h3>
+              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Deploy and manage Docker containers with auto-scaling and load balancing.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 dark:text-sky-400 group-hover:gap-3 transition-all">
+                Go to service
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div 
+            className="group relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
             onClick={() => navigate('/amount-dashboard')}
           >
             <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-500/10 to-orange-600/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>

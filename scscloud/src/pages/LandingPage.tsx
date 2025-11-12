@@ -104,15 +104,29 @@ const LandingPage: React.FC = () => {
 
           {/* Object Storage */}
           <div 
-            className="rounded-2xl border border-slate-200 bg-white p-8 hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer dark:border-slate-600 dark:bg-slate-700 dark:hover:border-purple-500"
+            className="group rounded-2xl border border-slate-200 bg-white p-8 hover:border-purple-300 hover:shadow-lg transition-all cursor-pointer dark:border-slate-600 dark:bg-slate-700 dark:hover:border-purple-500/50"
             onClick={() => navigate('/object-storage')}
           >
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg">
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg group-hover:scale-110 transition-transform">
               <FaDatabase className="text-2xl" />
             </div>
             <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Object Storage</h3>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               S3-compatible storage with unlimited scalability, versioning, and powerful bucket management.
+            </p>
+          </div>
+
+          {/* Container Service */}
+          <div 
+            className="group rounded-2xl border border-slate-200 bg-white p-8 hover:border-sky-300 hover:shadow-lg transition-all cursor-pointer dark:border-slate-600 dark:bg-slate-700 dark:hover:border-sky-500/50"
+            onClick={() => navigate('/container-service')}
+          >
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+              <FaServer className="text-2xl" />
+            </div>
+            <h3 className="mt-6 text-xl font-semibold text-slate-900 dark:text-slate-50">Container Service</h3>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Deploy Docker containers with managed orchestration, auto-scaling, and load balancing.
             </p>
           </div>
         </div>

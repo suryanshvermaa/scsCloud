@@ -3,6 +3,7 @@ import { FaVideo } from "react-icons/fa";
 import { IoIosCodeWorking } from "react-icons/io";
 import { HiDatabase } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { FaDocker } from "react-icons/fa";
 
 type Props = { onNavigate?: () => void }
 
@@ -50,6 +51,19 @@ const Services:React.FC<Props>=({ onNavigate })=>{
                                                   <div>
                                                        <div className="text-slate-900 dark:text-slate-50 font-medium">Object Storage</div>
                                                        <div className="text-xs text-slate-500 dark:text-slate-300">S3-compatible scalable object storage</div>
+                              </div>
+                         </button>
+
+                         <button
+                                className="w-full flex items-center gap-3 py-3 text-left hover:bg-slate-900/5 dark:hover:bg-slate-600/50 rounded-md px-2"
+                              onClick={()=>{ onNavigate?.(); navigate('/container-service') }}
+                         >
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 ring-1 ring-sky-500/20 dark:ring-sky-500/40">
+                                   <FaDocker className="text-lg"/>
+                              </span>
+                                                  <div>
+                                                       <div className="text-slate-900 dark:text-slate-50 font-medium">Container Service</div>
+                                                       <div className="text-xs text-slate-500 dark:text-slate-300">Run Docker images with managed hosting</div>
                               </div>
                          </button>
                     </div>

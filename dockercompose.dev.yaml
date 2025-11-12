@@ -1,37 +1,71 @@
 version: '3.8'
-env_file:
-  - .env.dev
 
 services:
-  mongoDb:
+  # scsApiServer:
+  #   build:
+  #     context: ./scsApiServer
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - ./scsApiServer/.env
+  #   depends_on:
+  #     - containerService
+  #     - mongoDb
+  #     - redis
+  
+  # containerService:
+  #   build:
+  #     context: ./containerService
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "4000:4000"
+  #   env_file:
+  #     - ./containerService/.env
+  #   depends_on:
+  #     - database
+
+  mongodb:
     image: mongo:latest
-    container_name: mongoDb
+    container_name: mongodb
     volumes:
       - ./mongo-data:/data/db
+    ports:
+      - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  database:
+    build:
+      context: ./containerService
+      dockerfile: db.dockerfile
+    environment:
+      POSTGRES_USER: scsuser
+      POSTGRES_PASSWORD: scspassword
+      POSTGRES_DB: scsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_v0:/var/lib/postgresql/data
 
   redis:
     image: redis:7.2-alpine
     container_name: redis
     volumes:
       - ./redis_data:/data
-    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
     restart: unless-stopped
 
-  emailServer:
+  emailserver:
     build:
       context: ./emailServer
       dockerfile: Dockerfile
-    environment:
-      - MY_EMAIL=${MY_EMAIL}
-      - MY_PASSWORD=${MY_PASSWORD}
-      - QUEUE_HOST=redis
-      - QUEUE_PORT=6379
-      - QUEUE_USER=default
-      - QUEUE_PASSWORD=${QUEUE_PASSWORD}
+    env_file:
+      - ./emailServer/.env
     depends_on:
       - redis
+
+volumes:
+  postgres_data_v0:

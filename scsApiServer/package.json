@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "proto:gen": "proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=./pb ./*.proto"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,8 @@
     "@aws-sdk/client-ecs": "^3.616.0",
     "@aws-sdk/client-s3": "^3.614.0",
     "@aws-sdk/s3-request-presigner": "^3.616.0",
+    "@grpc/grpc-js": "^1.14.1",
+    "@grpc/proto-loader": "^0.8.0",
     "@kubernetes/client-node": "^0.12.2",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",

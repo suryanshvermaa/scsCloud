@@ -8,6 +8,6 @@ spec:
     app: scs-container-service
   type:  ClusterIP
   ports:
-  - name:  scs-container-port
+  - name:  scs-cs-port
     port:  4000
     targetPort:  4000

@@ -151,3 +151,13 @@ spec:
             secretKeyRef:
               name: scs-cloud-app-secret
               key: GROQ_API_KEY
+        - name: CONTAINER_SERVICE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: CONTAINER_SERVICE_HOST
+        - name: CONTAINER_SERVICE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: scs-cloud-app-secret
+              key: CONTAINER_SERVICE_PORT

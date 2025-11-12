@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-container-db
+  namespace: scs-cloud
+  labels:
+    name: scs-container-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: scs-container-db
+  template:
+    metadata:
+      labels:
+        name: scs-container-db
+    spec:
+      containers:
+        - name: scs-container-db
+          image: scs-postgres:1.0.0 # this needs to be updated with every new build
+          ports:
+            - containerPort: 5432
+              name: scs-container-db
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: scs-container-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: scs-container-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: scs-container-db-secret
+                  key: POSTGRES_DB
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: scs-container-pvc
