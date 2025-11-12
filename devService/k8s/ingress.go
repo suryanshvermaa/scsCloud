@@ -1,52 +1,49 @@
-// import { V1Ingress } from "@kubernetes/client-node"
-// import "dotenv/config"
+package k8s
 
-// export const ingressManifest=async(vmId:string,url:string)=>{
-//     console.log(url);
-//     const ingManifest:V1Ingress={
-//         apiVersion: "networking.k8s.io/v1",
-//         kind: "Ingress",
-//         metadata:{
-//             name: vmId,
-//             namespace:"vm-namespace",
-//             annotations:{
-//                 // WebSocket & long-lived connection friendly settings
-//                 "nginx.ingress.kubernetes.io/proxy-http-version": "1.1",
-//                 "nginx.ingress.kubernetes.io/proxy-read-timeout": "3600",
-//                 "nginx.ingress.kubernetes.io/proxy-send-timeout": "3600",
-//                 "nginx.ingress.kubernetes.io/proxy-buffering": "off",
-//                 // Upstream (service) speaks HTTPS (TLS); tell ingress to use HTTPS to backend.
-//                 "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
-//                 // Disable cert verification for self-signed upstream (remove in production and use proxy-ssl-secret instead).
-//                 "nginx.ingress.kubernetes.io/proxy-ssl-verify": "off",
-//                 // NOTE: configuration-snippet was intentionally omitted (cluster blocks it).
-//             }
-//         },
-//         spec:{
-//             ingressClassName: "nginx",
-//             rules: [
-//                 {
-//                     host: url,
-//                     http:{
-//                         paths:[
-//                             {
-//                                 path:'/',
-//                                 pathType:"Prefix",
-//                                 backend:{
-//                                     service:{
-//                                         name:vmId,
-//                                         port:{
-//                                             number: 6901
-//                                         }
-//                                     }
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 }
-//             ]
-//         }
+import (
+	networkingv1 "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
-//     }
-//     return ingManifest;
-// }
+func IngressManifest(d Deployment) *networkingv1.Ingress {
+	ing := &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      d.Name,
+			Namespace: d.Namespace,
+			Annotations: map[string]string{
+				"nginx.ingress.kubernetes.io/proxy-http-version": "1.1",
+				"nginx.ingress.kubernetes.io/proxy-read-timeout": "3600",
+				"nginx.ingress.kubernetes.io/proxy-send-timeout": "3600",
+				"nginx.ingress.kubernetes.io/proxy-buffering":    "off",
+				"nginx.ingress.kubernetes.io/backend-protocol":   "HTTPS",
+				"nginx.ingress.kubernetes.io/proxy-ssl-verify":   "off",
+			},
+		},
+		Spec: networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: d.ServiceSubdomain + "." + "suryanshverma.live",
+					IngressRuleValue: networkingv1.IngressRuleValue{
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{
+								{
+									Path:     "/",
+									PathType: func() *networkingv1.PathType { p := networkingv1.PathTypePrefix; return &p }(),
+									Backend: networkingv1.IngressBackend{
+										Service: &networkingv1.IngressServiceBackend{
+											Name: d.Name,
+											Port: networkingv1.ServiceBackendPort{
+												Number: int32(d.Port),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	return ing
+}
