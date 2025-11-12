@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS deployments (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id VARCHAR(24) NOT NULL,
+  namespace VARCHAR(50) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  docker_image VARCHAR(200) NOT NULL,
+  cpu VARCHAR(20) NOT NULL,
+  memory VARCHAR(20) NOT NULL,
+  port INT NOT NULL,
+  unlock_password VARCHAR(30) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  is_running BOOLEAN NOT NULL DEFAULT TRUE,
+  service_subdomain VARCHAR(150) NOT NULL UNIQUE
+);
+

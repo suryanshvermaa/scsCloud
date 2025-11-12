@@ -23,21 +23,21 @@ type Deployment struct {
 	CreatedAt        string            `json:"created_at"`
 }
 
-type accountService struct {
+type containerService struct {
 	repository Repository
 }
 
 func NewService(r Repository) Service {
-	return &accountService{r}
+	return &containerService{r}
 }
 
 // GetDeployments retrieves deployments for a specific user.
-func (s *accountService) GetDeployments(userID string) ([]Deployment, error) {
+func (s *containerService) GetDeployments(userID string) ([]Deployment, error) {
 	return s.repository.GetDeploymentsByUserID(userID)
 }
 
 // CreateDeployment creates a new deployment for a user.
-func (s *accountService) CreateDeployment(userID, namespace, name, dockerImage, cpu, memory string, replicas, port int, environments map[string]string, serviceSubdomain string) (Deployment, error) {
+func (s *containerService) CreateDeployment(userID, namespace, name, dockerImage, cpu, memory string, replicas, port int, environments map[string]string, serviceSubdomain string) (Deployment, error) {
 	deployment := Deployment{
 		UserID:           userID,
 		Namespace:        namespace,
