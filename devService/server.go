@@ -113,3 +113,27 @@ func (s *grpcServer) CreateDevService(ctx context.Context, req *pb.CreateDevServ
 	}
 	return &pb.CreateDevServiceResponse{Deployment: createdDep}, nil
 }
+
+func (s *grpcServer) DeleteDevService(ctx context.Context, req *pb.DeleteDevServiceRequest) (*pb.DeleteDevServiceResponse, error) {
+	err := s.service.DeleteDevService(req.DeploymentId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteDevServiceResponse{Message: "devService deleted Successfully"}, nil
+}
+
+func (s *grpcServer) StopDevService(ctx context.Context, req *pb.StopDevServiceRequest) (*pb.StopDevServiceResponse, error) {
+	err := s.service.StopDevService(req.DeploymentId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.StopDevServiceResponse{Message: "devService stopped Successfully"}, nil
+}
+
+func (s *grpcServer) StartDevService(ctx context.Context, req *pb.StartDevServiceRequest) (*pb.StartDevServiceResponse, error) {
+	err := s.service.StartDevService(req.DeploymentId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.StartDevServiceResponse{Message: "devService started Successfully"}, nil
+}
