@@ -36,13 +36,26 @@ func CreateContainer(deployment Deployment) error {
 	return nil
 }
 
-func DeleteContainer(namespace, name string) {
+func DeleteContainer(namespace, name string) error {
 	ctx := context.Background()
-	deleteIngress(ctx, name, namespace)
-	deleteService(ctx, name, namespace)
-	deleteDeployment(ctx, name, namespace)
-	deletePersistentVolumeClaim(ctx, name+"-pvc", namespace)
-	deletePersistentVolume(ctx, name+"-pv")
+	err := deleteIngress(ctx, name, namespace)
+	if err != nil {
+		return err
+	}
+	err = deleteService(ctx, name, namespace)
+	if err != nil {
+		return err
+	}
+	err = deleteDeployment(ctx, name, namespace)
+	if err != nil {
+		return err
+	}
+	err = deletePersistentVolumeClaim(ctx, name+"-pvc", namespace)
+	if err != nil {
+		return err
+	}
+	err = deletePersistentVolume(ctx, name+"-pv")
+	return err
 }
 
 func StopDevService(namespace, name string) error {

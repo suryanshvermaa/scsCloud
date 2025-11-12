@@ -4,13 +4,14 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"github.com/suryanshvermaa/scsCloud/devService/k8s"
 )
 
 type Repository interface {
 	Close()
-	GetDevServices(userID string) ([]Deployment, error)
-	GetDevService(deploymentID string) (*Deployment, error)
-	CreateDevService(deploy Deployment) (*Deployment, error)
+	GetDevServices(userID string) ([]k8s.Deployment, error)
+	GetDevService(deploymentID string) (*k8s.Deployment, error)
+	CreateDevService(deploy k8s.Deployment) (*k8s.Deployment, error)
 	DeleteDevService(deploymentID string) error
 	StopDevService(deploymentID string) error
 	StartDevService(deploymentID string) error
@@ -42,7 +43,7 @@ func (r *postgresRepository) Ping() error {
 	return r.db.Ping()
 }
 
-func (r *postgresRepository) GetDevServices(userID string) ([]Deployment, error) {
+func (r *postgresRepository) GetDevServices(userID string) ([]k8s.Deployment, error) {
 	sqlQuery := `SELECT id, user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, created_at, is_running, service_subdomain FROM deployments WHERE user_id=$1`
 	rows, err := r.db.Query(sqlQuery, userID)
 	if err != nil {
@@ -50,9 +51,9 @@ func (r *postgresRepository) GetDevServices(userID string) ([]Deployment, error)
 	}
 	defer rows.Close()
 
-	var deployments []Deployment
+	var deployments []k8s.Deployment
 	for rows.Next() {
-		var d Deployment
+		var d k8s.Deployment
 		err := rows.Scan(&d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Port, &d.UnlockPass, &d.CreatedAt, &d.IsRunning, &d.ServiceSubdomain)
 		if err != nil {
 			return nil, err
@@ -62,11 +63,11 @@ func (r *postgresRepository) GetDevServices(userID string) ([]Deployment, error)
 	return deployments, nil
 }
 
-func (r *postgresRepository) GetDevService(deploymentID string) (*Deployment, error) {
+func (r *postgresRepository) GetDevService(deploymentID string) (*k8s.Deployment, error) {
 	sqlQuery := `SELECT id, user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, created_at, is_running, service_subdomain FROM deployments WHERE id=$1`
 	row := r.db.QueryRow(sqlQuery, deploymentID)
 
-	var d Deployment
+	var d k8s.Deployment
 	err := row.Scan(&d.ID, &d.UserID, &d.Namespace, &d.Name, &d.DockerImage, &d.CPU, &d.Memory, &d.Port, &d.UnlockPass, &d.CreatedAt, &d.IsRunning, &d.ServiceSubdomain)
 	if err != nil {
 		return nil, err
@@ -74,7 +75,7 @@ func (r *postgresRepository) GetDevService(deploymentID string) (*Deployment, er
 	return &d, nil
 }
 
-func (r *postgresRepository) CreateDevService(deploy Deployment) (*Deployment, error) {
+func (r *postgresRepository) CreateDevService(deploy k8s.Deployment) (*k8s.Deployment, error) {
 	sqlQuery := `INSERT INTO deployments (user_id, namespace, name, docker_image, cpu, memory, port, unlock_password, is_running, service_subdomain) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, created_at`
 	err := r.db.QueryRow(sqlQuery, deploy.UserID, deploy.Namespace, deploy.Name, deploy.DockerImage, deploy.CPU, deploy.Memory, deploy.Port, deploy.UnlockPass, deploy.IsRunning, deploy.ServiceSubdomain).Scan(&deploy.ID, &deploy.CreatedAt)
 	if err != nil {
