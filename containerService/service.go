@@ -66,7 +66,7 @@ func (s *containerService) CreateDeployment(userID, namespace, name, dockerImage
 	return s.repository.CreateDeployment(deployment)
 }
 
-func (s *accountService) DeleteDeployment(id string) error {
+func (s *containerService) DeleteDeployment(id string) error {
 	dep, err := s.repository.GetDeploymentByID(id)
 	if err != nil {
 		return err
