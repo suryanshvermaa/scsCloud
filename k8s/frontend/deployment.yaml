@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: scs-cloud-frontend
-          image: suryanshvermaaa/scs-cloud-frontend:1.0.0
+          image: suryanshvermaaa/scs-cloud-frontend:1.0.2
           ports:
             - containerPort: 80
               name: frontend-port

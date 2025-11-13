@@ -1,29 +1,91 @@
 # SCS Cloud ☁️
 
-**A Cloud-Native Multi-Service Platform for Modern Web Development**
+**A Cloud-Native Multi-Service Platform for Modern Web Development** 🚀
 
 SCS Cloud is a comprehensive, production-ready cloud platform built as a microservices monorepo. It provides video transcoding (HLS), static website hosting, object storage, container deployment service (similar to AWS ECS, GCP Cloud Run, Azure Container Instances), payment processing, and automated email notifications — all with a modern tech stack and container-native architecture.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](./dockercompose.dev.yaml)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Compatible-326CE5.svg)](./k8s/)
+[![Node.js](https://img.shields.io/badge/Node.js-22-green.svg)](https://nodejs.org/)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
 
 ## 🌟 Key Features
 
-### Core Services
-- 🎬 **HLS Video Transcoding** — FFmpeg-powered multi-resolution transcoding (1080p/720p/480p/360p) with S3 storage
-- 🌐 **Static Website Hosting** — Deploy sites to S3 with automatic subdomain routing and NGINX proxy
-- 🗄️ **Object Storage** — MinIO-based storage with programmatic access keys, signed URLs, and per-GB billing
-- 🐳 **Container Deployment Service** — Platform's own container orchestration service (like AWS ECS, GCP Cloud Run, Azure Container Instances)
-- 💳 **Payment Integration** — Cashfree gateway with SCS Coins wallet system and usage-based deductions
-- 🤖 **AI Assistant (scs-bot)** — Groq-powered conversational helper for onboarding, code snippets, and platform guidance
-- 📬 **Email Notifications** — BullMQ-powered workers for OTP, payment receipts, deployment notifications, and more
+### 🎯 Core Services
+- 🎬 **HLS Video Transcoding** — FFmpeg-powered multi-resolution transcoding (1080p/720p/480p/360p) with adaptive bitrate streaming
+  - ✨ Automatic thumbnail generation
+  - 📊 Progress tracking
+  - 🌐 CDN delivery ready
+  - ⚡ Queue-based processing with BullMQ
+  
+- 🌐 **Static Website Hosting** — Deploy React/Vite/Angular apps with one command
+  - 🚀 One-click deployment from Git repositories
+  - 🔒 Automatic HTTPS/SSL
+  - 🌍 Global CDN distribution
+  - 🎨 Custom subdomain support
+  - 🔧 Automatic builds via Kubernetes Jobs
+  
+- 🗄️ **Object Storage** — S3-compatible storage powered by MinIO
+  - 📦 Full S3 API compatibility
+  - 🔑 Programmatic access keys with signed URLs
+  - 💰 Per-GB billing and usage tracking
+  - 🏗️ Per-user isolated storage instances
+  - � Storage analytics dashboard
+  
+- �🐳 **Container Deployment Service** — Kubernetes-powered container orchestration (like AWS ECS, GCP Cloud Run, Azure ACI)
+  - ⚙️ gRPC-based deployment API
+  - 🎛️ Configurable CPU/Memory/Replicas
+  - 🔧 Environment variable injection
+  - 🌐 Automatic Service & Ingress provisioning
+  - 📈 Multi-user isolation and tracking
+  
+- 💳 **Payment Integration** — Cashfree gateway with virtual currency system
+  - 💰 SCS Coins wallet for service credits
+  - 💳 Secure payment processing
+  - 📧 Automated receipt delivery
+  - 📊 Usage-based deductions
+  
+- 🤖 **AI Assistant (scs-bot)** — Groq-powered documentation chatbot
+  - 💬 Context-aware conversations
+  - 🛠️ Code snippet generation
+  - 📖 Interactive documentation helper
+  - 🧠 Function calling for structured responses
+  
+- 📬 **Email Notifications** — BullMQ-powered multi-queue email system
+  - 🔐 OTP verification emails
+  - 🎬 Transcoding completion alerts
+  - 🌐 Hosting deployment notifications
+  - 💳 Payment receipts
+  - 🔑 API key delivery
 
-### Infrastructure
-- 🐳 **Docker Compose** — Streamlined local development with MongoDB, Redis, PostgreSQL, and email workers
-- ☸️ **Kubernetes Ready** — Production manifests with NGINX Ingress, namespaced deployments, and RBAC
-- 🔐 **Secure by Design** — JWT authentication, encrypted credentials, signed S3 URLs, and secret management
-- 📊 **Scalable Architecture** — gRPC microservices, message queues, and container orchestration
+### 🏗️ Infrastructure & DevOps
+- 🐳 **Docker Compose** — Streamlined local development environment
+  - 📦 MongoDB, Redis, PostgreSQL pre-configured
+  - 🔧 Hot-reload for rapid development
+  - 🌐 Network isolation and security
+  
+- ☸️ **Kubernetes Ready** — Production-grade manifests
+  - 🎯 NGINX Ingress with wildcard support
+  - 🏷️ Namespaced deployments (scs-cloud, minio, container-service)
+  - 🔐 RBAC with least-privilege principles
+  - 💾 Persistent volumes for databases
+  - 📊 Health checks and readiness probes
+  
+- 🔐 **Security First**
+  - 🔑 JWT-based authentication
+  - 🔒 Encrypted credential storage
+  - 📝 Signed URLs for temporary access
+  - 🛡️ Secret management via Kubernetes Secrets
+  - 🚫 CORS protection
+  
+- 📊 **Scalable Architecture**
+  - 🔄 gRPC microservices for inter-service communication
+  - 📬 Message queues (BullMQ) for async processing
+  - ⚡ Queue-driven workers for transcoding & hosting
+  - 🎯 Container orchestration with Kubernetes
+  - 🌐 CDN-ready static asset delivery
 
 ---
 
@@ -31,152 +93,223 @@ SCS Cloud is a comprehensive, production-ready cloud platform built as a microse
 
 ```
 scsCloud/
-├── scsApiServer/          # TypeScript Express API (REST + gRPC client)
+├── 🎯 scsApiServer/          # TypeScript Express API (REST + gRPC client)
 │   ├── src/
-│   │   ├── bot/          # Groq-powered AI assistant (scs-bot)
-│   │   ├── controllers/  # Request handlers for all routes
-│   │   ├── routes/       # API endpoint definitions
-│   │   ├── models/       # MongoDB schemas (users, payments, websites)
-│   │   ├── services/     # AWS S3, ECS, payment gateway integrations
-│   │   ├── middleware/   # Auth, CORS, error handling
-│   │   └── utils/        # JWT, crypto, helpers
-│   ├── docs/            # API documentation
-│   └── pb/              # Generated gRPC client stubs
+│   │   ├── 🤖 bot/          # Groq-powered AI assistant (scs-bot)
+│   │   ├── 🎛️ controllers/  # Request handlers for all routes
+│   │   ├── 🛣️ routes/       # API endpoint definitions
+│   │   ├── 📊 models/       # MongoDB schemas (users, payments, websites)
+│   │   ├── 🔧 services/     # AWS S3, ECS, payment gateway integrations
+│   │   ├── 🛡️ middleware/   # Auth, CORS, error handling
+│   │   └── 🛠️ utils/        # JWT, crypto, helpers
+│   ├── 📚 docs/            # API documentation
+│   └── 📦 pb/              # Generated gRPC client stubs
 │
-├── scscloud/             # React + Vite frontend (TailwindCSS + shadcn/ui)
+├── 🎨 scscloud/             # React + Vite frontend (TailwindCSS + shadcn/ui)
 │   ├── src/
-│   │   ├── components/  # Reusable UI components
-│   │   ├── pages/       # Route-level views
-│   │   ├── routes/      # React Router configuration
-│   │   ├── utils/       # Frontend helpers
-│   │   └── docs/        # User-facing documentation
-│   └── nginx.conf       # Production NGINX config
+│   │   ├── 🧩 components/  # Reusable UI components
+│   │   ├── 📄 pages/       # Route-level views (transcoding, hosting, storage, containers)
+│   │   ├── 🛣️ routes/      # React Router configuration
+│   │   ├── 🛠️ utils/       # Frontend helpers & API clients
+│   │   └── 📖 docs/        # User-facing documentation
+│   └── ⚙️ nginx.conf       # Production NGINX config
 │
-├── containerService/     # Go gRPC microservice - SCS Cloud's container deployment service
-│   ├── cmd/             # Main application entry point
-│   ├── k8s/             # Kubernetes client & resource builders
-│   ├── pb/              # Generated gRPC server stubs
-│   ├── repository.go    # PostgreSQL data layer
-│   ├── service.go       # Business logic
-│   └── server.go        # gRPC server (manages container deployments like AWS ECS/GCP Cloud Run/Azure ACI)
+├── 🐳 containerService/     # Go gRPC microservice for container deployments
+│   ├── 🚀 cmd/             # Main application entry point
+│   ├── ☸️ k8s/             # Kubernetes client & resource builders
+│   ├── 📦 pb/              # Generated gRPC server stubs
+│   ├── 🗄️ repository.go    # PostgreSQL data layer
+│   ├── 🎯 service.go       # Business logic
+│   └── 🌐 server.go        # gRPC server (manages deployments like ECS/Cloud Run)
 │
-├── emailServer/          # BullMQ workers + Nodemailer
-│   └── src/             # Email job processors (OTP, notifications)
+├── 📧 emailWorker/          # BullMQ workers + Nodemailer
+│   └── src/
+│       ├── 📬 mails/       # Email templates (OTP, hosting, transcoding, payment)
+│       └── 🔄 index.js     # Queue workers & processors
 │
-├── scs-cloud-services/   # Container workloads for transcoding & hosting
-│   ├── Transcoding-container/  # FFmpeg transcoding pipeline
-│   └── Hosting-container/      # Static site builder & S3 uploader
+├── 🎬 transcodingWorker/    # BullMQ worker for video transcoding
+│   └── src/
+│       ├── 📋 manifests.ts # Kubernetes Job manifest builder
+│       ├── ⚙️ schedule.ts  # Job scheduling logic
+│       └── 🔧 config/      # Kubernetes client configuration
 │
-├── scs-hls-client/       # JavaScript SDK for video upload & transcoding
+├── 🌐 hostingWorker/        # BullMQ worker for website deployment
+│   └── src/
+│       ├── 📋 manifests.ts # K8s Job + Ingress manifest builders
+│       ├── ⚙️ schedule.ts  # Hosting job orchestration
+│       └── 🔧 config/      # Kubernetes client configuration
 │
-├── k8s/                  # Kubernetes manifests
-│   ├── namespace.yaml    # Namespaces (scs-cloud, minio, container-service)
-│   ├── ingress.yaml      # NGINX Ingress routing
-│   ├── api-server/       # API deployment, service, secrets
-│   ├── frontend/         # Frontend deployment, service
-│   ├── container-service/ # Container service deployment, RBAC
-│   ├── email-server/     # Email worker deployment
-│   ├── db/              # MongoDB persistent volume & deployment
-│   ├── redis-server/    # Redis deployment
-│   ├── postgres_db/     # PostgreSQL for containerService
-│   └── nginx-ingress-controller.yaml
+├── ☸️ k8s/                  # Kubernetes manifests
+│   ├── 🏷️ namespace.yaml    # Namespaces (scs-cloud, minio, container-service)
+│   ├── 🌐 ingress.yaml      # NGINX Ingress routing
+│   ├── 🎯 api-server/       # API deployment, service, secrets
+│   ├── 🎨 frontend/         # Frontend deployment, service
+│   ├── 🐳 container-service/ # Container service deployment, RBAC
+│   ├── 📧 email-server/     # Email worker deployment
+│   ├── 🗄️ db/              # MongoDB persistent volume & deployment
+│   ├── 🔴 redis-server/    # Redis deployment
+│   ├── 🐘 postgres_db/     # PostgreSQL for containerService
+│   └── 🌐 nginx-ingress-controller.yaml
 │
-├── dockercompose.dev.yaml  # Local development stack
-└── readmeAssets/           # Architecture diagrams & screenshots
+├── 🐳 dockercompose.dev.yaml  # Local development stack
+├── 🖼️ readmeAssets/           # Architecture diagrams & screenshots
+└── 📄 LICENSE                 # MIT License
 ```
 
-### Service Responsibilities
+### 🎯 Service Responsibilities
 
-| Service | Technology | Purpose |
-|---------|-----------|---------|
-| **scsApiServer** | Node.js, TypeScript, Express | REST API, authentication, orchestration, subdomain proxy |
-| **scscloud** | React, Vite, TailwindCSS | User interface, dashboards, payment flows |
-| **containerService** | Go, gRPC, PostgreSQL | SCS Cloud's container deployment service (like AWS ECS, GCP Cloud Run, Azure ACI) |
-| **emailServer** | Node.js, BullMQ, Nodemailer | Background email notifications |
-| **Transcoding-container** | FFmpeg, S3 SDK | Video processing pipeline |
-| **Hosting-container** | npm, S3 SDK | Static site build & deployment |
+| Service | Technology | Purpose | Port |
+|---------|-----------|---------|------|
+| **🎯 scsApiServer** | Node.js 22, TypeScript, Express | REST API, authentication, orchestration, subdomain proxy | 3000 |
+| **🎨 scscloud** | React 18, Vite, TailwindCSS | User interface, dashboards, payment flows | 5173 |
+| **🐳 containerService** | Go 1.25, gRPC, PostgreSQL | Container deployment service (like ECS/Cloud Run/ACI) | 8080/4000 |
+| **📧 emailWorker** | Node.js, BullMQ, Nodemailer | Background email notifications | - |
+| **🎬 transcodingWorker** | TypeScript, BullMQ, K8s API | Video transcoding job scheduler | - |
+| **🌐 hostingWorker** | TypeScript, BullMQ, K8s API | Static site deployment scheduler | - |
 
 ---
 
 ## 🏗️ Architecture Overview
 
-### System Design
+### 🎨 System Design
 
-SCS Cloud follows a microservices architecture with clear separation of concerns:
+SCS Cloud follows a **microservices architecture** with **queue-driven async processing**:
 
-1. **API Gateway Pattern**
-   - `scsApiServer` acts as the primary gateway, handling authentication, routing, and orchestration
-   - Subdomain proxy: Non-API subdomains (e.g., `mysite.yourdomain.com`) automatically proxy to S3-hosted sites
-   - Request flow: `Client → NGINX Ingress → API Server → Services → Databases`
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     🎨 Frontend (React)                      │
+│              Vite + TailwindCSS + React Router              │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTP/REST
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│              🎯 API Server (Express + TypeScript)            │
+│    ┌──────────────────────────────────────────────────┐    │
+│    │  • JWT Auth  • Payment  • S3  • gRPC Client     │    │
+│    │  • Subdomain Proxy  • AI Bot  • User Management │    │
+│    └──────────────────────────────────────────────────┘    │
+└───┬─────────┬──────────┬──────────────┬──────────────┬─────┘
+    │         │          │              │              │
+    ▼         ▼          ▼              ▼              ▼
+┌─────────┐ ┌────────┐ ┌──────────┐ ┌─────────┐  ┌──────────┐
+│ 🗄️ Mongo│ │🔴 Redis│ │ ☸️ K8s   │ │🐳 gRPC  │  │ 💳 Payment│
+│   DB    │ │(BullMQ)│ │MinIO Svc │ │Container│  │  Gateway │
+└─────────┘ └───┬────┘ └──────────┘ │ Service │  └──────────┘
+                │                    └─────────┘
+        ┌───────┴───────┬────────────┬──────────┐
+        ▼               ▼            ▼          ▼
+  ┌──────────┐   ┌────────────┐  ┌───────────┐  ┌──────────┐
+  │📧 Email  │   │🎬 Transcode│  │🌐 Hosting │  │🔑 API    │
+  │ Worker   │   │  Worker    │  │  Worker   │  │Keys Queue│
+  └──────────┘   └─────┬──────┘  └─────┬─────┘  └──────────┘
+                       │                │
+                       ▼                ▼
+                 ┌──────────────────────────┐
+                 │  ☸️ Kubernetes Jobs      │
+                 │  • Transcoding Pods      │
+                 │  • Hosting Pods          │
+                 │  • Ingress Resources     │
+                 └──────────────────────────┘
+```
 
-2. **Background Processing**
-   - BullMQ + Redis for asynchronous job processing
-   - Email workers consume queues for OTP, payment receipts, deployment notifications
-   - Decoupled architecture ensures API responsiveness
+### 🔄 Key Architectural Patterns
 
-3. **Container Orchestration**
-   - `containerService` is SCS Cloud's own container deployment service (similar to AWS ECS, GCP Cloud Run, Azure Container Instances)
-   - gRPC-based API for creating, managing, and deleting container deployments
-   - Provisions Kubernetes resources (Deployment/Service/Ingress) automatically
-   - Persists deployment metadata and configuration in PostgreSQL
-   - Provides users with managed container hosting capabilities
+#### 1. **API Gateway Pattern** 🌐
+- `scsApiServer` acts as the primary gateway
+- Handles authentication, routing, and orchestration
+- **Subdomain proxy**: Non-API subdomains (e.g., `mysite.yourdomain.com`) automatically proxy to S3-hosted sites
+- Request flow: `Client → NGINX Ingress → API Server → Services → Databases`
 
-4. **Object Storage Strategy**
-   - Local dev: MinIO on `localhost:9000`
-   - Kubernetes: Per-user MinIO services (`http://<service>.minio.svc.cluster.local:9000`)
-   - API generates signed URLs for secure, temporary access
-   - Usage tracking for billing purposes
+#### 2. **Queue-Driven Background Processing** ⚡
+- **BullMQ + Redis** for asynchronous job processing
+- **7 Specialized Queues**:
+  - 📧 `Email` — OTP verification emails
+  - 🎬 `TranscodingWorker` — Video transcoding jobs
+  - 🌐 `HostingWorker` — Static site deployment jobs
+  - 🔑 `APIKEYS` — API credential delivery
+  - 💳 `PaymentQueue` — Payment confirmations
+  - 🚀 `Hosting` — Hosting completion notifications
+  - 🔄 `HostingRenewal` — Renewal reminders
+- **Separate Worker Processes** consume queues and execute tasks
+- **Kubernetes Jobs** created dynamically for compute-intensive work
+- Decoupled architecture ensures API responsiveness
 
-5. **Payment & Billing Flow**
-   ```
-   User → Cashfree Gateway → Webhook → API → MongoDB (payment record) 
-         → Credit SCS Coins → Queue success email
-   ```
+#### 3. **Container Orchestration** 🐳
+- `containerService` is SCS Cloud's own container deployment platform (similar to AWS ECS, GCP Cloud Run, Azure ACI)
+- **gRPC-based API** for creating, managing, and deleting deployments
+- Provisions Kubernetes resources (Deployment/Service/Ingress) automatically
+- Persists deployment metadata in PostgreSQL with JSONB support
+- Multi-user isolation with namespace management
 
-### Data Flow Examples
+#### 4. **Object Storage Strategy** 🗄️
+- **Local dev**: MinIO on `localhost:9000`
+- **Kubernetes**: Per-user MinIO services (`http://minio-{userId}.minio.svc.cluster.local:9000`)
+- API generates **signed URLs** for secure, temporary access
+- **S3-compatible API** for programmatic access
+- Usage tracking for billing purposes
 
-**Video Transcoding Pipeline:**
+#### 5. **Payment & Billing Flow** 💰
+```
+User → Cashfree Gateway → Webhook → API → MongoDB (payment record) 
+      → Credit SCS Coins → Queue success email → Email Worker
+```
+
+### 📊 Data Flow Examples
+
+#### 🎬 **Video Transcoding Pipeline:**
 ```
 1. User uploads video → API → S3 (raw-videos/)
-2. API creates ECS Fargate task (Transcoding-container)
-3. Container downloads, transcodes (FFmpeg), uploads HLS outputs
-4. Container queues completion email → Email worker sends notification
+2. API enqueues job → TranscodingWorker Queue (Redis)
+3. Worker creates Kubernetes Job → Transcoding Pod
+4. Container downloads, transcodes (FFmpeg), uploads HLS outputs
+5. Container queues completion email → Email worker sends notification
 ```
 
-**Static Site Hosting:**
+#### 🌐 **Static Site Hosting:**
 ```
 1. User provides GitHub repo URL → API creates hosting record
-2. API launches ECS task (Hosting-container)
-3. Container clones repo, runs npm build, uploads to S3 (hosted-websites/)
-4. User accesses site via subdomain: subdomain.yourdomain.com
-5. API proxy resolves to S3 bucket, serves index.html
+2. API enqueues job → HostingWorker Queue (Redis)
+3. Worker creates Kubernetes Job + Ingress resources
+4. Container clones repo, runs npm build, uploads to S3 (hosted-websites/)
+5. User accesses site via subdomain: subdomain.yourdomain.com
+6. API proxy resolves to S3 bucket, serves index.html
 ```
 
-### Technology Stack
+#### 🐳 **Container Deployment:**
+```
+1. User configures container (image, CPU, memory, env) → API
+2. API calls containerService via gRPC
+3. Service saves record to PostgreSQL
+4. Service provisions K8s Deployment + Service + Ingress
+5. Container accessible via generated subdomain
+```
 
-#### Backend
+### 🛠️ Technology Stack
+
+#### 🔧 Backend
 - **Runtime:** Node.js 22, Go 1.25
 - **Frameworks:** Express, gRPC (@grpc/grpc-js)
 - **Databases:** MongoDB (Mongoose), PostgreSQL (lib/pq), Redis
 - **Queues:** BullMQ (Redis-backed job processing)
 - **Payment:** Cashfree SDK
+- **Workers:** Separate TypeScript/Node.js processes for queue consumption
 
-#### Frontend  
+#### 🎨 Frontend  
 - **Framework:** React 18, Vite
-- **Styling:** TailwindCSS, shadcn/ui components, Headless UI
+- **Styling:** TailwindCSS, shadcn/ui, Headless UI
 - **Routing:** React Router v6
 - **State:** React hooks, Axios for API calls
 - **UI/UX:** Lucide icons, react-hot-toast, markdown rendering
 
-#### DevOps & Cloud
+#### ☁️ DevOps & Cloud
 - **Containerization:** Docker, Docker Compose
 - **Orchestration:** Kubernetes (Kind for local), NGINX Ingress
-- **Cloud Services:** AWS S3, AWS ECS (Fargate)
-- **Object Storage:** MinIO (on-premises/k8s)
-- **Media Processing:** FFmpeg
+- **Cloud Services:** AWS S3 (storage & hosting artifacts)
+- **Object Storage:** MinIO (on-premises/k8s, S3-compatible)
+- **Media Processing:** FFmpeg (HLS transcoding)
 
-#### AI/ML
-- **scs-bot:** Groq SDK (LLM inference), function calling for tool use
+#### 🤖 AI/ML
+- **scs-bot:** Groq SDK (LLM inference), function calling for structured responses
 
 ---
 
@@ -679,16 +812,17 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
 
 ## 🔍 Service Details
 
-### API Server (`scsApiServer/`)
+### 🎯 API Server (`scsApiServer/`)
 
-**Technology:** Node.js, TypeScript, Express, MongoDB, Redis
+**Technology:** Node.js 22, TypeScript, Express, MongoDB, Redis
 
 **Key Features:**
-- RESTful API with JWT authentication
-- Subdomain proxy for hosted static sites
-- gRPC client for containerService
-- BullMQ job queue integration
-- AWS S3 & ECS orchestration
+- 🔐 RESTful API with JWT authentication
+- 🌐 Subdomain proxy for hosted static sites
+- 🐳 gRPC client for containerService
+- 📬 BullMQ job queue integration (7 queues)
+- ☁️ AWS S3 integration for storage
+- 🤖 AI documentation chatbot (Groq-powered)
 
 **API Routes:**
 
@@ -703,9 +837,10 @@ If you’ve pointed DNS A records to your machine (e.g., `suryanshverma.live -> 
 | `/api/v1/health-check` | Service health status |
 | `/api/payment/*` | Cashfree payment flows |
 | `/api/host/*` | Static website hosting |
+| `/api/v1/deployment/*` | Container deployment management |
 
 **Configuration:**
-- Port: `3000` (default)
+- Port: `3000` (default), `8000` (alternative)
 - Environment: See `scsApiServer/.env.example`
 - Documentation: `scsApiServer/docs/`
 
@@ -718,28 +853,36 @@ npm run build   # TypeScript compilation
 npm start       # Production
 ```
 
+**Queue Management:**
+The API server enqueues jobs to BullMQ instead of directly creating resources:
+- 📬 `TranscodingWorker` queue → consumed by transcodingWorker
+- 🌐 `HostingWorker` queue → consumed by hostingWorker
+- 📧 `Email` queue → consumed by emailWorker
+
 ---
 
-### Frontend (`scscloud/`)
+### 🎨 Frontend (`scscloud/`)
 
 **Technology:** React 18, Vite, TailwindCSS, shadcn/ui
 
 **Key Features:**
-- Modern, responsive UI with dark mode support
-- Dashboard for transcoding, hosting, and storage
-- Real-time payment integration (Cashfree)
-- Interactive AI assistant (scs-bot)
-- Markdown documentation viewer
+- 🎨 Modern, responsive UI with dark mode support
+- 📊 Dashboard for transcoding, hosting, and storage
+- 💳 Real-time payment integration (Cashfree)
+- 🤖 Interactive AI assistant (scs-bot)
+- 📖 Markdown documentation viewer
+- ⚡ Lightning-fast HMR with Vite
 
 **Pages:**
-- Landing page with feature showcase
-- User authentication (login, signup, OTP verification)
-- Dashboard (overview, usage stats)
-- Video transcoding interface
-- Static site hosting manager
-- Object storage browser
-- Payment and billing
-- API documentation
+- 🏠 Landing page with feature showcase
+- 🔐 User authentication (login, signup, OTP verification)
+- 🎛️ Dashboard (overview, usage stats)
+- 🎬 Video transcoding interface
+- 🌐 Static site hosting manager
+- 📦 Object storage browser
+- 🐳 Container service dashboard
+- 💰 Payment and billing
+- 📚 API documentation
 
 **Configuration:**
 - Dev server: `localhost:5173`
@@ -757,20 +900,20 @@ npm run preview  # Preview production build
 
 ---
 
-### Container Service (`containerService/`)
+### 🐳 Container Service (`containerService/`)
 
 **Technology:** Go 1.25, gRPC, PostgreSQL, Kubernetes client-go
 
 **Overview:**
-The Container Service is SCS Cloud's own container deployment platform, providing functionality similar to AWS ECS, GCP Cloud Run, and Azure Container Instances. It allows users to deploy and manage containerized applications through a simple gRPC API.
+The Container Service is SCS Cloud's own container deployment platform, providing functionality similar to AWS ECS, GCP Cloud Run, and Azure Container Instances.
 
 **Key Features:**
-- gRPC API for container deployment management
-- Automatic Kubernetes resource provisioning (Deployment, Service, Ingress)
-- PostgreSQL persistence with JSONB support for environment variables
-- Server reflection enabled for easy testing with grpcurl
-- Multi-user deployment isolation and tracking
-- Declarative container configuration (image, CPU, memory, replicas, ports, env vars)
+- 🔌 gRPC API with server reflection enabled
+- ☸️ Automatic Kubernetes resource provisioning (Deployment, Service, Ingress)
+- 🗄️ PostgreSQL persistence with JSONB support for environment variables
+- 🧪 Easy testing with grpcurl
+- 👥 Multi-user deployment isolation and tracking
+- ⚙️ Declarative container configuration (image, CPU, memory, replicas, ports, env vars)
 
 **gRPC Methods:**
 
@@ -816,35 +959,27 @@ grpcurl -plaintext -d '{"user_id":"test"}' \
 **Configuration:**
 - Port: `8080` (local), `4000` (k8s)
 - Database: PostgreSQL via `DATABASE_URL`
-- Kubernetes: Uses `~/.kube/config` for cluster access in development
-- Target Platform: Kubernetes (provisions Deployment/Service/Ingress resources)
-
-**Use Cases:**
-- Provide users with managed container hosting (like Heroku, Railway, Render)
-- Deploy user applications to Kubernetes without users needing K8s knowledge
-- Track and bill container resource usage per user
-- Provision isolated namespaced deployments for each user
-- Offer a container-as-a-service platform within SCS Cloud
-
-**How It Works:**
-1. User makes gRPC call to create deployment with container specs
-2. Service saves deployment record to PostgreSQL
-3. Service provisions Kubernetes Deployment, Service, and Ingress
-4. Container is deployed and accessible via generated subdomain
-5. Users can list, manage, and delete their deployments via API
+- Kubernetes: Uses `~/.kube/config` for cluster access
+- RBAC: Requires permissions to create Deployments/Services/Ingress
 
 ---
 
-### Email Worker (`emailServer/`)
+### 📧 Email Worker (`emailWorker/`)
 
 **Technology:** Node.js, BullMQ, Nodemailer
 
 **Job Types:**
-- `sendOTPEmail` — User authentication OTPs
-- `sendTranscodeCompleteEmail` — Video transcoding completion
-- `sendHostingCompleteEmail` — Site deployment success
-- `sendPaymentSuccessEmail` — Payment confirmation
-- `sendAccessKeysEmail` — API key generation notification
+- 🔐 `sendOTPEmail` — User authentication OTPs
+- 🎬 `sendTranscodeCompleteEmail` — Video transcoding completion
+- 🌐 `sendHostingCompleteEmail` — Site deployment success
+- 💳 `sendPaymentSuccessEmail` — Payment confirmation
+- 🔑 `sendAccessKeysEmail` — API key generation notification
+- 🔄 `sendHostingRenewalEmail` — Hosting renewal reminders
+
+**Email Templates:**
+- Polished HTML emails with branding
+- Configurable sender address
+- Support for Gmail, SendGrid, Mailgun, AWS SES
 
 **Configuration:**
 ```env
@@ -858,64 +993,93 @@ QUEUE_PASSWORD=redis_password
 
 **Development:**
 ```bash
-cd emailServer
+cd emailWorker
 npm install
 npm run dev
 ```
 
 ---
 
-### Transcoding Container (`scs-cloud-services/Transcoding-container/`)
+### 🎬 Transcoding Worker (`transcodingWorker/`)
 
-**Purpose:** Convert videos to multi-resolution HLS format
+**Technology:** TypeScript, BullMQ, Kubernetes client-node
+
+**Purpose:** Queue-driven worker that schedules Kubernetes Jobs for video transcoding
 
 **Process:**
-1. Download source video from S3 (`raw-videos/<VIDEO_KEY>`)
-2. Transcode with FFmpeg to multiple resolutions:
-   - 1080p (1920x1080, 5000k bitrate)
-   - 720p (1280x720, 2800k bitrate)
-   - 480p (854x480, 1400k bitrate)
-   - 360p (640x360, 800k bitrate)
-3. Generate HLS master playlist
-4. Upload outputs to S3 (`<BUCKET_PATH>/<VIDEO_KEY>/`)
-5. Queue completion email
+1. 📬 Listens on `TranscodingWorker` BullMQ queue
+2. 📋 Parses job payload to extract run properties
+3. ☸️ Dynamically builds Kubernetes `Job` manifest
+4. 🚀 Launches transcoding container (`suryanshvermaaa/transcoding-container:1.0.3`)
+5. 🎬 Container transcodes video to HLS format (1080p/720p/480p/360p)
+6. 📤 Uploads outputs to user's S3/MinIO bucket
+7. 📧 Queues completion notification
 
-**Environment Variables:**
+**Job Payload Schema:**
+```json
+{
+  "runProps": {
+    "videoKey": "source/path/video.mp4",
+    "userAccessKey": "<access_key>",
+    "userSecretAccessKey": "<secret_key>",
+    "userBucketName": "my-media-bucket",
+    "bucketPath": "outputs/user123/",
+    "email": "user@example.com",
+    "storageEndpoint": "https://storage.endpoint"
+  }
+}
+```
+
+**Development:**
 ```bash
-STORAGE_ENDPOINT=s3.amazonaws.com
-ACCESS_KEY=your_access_key
-SECRET_ACCESS_KEY=your_secret_key
-BUCKET_NAME=your_bucket
-VIDEO_KEY=unique_video_id
-BUCKET_PATH=transcoded-videos
-USER_EMAIL=user@example.com
-QUEUE_HOST=localhost
-QUEUE_PORT=6379
+cd transcodingWorker
+npm install
+npm run build
+npm start      # or npm run dev for watch mode
 ```
 
 ---
 
-### Hosting Container (`scs-cloud-services/Hosting-container/`)
+### 🌐 Hosting Worker (`hostingWorker/`)
 
-**Purpose:** Build and deploy static websites to S3
+**Technology:** TypeScript, BullMQ, Kubernetes client-node
+
+**Purpose:** Queue-driven worker that schedules Kubernetes Jobs + Ingress for website deployment
 
 **Process:**
-1. Clone Git repository (or use pre-populated source)
-2. Run `npm install && npm run build`
-3. Upload built files to S3 (`hosted-websites/<WEB_URL>/`)
-4. Site becomes accessible via subdomain
+1. 📬 Listens on `HostingWorker` BullMQ queue
+2. 📋 Parses job payload (Git URL, web URL)
+3. ☸️ Dynamically builds Kubernetes `Job` + `Ingress` manifests
+4. 🚀 Launches hosting container (`suryanshvermaaa/hosting-container:1.0.0`)
+5. 📦 Container clones repo, runs `npm install && npm run build`
+6. 📤 Uploads built files to S3 (hosted-websites/)
+7. 🌐 Ingress makes site accessible via subdomain
 
-**Environment Variables:**
+**Job Payload Schema:**
+```json
+{
+  "runProps": {
+    "gitUrl": "https://github.com/user/project.git",
+    "webUrl": "myapp"
+  }
+}
+```
+
+**Resulting Access:**
+- Ingress host: `myapp.{HOSTING_DOMAIN}`
+- Example: `myapp.suryanshverma.live`
+
+**Development:**
 ```bash
-MY_ACCESS_KEY_ID=your_access_key
-MY_SECRET_ACCESS_KEY=your_secret_key
-MY_BUCKET_NAME=your_bucket
-WEB_URL=mysite
+cd hostingWorker
+npm install
+npm run build
+npm start      # or npm run dev for watch mode
 ```
 
 ---
 
-### HLS Client SDK (`scs-hls-client/`)
+### 🛠️ HLS Client SDK (`scs-hls-client/`)
 
 **Purpose:** Simplified JavaScript SDK for video operations
 

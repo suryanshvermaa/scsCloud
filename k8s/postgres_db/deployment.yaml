@@ -17,10 +17,11 @@ spec:
     spec:
       containers:
         - name: scs-container-db
-          image: scs-postgres:1.0.0 # this needs to be updated with every new build
+          image: suryanshvermaaa/scs-cs-postgres:1.0.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 5432
-              name: scs-container-db
+              name: scs-cdb
           env:
             - name: POSTGRES_USER
               valueFrom:
