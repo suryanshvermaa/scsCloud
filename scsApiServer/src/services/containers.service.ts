@@ -1,10 +1,5 @@
 import { scheduleHostingJob, scheduleTranscodingJob } from "./k8s.service";
 
-export const queueHost = process.env.QUEUE_HOST;
-export const queueUser = process.env.QUEUE_USER;
-export const queuePassword = process.env.QUEUE_PASSWORD;
-export const myBucketName = process.env.MY_BUCKET_NAME;
-
 export interface IRunProps {
   videoKey: string;
   userAccessKey: string;
@@ -25,7 +20,6 @@ export interface IRunPropsHost {
  * @param {IRunProps} runObj
  */
 export const spinTranscoder = async (runObj: IRunProps) => {
-    // await transcodingContainerTask(runObj);
     await scheduleTranscodingJob(runObj);
 };
 
@@ -34,6 +28,5 @@ export const spinTranscoder = async (runObj: IRunProps) => {
  * @param {IRunPropsHost} runObj 
  */
 export const spinHoster = async (runObj: IRunPropsHost) => {
-//  await hostingContainerTask(runObj);
     await scheduleHostingJob(runObj);
 };
