@@ -18,7 +18,7 @@ spec:
       serviceAccountName: api-access
       containers:
       - name: scs-container-service
-        image: suryanshvermaaa/scs-container-service:1.0.0
+        image: suryanshvermaaa/scs-container-service:1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 4000

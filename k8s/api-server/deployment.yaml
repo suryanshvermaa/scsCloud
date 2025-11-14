@@ -18,7 +18,7 @@ spec:
       serviceAccountName: api-access
       containers:
       - name: scs-cloud-api-server
-        image: suryanshvermaaa/scs-api-server:1.1.2
+        image: suryanshvermaaa/scs-api-server:1.3.1
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

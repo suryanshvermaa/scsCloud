@@ -5,7 +5,7 @@ import { GetDeployments, DeployContainer, DeleteDeployment } from "../services/g
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 import response from "../utils/response";
-import { Deployment } from "../../pb/containerService/Deployment";
+import { Deployment } from "../pb/containerService/Deployment";
 
 /**
  * @description Controller to get all deployments

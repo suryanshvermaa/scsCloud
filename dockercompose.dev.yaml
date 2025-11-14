@@ -60,10 +60,10 @@ services:
 
   emailserver:
     build:
-      context: ./emailServer
+      context: ./emailWorker
       dockerfile: Dockerfile
     env_file:
-      - ./emailServer/.env
+      - ./emailWorker/.env
     depends_on:
       - redis
 
