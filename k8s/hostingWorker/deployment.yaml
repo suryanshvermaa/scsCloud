@@ -64,4 +64,9 @@ spec:
             secretKeyRef:
               name: scs-hw-secret
               key: QUEUE_PORT
+        - name: HOSTING_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: scs-hw-secret
+              key: HOSTING_DOMAIN
   
