@@ -34,3 +34,13 @@ export const hostingRenewalQueue=new Queue('HostingRenewal',connection);
  * @description paymentQueue manages payment processing tasks within the application's queue infrastructure.
  */
 export const paymentQueue=new Queue('PaymentQueue',connection);
+
+/**
+ * @description hostingWorkerQueue is used for processing background tasks related to hosting services.
+ */
+export const hostingWorkerQueue=new Queue('HostingWorker',connection);
+
+/**
+ * @description transcodingWorkerQueue handles video transcoding tasks in the background.
+ */
+export const transcodingWorkerQueue=new Queue('TranscodingWorker',connection);

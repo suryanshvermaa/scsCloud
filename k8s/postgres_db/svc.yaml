@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name:  scs-cloud-db
+  name:  scs-container-db
   namespace: scs-cloud
 spec:
   selector:

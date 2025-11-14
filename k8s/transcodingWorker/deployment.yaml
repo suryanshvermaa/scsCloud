@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scs-transcoding-worker
+  namespace: scs-cloud
+  labels:
+    app: scs-transcoding-worker
+spec:
+  replicas: 1 # due to low resource availability on my local cluster
+  selector:
+    matchLabels:
+      app: scs-transcoding-worker
+  template:
+    metadata:
+      labels:
+        app: scs-transcoding-worker
+    spec:
+      serviceAccountName: api-access
+      containers:
+      - name: scs-transcoding-worker
+        image: suryanshvermaaa/scs-transcoding-worker:1.0.0
+        imagePullPolicy: Always
+        # resources commented out for low resource cluster
+        # resources:
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "500m"
+        #   requests:
+        #     memory: "128Mi"
+        #     cpu: "250m"
+        env:
+        - name: QUEUE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: scs-ts-secret
+              key: QUEUE_HOST
+        - name: QUEUE_USER
+          valueFrom:
+            secretKeyRef:
+              name: scs-ts-secret
+              key: QUEUE_USER
+        - name: QUEUE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: scs-ts-secret
+              key: QUEUE_PASSWORD
+        - name: QUEUE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: scs-ts-secret
+              key: QUEUE_PORT
+  

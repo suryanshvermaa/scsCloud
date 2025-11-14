@@ -1,5 +1,5 @@
 import {V1Job} from "@kubernetes/client-node";
-import { IRunProps } from "../containers.service";
+import { IRunProps } from "./schedule";
 
 const transcodingJob = (runProps: IRunProps) => {
   const jobConfig: V1Job = {

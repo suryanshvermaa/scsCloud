@@ -14,16 +14,23 @@ kubectl get pods -n ingress-nginx --watch
 ```
 
 ## applying manifests
+Use the following ordered commands so you don't accidentally run only a selection of the lines. Run them one-by-one (or copy/paste them together) so the namespace is created first, infra (DB/Redis) comes up, then services and the API/frontend.
+
 ```bash
-kubectl apply -f ./namespace.yaml -f ./db -f ./redis-server
+# 1) Create namespaces
+kubectl apply -f ./namespace.yaml
+
+# 2) Infrastructure: databases and cache
+kubectl apply -f ./db -f ./redis-server -f ./postgres_db -f ./serviceAccount.yaml
+
+# 3) Background services and workers
+kubectl apply -f ./email-server -f ./hostingWorker -f ./transcodingWorker -f ./container-service
+
+# 4) API, frontend and ingress
+kubectl apply -f ./api-server -f ./frontend -f ./ingress.yaml
 ```
-```bash
-# Optional: Postgres for containerService
-kubectl apply -f ./postgres_db
-```
-```bash
-kubectl apply -f ./email-server -f ./api-server -f ./container-service -f ./frontend -f ./ingress.yaml
-```
+
+If you prefer a single command, you can run the four lines above joined with `&&` so they execute sequentially and stop on error.
 
 ## pods status
 ```bash
@@ -34,14 +41,6 @@ kubectl get pods -n scs-cloud --watch
 ```bash
 kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:80
 ```
-
-## Notes for container-service manifests
-
-- Secret: `container-service/secrets.yaml` defines base64 encoded `DATABASE_URL` and `PORT` (default 4000 in cluster)
-- Deployment: confirm `containers[].ports[].containerPort` equals the `PORT` env; update image tag on new releases
-- Service: `container-service/svc.yaml` should select `app: scs-container-service`; verify port 4000 mapping
-- RBAC: `container-service/serviceAccount.yaml` binds `api-access` as cluster-admin (broad). Tighten for production (least privilege)
-- Postgres: apply `postgres_db/` before container-service to satisfy `DATABASE_URL`
 
 ## cleaning up resources
 ```bash

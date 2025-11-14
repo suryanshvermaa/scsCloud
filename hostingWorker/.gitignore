@@ -1,0 +1,9 @@
+node_modules
+dist
+pnpm-lock.yaml
+mongo-data
+*.log
+*.local
+*.local.*
+.env
+.env.local
