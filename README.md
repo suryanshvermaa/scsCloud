@@ -11,6 +11,9 @@ SCS Cloud is a comprehensive, production-ready cloud platform built as a microse
 [![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
 
+## Architecture Diagram
+![SCS Cloud Architecture](./readmeAssets/Architecture.png)
+
 ## 🌟 Key Features
 
 ### 🎯 Core Services
