@@ -91,3 +91,23 @@ sudo apt install nginx
 ## 7. follow next instructions
 for cluster deplyment.<br>
 [Cluster deplyment](./k8s/README.md)
+
+## Nginx HTTPS wildcard domain configuration
+1. certbot installation
+```bash
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/local/bin/certbot
+sudo snap set certbot trust-plugin-with-root=ok
+```
+2. cloudflare plugin if using cloudflare DNS
+```bash
+sudo snap install certbot-dns-cloudflare
+```
+3. Certificate generation
+```bash
+sudo certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+  -d nebula-hack.tech \
+  -d "*.nebula-hack.tech"
+```
