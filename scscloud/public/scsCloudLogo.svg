@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cloudGradient" x1="80" y1="70" x2="430" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Cloud Outline -->
+  <path
+    d="M168 352
+       H340
+       C395 352 440 309 440 256
+       C440 206 405 165 358 156
+       C342 102 294 64 240 64
+       C182 64 133 104 120 160
+       C67 165 32 208 32 260
+       C32 311 73 352 128 352
+       H168"
+    stroke="url(#cloudGradient)"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"/>
+
+  <!-- Network -->
+  <line x1="256" y1="170" x2="180" y2="260"
+        stroke="url(#cloudGradient)"
+        stroke-width="16"
+        stroke-linecap="round"/>
+
+  <line x1="256" y1="170" x2="332" y2="260"
+        stroke="url(#cloudGradient)"
+        stroke-width="16"
+        stroke-linecap="round"/>
+
+  <line x1="180" y1="260" x2="332" y2="260"
+        stroke="url(#cloudGradient)"
+        stroke-width="16"
+        stroke-linecap="round"/>
+
+  <!-- Nodes -->
+  <circle cx="256" cy="170" r="18" fill="url(#cloudGradient)"/>
+  <circle cx="180" cy="260" r="18" fill="url(#cloudGradient)"/>
+  <circle cx="332" cy="260" r="18" fill="url(#cloudGradient)"/>
+</svg>

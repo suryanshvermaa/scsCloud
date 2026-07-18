@@ -101,7 +101,7 @@ func createK8sIngress(ctx context.Context, d K8sDeploymentSpec) error {
 		Spec: networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
 				{
-					Host: d.ServiceSubdomain + "." + "suryanshverma.live",
+					Host: d.ServiceSubdomain + "." + "nebula-hack.tech",
 					IngressRuleValue: networkingv1.IngressRuleValue{
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
