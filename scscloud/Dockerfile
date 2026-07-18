@@ -15,4 +15,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 # build command
-# docker build --build-arg VITE_API_URL=http://your-api-url:3000 -t frontend ./scscloud
+# docker build --build-arg VITE_API_URL=http://api.nebula-hack.tech -t frontend ./scscloud
