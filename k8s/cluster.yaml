@@ -4,12 +4,8 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
     image: kindest/node:v1.31.2
-    kubeadmConfigPatches:
-      - |
-        kind: InitConfiguration
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: "ingress-ready=true"
+  - role: worker
+    image: kindest/node:v1.31.2
     extraPortMappings:
       - containerPort: 80
         hostPort: 3000
@@ -17,6 +13,3 @@ nodes:
       - containerPort: 443
         hostPort: 4000
         protocol: TCP
-
-  - role: worker
-    image: kindest/node:v1.31.2
